@@ -1,0 +1,11 @@
+module.exports = app => {
+    const { getPlayersOnline } = app.src.main.repository.PlayersOnline;
+    const TesteService = async () => {
+        console.log('response do service');
+        const resp = await getPlayersOnline();
+    return { status: 200, data: resp};
+}
+    return {
+        TesteService,
+    }
+}
