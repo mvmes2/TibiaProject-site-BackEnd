@@ -7,4 +7,8 @@ class players_online extends Model {
     static tableName = 'players_online'
 }
 
-module.exports = { players_online }
+class accounts extends Model {
+    static tableName = 'accounts'
+}
+
+module.exports = { players_online, accounts }
