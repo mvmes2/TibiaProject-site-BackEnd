@@ -11,4 +11,8 @@ class accounts extends Model {
     static tableName = 'accounts'
 }
 
-module.exports = { players_online, accounts }
+class players extends Model {
+    static tableName = 'players'
+}
+
+module.exports = { players_online, accounts, players }
