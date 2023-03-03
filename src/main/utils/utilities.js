@@ -27,7 +27,18 @@ const hashGenerator = (size) => {
     return string.join('')
   }
 
+  const validateRegexSecurity = (inputToTest) => {
+    const regex = /^(?!.*(input|null|utf8|and|or|select|insert|update|delete|from|where|drop|create|alter|rename|truncate|database|table|index|grant|revoke|union|exec|script|javascript|alert|prompt|confirm|document|location|window|xmlhttprequest|eval|function|prototype|constructor|class|import|export|default|super|this|catch|finally|try|debugger|arguments))[a-zA-Z](?!.*['-])[a-zA-Z'-]*(?!.*(--|['-].*['-]))[a-zA-Z'-]*'?[a-zA-Z'-]*$/;
+    if (regex.test(inputToTest)) {
+      return true
+    } else {
+      return false
+    }
+  }
+
+
 module.exports = {
     checkPassword,
-    hashGenerator
+    hashGenerator,
+    validateRegexSecurity
 }

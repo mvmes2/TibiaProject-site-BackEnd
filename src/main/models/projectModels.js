@@ -15,4 +15,16 @@ class players extends Model {
     static tableName = 'players'
 }
 
-module.exports = { players_online, accounts, players }
+class player_deaths extends Model {
+    static tableName = 'player_deaths'
+}
+
+class worlds extends Model {
+    static tableName = 'worlds'
+}
+
+class player_items extends Model {
+    static tableName = 'player_items'
+}
+
+module.exports = { players_online, accounts, players, player_deaths, worlds, player_items }

@@ -10,7 +10,8 @@ module.exports = app => {
         const resp = await InsertNewAccount(data);
     return { status: resp.status, message: resp.message};
 }
+
     return {
-        CreateAccService,
+        CreateAccService
     }
 }

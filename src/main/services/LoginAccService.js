@@ -5,7 +5,7 @@ module.exports = app => {
     const LoginAccService = async (data) => {
         const exists = await checkIfAccExists(data.email);
         if (!exists.bool) {
-            return { status: 404, message: 'Conta Não existe, ou email inválido!' }
+            return { status: 404, message: 'Conta Não existe, ou email e senha inválidos!' }
         }
 
         const acc = exists.acc[0];
@@ -18,6 +18,7 @@ module.exports = app => {
 
         const updateInfo = {
             loginHash: hash,
+            web_lastlogin: Math.floor(Date.now() / 1000) 
         }
 
         await updateAcc({ update: updateInfo, id: acc.id });

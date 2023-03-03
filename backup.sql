@@ -51,16 +51,15 @@ INSERT INTO `boosted_boss` VALUES (0,0,0,0,0,0,0,'27','Realityquake','1218');
 
 DROP TABLE IF EXISTS `worlds`;
 CREATE TABLE `worlds` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `id` int(11) UNSIGNED NOT NULL,
   `serverName` varchar(45) NOT NULL,
-  `port` int(11) NOT NULL DEFAULT 7172,
-  `connectionip` varchar(45) NOT NULL DEFAULT '127.0.0.1',
-  `location` varchar(45) NOT NULL DEFAULT 'BRA',
-  `pvptype` int(11) NOT NULL DEFAULT 0,
-  `createdAt` bigint(22) NOT NULL DEFAULT 0,
-  `deletedAt` bigint(22) NOT NULL DEFAULT 0
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4;
+  `port` int(11) NOT NULL,
+  `connectionip` varchar(45) NOT NULL,
+  `location` varchar(45) NOT NULL,
+  `pvptype` int(11) NOT NULL,
+  `createdAt` bigint(22) NOT NULL,
+  `deletedAt` bigint(22) NOT NULL
+);
 
 ALTER TABLE `worlds`;
 INSERT INTO `worlds` VALUES (1,'Antica',7172,'143.0.20.85','BRA',0,'2023-02-26 21:32:11',NULL),(2,'TestServer',7173,'143.0.20.85','BRA',0,'2023-02-27 16:55:18',NULL);
@@ -1446,23 +1445,23 @@ CREATE TABLE `players` (
   `health` int(11) NOT NULL DEFAULT 150,
   `healthmax` int(11) NOT NULL DEFAULT 150,
   `experience` bigint(20) NOT NULL DEFAULT 0,
-  `lookbody` int(11) NOT NULL DEFAULT 0,
-  `lookfeet` int(11) NOT NULL DEFAULT 0,
-  `lookhead` int(11) NOT NULL DEFAULT 0,
-  `looklegs` int(11) NOT NULL DEFAULT 0,
-  `looktype` int(11) NOT NULL DEFAULT 136,
+  `lookbody` int(11) NOT NULL DEFAULT 113,
+  `lookfeet` int(11) NOT NULL DEFAULT 115,
+  `lookhead` int(11) NOT NULL DEFAULT 95,
+  `looklegs` int(11) NOT NULL DEFAULT 39,
+  `looktype` int(11) NOT NULL DEFAULT 128,
   `lookaddons` int(11) NOT NULL DEFAULT 0,
   `maglevel` int(11) NOT NULL DEFAULT 0,
-  `mana` int(11) NOT NULL DEFAULT 0,
-  `manamax` int(11) NOT NULL DEFAULT 0,
+  `mana` int(11) NOT NULL DEFAULT 50,
+  `manamax` int(11) NOT NULL DEFAULT 50,
   `manaspent` bigint(20) UNSIGNED NOT NULL DEFAULT 0,
   `soul` int(10) UNSIGNED NOT NULL DEFAULT 0,
-  `town_id` int(11) NOT NULL DEFAULT 1,
+  `town_id` int(11) NOT NULL DEFAULT 3,
   `posx` int(11) NOT NULL DEFAULT 0,
   `posy` int(11) NOT NULL DEFAULT 0,
   `posz` int(11) NOT NULL DEFAULT 0,
   `conditions` blob NOT NULL,
-  `cap` int(11) NOT NULL DEFAULT 0,
+  `cap` int(11) NOT NULL DEFAULT 410,
   `sex` int(11) NOT NULL DEFAULT 0,
   `lastlogin` bigint(20) UNSIGNED NOT NULL DEFAULT 0,
   `lastip` int(10) UNSIGNED NOT NULL DEFAULT 0,
@@ -13512,3 +13511,28 @@ COMMIT;
 
 ALTER TABLE `accounts`
 	ADD `loginHash` varchar(45) DEFAULT NULL;
+	
+	ALTER TABLE `worlds`
+  ADD PRIMARY KEY (`id`);
+	
+	
+DROP TABLE IF EXISTS `vocations`;
+
+CREATE TABLE `vocations` (
+  `vocation_id` int(11) UNSIGNED NOT NULL,
+  `vocation_name` varchar(25) NOT NULL
+);
+
+ALTER TABLE `vocations`
+  ADD PRIMARY KEY (`vocation_id`);
+  
+INSERT INTO `vocations` (`vocation_id`, `vocation_name`) VALUES
+(0, 'None'),
+(1, 'Sorcerer'),
+(2, 'Druid'),
+(3, 'Paladin'),
+(4, 'Knight'),
+(5, 'Master Sorcerer'),
+(6, 'Elder Druid'),
+(7, 'Royal Paladin'),
+(8, 'Elite Knight');
