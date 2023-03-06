@@ -5,14 +5,14 @@ module.exports = app => {
     const LoginAccService = async (data) => {
         const exists = await checkIfAccExists(data.email);
         if (!exists.bool) {
-            return { status: 404, message: 'Conta Não existe, ou email e senha inválidos!' }
+            return { status: 404, message: 'Wrong Email and Password, or Account does not exists!' }
         }
 
         const acc = exists.acc[0];
         
-        const isPasswordValid = checkPassword(acc.password, data.password);
+        const isPasswordValid = checkPassword(data.password, acc.password);
 
-        if (!isPasswordValid) { return { status: 403, message: 'Password inválida, se esqueceu sua senha, use "Recuperar Account"!' } };
+        if (!isPasswordValid) { return { status: 400, message: 'Wrong passwrod, if you forgot your password please use account recovery!' } };
 
        const hash = hashGenerator(8);
 

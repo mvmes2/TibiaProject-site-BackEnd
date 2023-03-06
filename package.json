@@ -23,11 +23,14 @@
     "dotenv": "^16.0.3",
     "express": "^4.18.2",
     "knex": "^2.4.2",
-    "mysql": "^2.18.1",
     "nodemon": "^2.0.20",
     "objection": "^3.0.1"
   },
   "devDependencies": {
-    "crypto-js": "^4.1.1"
+    "bcrypt-nodejs": "^0.0.3",
+    "crypto-js": "^4.1.1",
+    "jssha": "^3.3.0",
+    "mysql": "^2.18.1",
+    "mysqldump": "^3.2.0"
   }
 }

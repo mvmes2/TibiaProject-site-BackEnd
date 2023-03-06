@@ -7,7 +7,7 @@ app.use(cors());
 app.use(express.json());
 
 app.use((req, res, next) => {
-    console.log('Host Log: ',req.headers.host)
+    console.log('Host Log: req vindo de: ',req.headers.host)
     const allowedOrigin = "localhost:3333"; //origem permitida para se solicitar requisições da nossa api.
     req.header("Access-Control-Allow-Origin", allowedOrigin);
 

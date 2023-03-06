@@ -27,4 +27,8 @@ class player_items extends Model {
     static tableName = 'player_items'
 }
 
-module.exports = { players_online, accounts, players, player_deaths, worlds, player_items }
+class players_comment extends Model {
+    static tableName = 'players_comment'
+}
+
+module.exports = { players_online, accounts, players, player_deaths, worlds, player_items, players_comment }

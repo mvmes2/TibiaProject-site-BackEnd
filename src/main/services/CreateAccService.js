@@ -1,12 +1,10 @@
-const { SHA1 } = require("crypto-js");
-
+const { encryptPassword } = require('../utils/utilities');
 module.exports = app => {
     const { InsertNewAccount } = app.src.main.repository.UserRepository;
 
     const CreateAccService = async (data) => {
-        const encrypt = SHA1(data.password).toString()
-        data.password = encrypt;
-        console.log('response do service');
+        const encrypted = encryptPassword(data.password);
+        data.password = encrypted;
         const resp = await InsertNewAccount(data);
     return { status: resp.status, message: resp.message};
 }
