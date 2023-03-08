@@ -46,6 +46,7 @@ const validateLoginHash = async (data) => {
     console.log('consolando data hashlogin', data)
     const validHash = await accounts.query().select('loginHash').where({ id: Number(data.id) }).first();
 
+    console.log(validHash)
     if (!data?.loginHash || !validHash || validHash === undefined) { return { status: 403, message:'error' } }
     console.log('consolando data hashlogin', data.loginHash.trim())
     console.log('consolando data hashlogin2', validHash?.loginHash.trim())
