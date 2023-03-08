@@ -1,5 +1,6 @@
 module.exports = app => {
     const { checkValidLoginHash, createCharacterSerice, validateCharacterService, deleteCharacterService, updateHidenCharacterService, updateCharacterCommentService } = app.src.main.services.AccountService;
+    const { updateAcc } = app.src.main.repository.UserRepository;
     const validateAccountRequest = async (req, res) => {
         const data = req.body;
         const resp = await checkValidLoginHash(data)
@@ -36,12 +37,20 @@ const updateCharacterCommentRequest = async (req, res) => {
     res.status(resp.status).send({message: resp.message});
 }
 
+const updateRKRequest = async (req, res) => {
+    
+    data = req.body;
+    const resp = await updateAcc(data);
+   return res.status(resp.status).send({message: resp.message});
+}
+
     return {
         createCharacterRequest,
         validateAccountRequest,
         checkCharacterOwnershipRequest,
         deleteCharacterRequest,
         updateHidenCharacterRequest,
-        updateCharacterCommentRequest
+        updateCharacterCommentRequest,
+        updateRKRequest
     }
 }

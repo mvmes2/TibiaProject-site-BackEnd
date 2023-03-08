@@ -1,7 +1,7 @@
 const { projectMailer } = require("../utils/utilities");
 module.exports = (app) => {
   const { CreateAccService } = app.src.main.services.CreateAccService;
-  const { checkEmailAndEmail } = app.src.main.repository.AccountRepository;
+  const { checkNameAndEmail } = app.src.main.repository.AccountRepository;
 
   const CreateAccRequest = async (req, res) => {
     const data = req.body;
@@ -18,7 +18,7 @@ module.exports = (app) => {
     }
     try {
       const { password2, ...dataWithoutPass2 } = data;
-      const returnal = await checkEmailAndEmail(dataWithoutPass2);
+      const returnal = await checkNameAndEmail(dataWithoutPass2);
 
       if (returnal.status === 200) {
         console.log("cade data?", data);
@@ -26,7 +26,7 @@ module.exports = (app) => {
         const link = `http://143.0.20.85:3000/create-account/validate/${data.name}`;
         projectMailer.welcomeAndValidate(
           data.email,
-          "Teste",
+          "Welcome to TibiaProject",
           data.email,
           data.name,
           data.password2,

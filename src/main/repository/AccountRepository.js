@@ -35,7 +35,8 @@ const updateCharacterCommentInDB = async (data) => {
     }
 }
 
-const checkEmailAndEmail = async (data) => {
+const checkNameAndEmail = async (data) => {
+    
     if (!data || data === undefined || data === null) {
         return resp.status(500).send({
           message:
@@ -43,7 +44,7 @@ const checkEmailAndEmail = async (data) => {
         });
       }
         const checkIfExistEmailFirst = await accounts.query().select('email').where({ email: data.email });
-        const checkIfExistNameFirst = await accounts.query().select('email').where({ name: data.name });
+        const checkIfExistNameFirst = await accounts.query().select('email').whereRaw('LOWER(name) = ?', data.name.toLowerCase());
     
         if (checkIfExistNameFirst.length > 0) {
           return { status: 403, message: 'Account name already in use!' }
@@ -58,6 +59,6 @@ const checkEmailAndEmail = async (data) => {
         updateHidenCharacterInDB,
         deleteCharacter,
         updateCharacterCommentInDB,
-        checkEmailAndEmail
+        checkNameAndEmail
     }
 }

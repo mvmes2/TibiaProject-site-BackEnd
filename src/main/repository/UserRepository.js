@@ -3,7 +3,7 @@ const { accounts, players, players_online, player_deaths, player_items, players_
 module.exports = app => {
   const InsertNewAccount = async (data) => {
     const checkIfExistEmailFirst = await accounts.query().select('email').where({ email: data.email });
-    const checkIfExistNameFirst = await accounts.query().select('email').where({ name: data.name });
+    const checkIfExistNameFirst = await accounts.query().select('email').whereRaw('LOWER(name) = ?', data.name.toLowerCase());
 
     if (checkIfExistNameFirst.length > 0) {
       return { status: 403, message: 'Account name already in use!' }
@@ -15,15 +15,15 @@ module.exports = app => {
     try {
       data.createdAt = Math.floor(Date.now() / 1000);
       const resp = await accounts.query().insert(data);
-      return { status: 201, data: resp };
+      const { id, ...rests } = resp;
+      return { status: 201, message: id };
     } catch (err) {
       console.log(err)
-      return { status: 500, data: err }
+      return { status: 500, message: err }
     }
   }
 
   const updateAcc = async (data) => {
-
     try {
       await accounts.query().update(data.update).where({ id: data.id });
       return { status: 200, message: 'Account updated successfully!' };

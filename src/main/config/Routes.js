@@ -11,6 +11,6 @@ module.exports = app => {
     app.route('/character-updateComment').post(app.src.main.controllers.AccountController.updateCharacterCommentRequest);
     app.route('/getWorldWide-characters').get(app.src.main.controllers.WorldsController.getAllWorldsCharactersRequest);
     app.route('/before-create-acc-email-validation').post(app.src.main.controllers.CreateAccController.beforeAccCreateSendEmailRequest);
+    app.route('/update-rk').post(app.src.main.controllers.AccountController.updateRKRequest);
     
-
 }
