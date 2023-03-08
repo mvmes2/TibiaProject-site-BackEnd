@@ -1,4 +1,9 @@
 const jsSHA = require('jssha');
+const mailer = require('../modules/mailer');
+const instagram_logo = 'https://res.cloudinary.com/dqncp7bg6/image/upload/v1678229806/instagram_nrqx0k.png';
+const youtube_logo = 'https://res.cloudinary.com/dqncp7bg6/image/upload/c_pad,b_auto:predominant,fl_preserve_transparency/v1678229812/youtube_buxwrq.jpg';
+const discord_logo = 'https://res.cloudinary.com/dqncp7bg6/image/upload/v1678229803/discord_rh9nrm.png';
+
 
 const encryptPassword = (password) => {
   const sha1 = new jsSHA("SHA-1", "TEXT");
@@ -55,11 +60,45 @@ const hashGenerator = (size) => {
     return dataTimestamp;
 }
 
+const projectMailer = {
+  welcomeAndValidate: function sendEmailTo(email, subject, account_email, account_name, account_pass, activation_link) {
+    mailer.sendMail({
+        from: "tibiaprojectbr@gmail.com",        
+        to: email,
+        subject,
+        template: "main/resources/emailTemplates/welcomeAndActivationAccount",
+        context: {
+          account_email,
+          account_name,
+          account_pass,
+          youtube_logo,
+          instagram_logo,
+          discord_logo,
+          activation_link
+        },
+      });
+  },
+  teste: function sendEmailTo(email, subject, account_email, account_name, account_pass) {
+    mailer.sendMail({
+        from: "tibiaprojectbr@gmail.com",        
+        to: email,
+        subject,
+        template: "main/resources/emailTemplates/welcomeAndActivationAccount",
+        context: {
+          account_email,
+          account_name,
+          account_pass
+        },
+      });
+  },
+}
+
 
 module.exports = {
     checkPassword,
     hashGenerator,
     validateRegexSecurity,
     encryptPassword,
-    formatDateToTimeStampEpoch
+    formatDateToTimeStampEpoch,
+    projectMailer
 }

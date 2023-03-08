@@ -1,4 +1,4 @@
-const { checkPassword, hashGenerator } = require('../utils/utilities');
+const { checkPassword, hashGenerator, sendEmailTo } = require('../utils/utilities');
 module.exports = app => {
     const { checkIfAccExists, updateAcc } = app.src.main.repository.UserRepository;
 
@@ -22,7 +22,6 @@ module.exports = app => {
         }
 
         await updateAcc({ update: updateInfo, id: acc.id });
-
     return { status: 200, message: { id: acc.id, loginHash: hash }};
 }
     return {

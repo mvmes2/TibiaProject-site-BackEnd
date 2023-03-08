@@ -6,7 +6,7 @@ module.exports = app => {
     const checkIfExistNameFirst = await accounts.query().select('email').where({ name: data.name });
 
     if (checkIfExistNameFirst.length > 0) {
-      return { status: 403, message: 'User already in use!' }
+      return { status: 403, message: 'Account name already in use!' }
     }
 
     if (checkIfExistEmailFirst.length > 0) {
@@ -106,7 +106,6 @@ module.exports = app => {
         const newComersIinitialItens = [
           { player_id: Number(getCreatedPlayer.id), pid: 3, sid: 101, itemtype: 2853, count: 1 },
           { player_id: Number(getCreatedPlayer.id), pid: 4, sid: 102, itemtype: 3561, count: 1 },
-          { player_id: Number(getCreatedPlayer.id), pid: 11, sid: 103, itemtype: 23396, count: 1 },
           { player_id: Number(getCreatedPlayer.id), pid: 101, sid: 104, itemtype: 3291, count: 1 },
           { player_id: Number(getCreatedPlayer.id), pid: 101, sid: 105, itemtype: 3270, count: 1 },
           { player_id: Number(getCreatedPlayer.id), pid: 101, sid: 106, itemtype: 3293, count: 1 },
