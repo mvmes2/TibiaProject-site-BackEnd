@@ -1,5 +1,5 @@
 module.exports = app => {
-    const { checkValidLoginHash, createCharacterSerice, validateCharacterService, deleteCharacterService, updateHidenCharacterService, updateCharacterCommentService } = app.src.main.services.AccountService;
+    const { checkValidLoginHash, createCharacterSerice, validateCharacterService, deleteCharacterService, updateHidenCharacterService, updateCharacterCommentService, recoveryAccountGenericService } = app.src.main.services.AccountService;
     const { updateAcc } = app.src.main.repository.UserRepository;
     const validateAccountRequest = async (req, res) => {
         const data = req.body;
@@ -38,9 +38,13 @@ const updateCharacterCommentRequest = async (req, res) => {
 }
 
 const updateRKRequest = async (req, res) => {
-    
     data = req.body;
     const resp = await updateAcc(data);
+   return res.status(resp.status).send({message: resp.message});
+}
+const recoveryAccountGenericRequest = async (req, res) => {
+    data = req.body;
+    const resp = await recoveryAccountGenericService(data);
    return res.status(resp.status).send({message: resp.message});
 }
 
@@ -51,6 +55,7 @@ const updateRKRequest = async (req, res) => {
         deleteCharacterRequest,
         updateHidenCharacterRequest,
         updateCharacterCommentRequest,
-        updateRKRequest
+        updateRKRequest,
+        recoveryAccountGenericRequest
     }
 }

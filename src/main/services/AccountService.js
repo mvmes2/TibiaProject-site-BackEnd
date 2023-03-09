@@ -33,12 +33,18 @@ const updateCharacterCommentService = async (data) => {
 return { status: resp.status, message: resp.message};
 }
 
+const recoveryAccountGenericService = async (data) => {
+    const resp = await updateCharacterCommentInDB(data);
+return { status: resp.status, message: resp.message};
+}
+
     return {
         checkValidLoginHash,
         createCharacterSerice,
         validateCharacterService,
         deleteCharacterService,
         updateHidenCharacterService,
-        updateCharacterCommentService
+        updateCharacterCommentService,
+        recoveryAccountGenericService
     }
 }

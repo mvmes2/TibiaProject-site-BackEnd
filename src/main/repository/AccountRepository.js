@@ -55,10 +55,36 @@ const checkNameAndEmail = async (data) => {
         }
         return { status: 200, message: 'ok' }
 }
+
+const checkIfExixtsNameOrEmailOrBothAndReturnAccount = async (name, email) => {
+    let account = null;
+    try {
+        if (name) {
+            const checkIfExistNameFirst = await accounts.query().select('email').whereRaw('LOWER(name) = ?', name.toLowerCase());
+            if (checkIfExistNameFirst.length < 1) {
+              return { status: 400, message: 'Wrong or non-existent account name!' }
+            }
+            account = checkIfExistNameFirst;
+           }
+           
+           if (email) {
+             const checkIfExistEmailFirst = await accounts.query().select('email').where({ email });
+             if (checkIfExistEmailFirst.length < 1) {
+               return { status: 400, message: 'Wrong or non-existent user email!' }
+             }
+             account = email;
+           }
+           return account;
+    } catch (err) {
+        console.log(err);
+        return { status: 500, message: 'Internal error, open a ticket, or re-try later' }
+    }
+  }
     return {
         updateHidenCharacterInDB,
         deleteCharacter,
         updateCharacterCommentInDB,
-        checkNameAndEmail
+        checkNameAndEmail,
+        checkIfExixtsNameOrEmailOrBothAndReturnAccount
     }
 }

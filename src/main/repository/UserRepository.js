@@ -6,11 +6,11 @@ module.exports = app => {
     const checkIfExistNameFirst = await accounts.query().select('email').whereRaw('LOWER(name) = ?', data.name.toLowerCase());
 
     if (checkIfExistNameFirst.length > 0) {
-      return { status: 403, message: 'Account name already in use!' }
+      return { status: 404, message: 'Account name already in use!' }
     }
 
     if (checkIfExistEmailFirst.length > 0) {
-      return { status: 403, message: 'Email already in use!' }
+      return { status: 404, message: 'Email already in use!' }
     }
     try {
       data.createdAt = Math.floor(Date.now() / 1000);
@@ -24,6 +24,10 @@ module.exports = app => {
   }
 
   const updateAcc = async (data) => {
+    const findAccountFirst = await accounts.query().select('id').where({ id: data.id });
+    if (findAccountFirst.length < 1) {
+      return { status: 500, message: 'Error at inserting RK to your \n Account,open a ticket or call admin!' }
+    }
     try {
       await accounts.query().update(data.update).where({ id: data.id });
       return { status: 200, message: 'Account updated successfully!' };
@@ -197,12 +201,14 @@ module.exports = app => {
     }
   }
 
+ 
+
   return {
     checkIfAccExists,
     InsertNewAccount,
     updateAcc,
     validateLoginHash,
     createNewCharacterDB,
-    checkCharacterOwnerAtDB
+    checkCharacterOwnerAtDB,
   }
 }
