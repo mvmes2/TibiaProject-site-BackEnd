@@ -1,12 +1,25 @@
-const crypto = require('crypto');
+const jsSHA = require('jssha');
+const jwt = require('jsonwebtoken');
+const mailer = require('../modules/mailer');
+const instagram_logo = 'https://res.cloudinary.com/dqncp7bg6/image/upload/v1678229806/instagram_nrqx0k.png';
+const youtube_logo = 'https://res.cloudinary.com/dqncp7bg6/image/upload/c_pad,b_auto:predominant,fl_preserve_transparency/v1678229812/youtube_buxwrq.jpg';
+const discord_logo = 'https://res.cloudinary.com/dqncp7bg6/image/upload/v1678229803/discord_rh9nrm.png';
 
-const checkPassword = (encryptedPassword, givenPassword) => {
-    const hash = crypto.createHash('sha1').update(givenPassword).digest('hex');
 
-    if(hash === encryptedPassword) {
-        return true;
+const encryptPassword = (password) => {
+  const sha1 = new jsSHA("SHA-1", "TEXT");
+  sha1.update(password);
+  return sha1.getHash("HEX");
+}
+
+const checkPassword = (givenPassword, encryptedPassword) => {
+  let passwordHash = null;
+    try {
+       passwordHash = encryptPassword(givenPassword);
+    } catch(err){
+     console.log(err);
     }
-    return false;
+    return passwordHash === encryptedPassword;
 }
 
 const hashGenerator = (size) => {
@@ -28,7 +41,8 @@ const hashGenerator = (size) => {
   }
 
   const validateRegexSecurity = (inputToTest) => {
-    const regex = /^(?!.*(input|null|utf8|and|or|select|insert|update|delete|from|where|drop|create|alter|rename|truncate|database|table|index|grant|revoke|union|exec|script|javascript|alert|prompt|confirm|document|location|window|xmlhttprequest|eval|function|prototype|constructor|class|import|export|default|super|this|catch|finally|try|debugger|arguments))[a-zA-Z](?!.*['-])[a-zA-Z'-]*(?!.*(--|['-].*['-]))[a-zA-Z'-]*'?[a-zA-Z'-]*$/;
+    const regex = /^(?!.*(INPUT|NULL|UTF8|AND|OR|SELECT|INSERT|UPDATE|DELETE|FROM|WHERE|DROP|CREATE|ALTER|RENAME|TRUNCATE|DATABASE|TABLE|INDEX|GRANT|REVOKE|UNION|EXEC|SCRIPT|JAVASCRIPT|ALERT|PROMPT|CONFIRM|DOCUMENT|LOCATION|WINDOW|XMLHTTPREQUEST|EVAL|FUNCTION|PROTOTYPE|CONSTRUCTOR|CLASS|IMPORT|EXPORT|DEFAULT|SUPER|THIS|CATCH|FINALLY|TRY|DEBUGGER|ARGUMENTS|input|null|utf8|and|or|select|insert|update|delete|from|where|drop|create|alter|rename|truncate|database|table|index|grant|revoke|union|exec|script|javascript|alert|prompt|confirm|document|location|window|xmlhttprequest|eval|function|prototype|constructor|class|import|export|default|super|this|catch|finally|try|debugger|arguments))([a-zA-Z]+([ '-][a-zA-Z]+){0,2})$/ ;
+
     if (regex.test(inputToTest)) {
       return true
     } else {
@@ -36,9 +50,87 @@ const hashGenerator = (size) => {
     }
   }
 
+  const formatDateToTimeStampEpoch = (date) => {
+    //formato de date 'MM/DD/YYY'
+    const agora = new Date();
+    const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const horarioFormatado = agora.toLocaleTimeString('pt-BR', { timeZone });
+    const horarioAtual = horarioFormatado.slice(0, 8);
+
+    const dataTimestamp = Math.floor(new Date(`${date} ${horarioAtual}`).getTime() / 1000);
+    return dataTimestamp;
+}
+
+const projectMailer = {
+  welcomeAndValidate: function sendEmailTo(email, subject, account_email, account_name, account_pass, activation_link) {
+    mailer.sendMail({
+        from: "tibiaprojectbr@gmail.com",        
+        to: email,
+        subject,
+        template: "main/resources/emailTemplates/welcomeAndActivationAccount",
+        context: {
+          account_email,
+          account_name,
+          account_pass,
+          youtube_logo,
+          instagram_logo,
+          discord_logo,
+          activation_link
+        },
+      });
+  },
+  changePassword: function sendEmailTo(account_email, account_name, account_pass, changePassword_link) {
+    mailer.sendMail({
+        from: "tibiaprojectbr@gmail.com",        
+        to: account_email,
+        subject: 'Change password request',
+        template: "main/resources/emailTemplates/passwordRecovery",
+        context: {
+          account_email,
+          account_name,
+          account_pass,
+          youtube_logo,
+          instagram_logo,
+          discord_logo,
+          changePassword_link
+        },
+      });
+  },
+}
+
+const generateToken = (duration, userData) =>{
+  const JWTCONFIG = {
+    expiresIn: `${duration}m`,
+    algorithm: 'HS256'
+  }
+
+  const generatedUserToken = jwt.sign({ 
+    data: userData},
+    process.env.TOKEN_GENERATE_SECRET,
+    JWTCONFIG
+    );
+
+    return generatedUserToken;
+}
+
+const tokenValidation = (token) => {
+ try {
+  const decoded = jwt.verify(token, process.env.TOKEN_GENERATE_SECRET);
+  return decoded;
+ } catch(err) {
+  console.log(err);
+  return false;
+ }
+}
+
 
 module.exports = {
     checkPassword,
     hashGenerator,
-    validateRegexSecurity
+    validateRegexSecurity,
+    encryptPassword,
+    formatDateToTimeStampEpoch,
+    projectMailer,
+    generateToken,
+    tokenValidation
 }
