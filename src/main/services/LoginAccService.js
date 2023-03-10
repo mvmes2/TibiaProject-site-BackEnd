@@ -3,13 +3,14 @@ module.exports = app => {
     const { checkIfAccExists, updateAcc } = app.src.main.repository.UserRepository;
 
     const LoginAccService = async (data) => {
-        console.log(data)
         const exists = await checkIfAccExists(data.email);
         if (!exists.bool) {
             return { status: 404, message: 'Wrong Email and Password, or Account does not exists!' }
         }
 
         const acc = exists.acc[0];
+
+        console.log("User banco de dados", exists)
         
         const isPasswordValid = checkPassword(data.password, acc.password);
 
