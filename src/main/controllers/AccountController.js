@@ -1,6 +1,9 @@
 module.exports = app => {
-    const { checkValidLoginHash, createCharacterSerice, validateCharacterService, deleteCharacterService, updateHidenCharacterService, updateCharacterCommentService, recoveryAccountGenericService } = app.src.main.services.AccountService;
+    const { checkValidLoginHash, createCharacterSerice, validateCharacterService, deleteCharacterService, 
+        updateHidenCharacterService, updateCharacterCommentService, recoveryAccountGenericService, validateJsonTokenService } = app.src.main.services.AccountService;
     const { updateAcc } = app.src.main.repository.UserRepository;
+    const { getAccountInfoRepository } = app.src.main.repository.AccountRepository;
+
     const validateAccountRequest = async (req, res) => {
         const data = req.body;
         const resp = await checkValidLoginHash(data)
@@ -43,9 +46,23 @@ const updateRKRequest = async (req, res) => {
    return res.status(resp.status).send({message: resp.message});
 }
 const recoveryAccountGenericRequest = async (req, res) => {
+    console.log('consolando recebimento de data no controller.', req.body)
     data = req.body;
     const resp = await recoveryAccountGenericService(data);
    return res.status(resp.status).send({message: resp.message});
+}
+
+const getAccountInfoRequest = async (req, res) => {
+    const data = req.body;
+    const resp = await getAccountInfoRepository(data);
+    return res.status(resp.status).send({message: resp.message});
+}
+
+const validateJsonTokenRequest = async (req, res) => {
+    const data = req.body;
+    console.log('recebi com token válido uma request de: ', data)
+    console.log('prossiga...')
+    return res.status(200).send({message: 'okla', user: req.user});
 }
 
     return {
@@ -56,6 +73,8 @@ const recoveryAccountGenericRequest = async (req, res) => {
         updateHidenCharacterRequest,
         updateCharacterCommentRequest,
         updateRKRequest,
-        recoveryAccountGenericRequest
+        recoveryAccountGenericRequest,
+        getAccountInfoRequest,
+        validateJsonTokenRequest
     }
 }

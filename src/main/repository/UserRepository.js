@@ -26,7 +26,7 @@ module.exports = app => {
   const updateAcc = async (data) => {
     const findAccountFirst = await accounts.query().select('id').where({ id: data.id });
     if (findAccountFirst.length < 1) {
-      return { status: 500, message: 'Error at inserting RK to your \n Account,open a ticket or call admin!' }
+      return { status: 500, message: 'Internal error on trying update your account, account not found, open a ticket or call admin!' }
     }
     try {
       await accounts.query().update(data.update).where({ id: data.id });

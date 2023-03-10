@@ -21,6 +21,7 @@ app.use(express.json());
 
     consign()
     .then("./src/main/utils")
+    .then("./src/main/middlewares")
     .then("./src/main/repository")
     .then("./src/main/services")
     .then("./src/main/controllers")

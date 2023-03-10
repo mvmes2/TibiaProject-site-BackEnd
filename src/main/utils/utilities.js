@@ -1,4 +1,5 @@
 const jsSHA = require('jssha');
+const jwt = require('jsonwebtoken');
 const mailer = require('../modules/mailer');
 const instagram_logo = 'https://res.cloudinary.com/dqncp7bg6/image/upload/v1678229806/instagram_nrqx0k.png';
 const youtube_logo = 'https://res.cloudinary.com/dqncp7bg6/image/upload/c_pad,b_auto:predominant,fl_preserve_transparency/v1678229812/youtube_buxwrq.jpg';
@@ -78,19 +79,48 @@ const projectMailer = {
         },
       });
   },
-  teste: function sendEmailTo(email, subject, account_email, account_name, account_pass) {
+  changePassword: function sendEmailTo(account_email, account_name, account_pass, changePassword_link) {
     mailer.sendMail({
         from: "tibiaprojectbr@gmail.com",        
-        to: email,
-        subject,
-        template: "main/resources/emailTemplates/welcomeAndActivationAccount",
+        to: account_email,
+        subject: 'Change password request',
+        template: "main/resources/emailTemplates/passwordRecovery",
         context: {
           account_email,
           account_name,
-          account_pass
+          account_pass,
+          youtube_logo,
+          instagram_logo,
+          discord_logo,
+          changePassword_link
         },
       });
   },
+}
+
+const generateToken = (duration, userData) =>{
+  const JWTCONFIG = {
+    expiresIn: `${duration}m`,
+    algorithm: 'HS256'
+  }
+
+  const generatedUserToken = jwt.sign({ 
+    data: userData},
+    process.env.TOKEN_GENERATE_SECRET,
+    JWTCONFIG
+    );
+
+    return generatedUserToken;
+}
+
+const tokenValidation = (token) => {
+ try {
+  const decoded = jwt.verify(token, process.env.TOKEN_GENERATE_SECRET);
+  return decoded;
+ } catch(err) {
+  console.log(err);
+  return false;
+ }
 }
 
 
@@ -100,5 +130,7 @@ module.exports = {
     validateRegexSecurity,
     encryptPassword,
     formatDateToTimeStampEpoch,
-    projectMailer
+    projectMailer,
+    generateToken,
+    tokenValidation
 }

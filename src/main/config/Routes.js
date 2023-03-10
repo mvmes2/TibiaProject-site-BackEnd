@@ -1,3 +1,5 @@
+const authMiddleware = require('../middlewares/AuthMiddleware');
+
 module.exports = app => {
     app.route('/teste').get(app.src.main.controllers.ServerTestResponseController.TesteRequest);
     app.route('/create-acc').post(app.src.main.controllers.CreateAccController.CreateAccRequest);
@@ -13,5 +15,6 @@ module.exports = app => {
     app.route('/before-create-acc-email-validation').post(app.src.main.controllers.CreateAccController.beforeAccCreateSendEmailRequest);
     app.route('/update-rk').post(app.src.main.controllers.AccountController.updateRKRequest);
     app.route('/recovery-acc-back-generic').post(app.src.main.controllers.AccountController.recoveryAccountGenericRequest);
-    
+    app.route('/get-account-info').post(app.src.main.controllers.AccountController.getAccountInfoRequest);
+    app.route('/validate-changePass-token').post(authMiddleware, app.src.main.controllers.AccountController.validateJsonTokenRequest);
 }

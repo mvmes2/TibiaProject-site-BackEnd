@@ -59,32 +59,52 @@ const checkNameAndEmail = async (data) => {
 const checkIfExixtsNameOrEmailOrBothAndReturnAccount = async (name, email) => {
     let account = null;
     try {
-        if (name) {
-            const checkIfExistNameFirst = await accounts.query().select('email').whereRaw('LOWER(name) = ?', name.toLowerCase());
+        if (name !== null) {
+            const checkIfExistNameFirst = await accounts.query().select('email', 'name').whereRaw('LOWER(name) = ?', name.toLowerCase());
             if (checkIfExistNameFirst.length < 1) {
               return { status: 400, message: 'Wrong or non-existent account name!' }
             }
             account = checkIfExistNameFirst;
            }
            
-           if (email) {
-             const checkIfExistEmailFirst = await accounts.query().select('email').where({ email });
+           if (email !== null) {
+             const checkIfExistEmailFirst = await accounts.query().select('email', 'name', 'id', 'password2').where({ email });
              if (checkIfExistEmailFirst.length < 1) {
                return { status: 400, message: 'Wrong or non-existent user email!' }
              }
-             account = email;
+             account = checkIfExistEmailFirst;
            }
-           return account;
+           return { status: 200, message: account };
     } catch (err) {
         console.log(err);
         return { status: 500, message: 'Internal error, open a ticket, or re-try later' }
     }
+  }
+  const getAccountInfoRepository = async (data) => {
+    try {
+      const acc = await accounts.query().select(data?.selectinfo ? data.selectinfo : 'change_pass_token').where({id: data.id});
+      if (acc.length < 1) {
+        return { status: 400, message: '!Account Not Found.' }
+      }
+      return { status: 200, message: acc }
+    } catch (err) {
+      console.log(err);
+      return { status: 500, message: 'internal error! open a ticket or call admin!' }
+    }
+  }
+
+  const validateJsonTokenRepository = async (data) => {
+    const acc = await accounts.query().select('change_pass_token').where({ id: data.id }).first();
+    console.log(acc);
+    return { status: 200, message: 'ok' }
   }
     return {
         updateHidenCharacterInDB,
         deleteCharacter,
         updateCharacterCommentInDB,
         checkNameAndEmail,
-        checkIfExixtsNameOrEmailOrBothAndReturnAccount
+        checkIfExixtsNameOrEmailOrBothAndReturnAccount,
+        getAccountInfoRepository,
+        validateJsonTokenRepository
     }
 }
