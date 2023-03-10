@@ -50,7 +50,7 @@ module.exports = app => {
         const acc = returnal.message[0];
         console.log(acc);
         const newToken = generateToken(30, acc)
-        const link = `http://143.0.20.85:3000/account-changepassword/${hashGenerator(16)}-${acc.id}`;
+        const link = `http://${process.env.BASE_URL_IP}:3000/account-changepassword/${hashGenerator(16)}-${acc.id}`;
         try {
           projectMailer.changePassword(
             acc.email,
