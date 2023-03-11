@@ -96,6 +96,7 @@ module.exports = app => {
   }
 
   const createNewCharacterDB = async (data) => {
+    console.log('informações enviadas na criação do personagem no back: ', data)
     data.createdAt = Math.floor(Date.now() / 1000);
     try {
       const checkNameExist = await players.query().select('name').where({ name: data.name });

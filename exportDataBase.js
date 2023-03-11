@@ -5,7 +5,7 @@ const path = require('path');
 const dbConfig = {
   host: 'localhost',
   user: 'root',
-  password: '',
+  password: 'root',
   database: 'tibiaproject'
 };
 

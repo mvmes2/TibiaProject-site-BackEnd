@@ -60,7 +60,7 @@ const checkIfExixtsNameOrEmailOrBothAndReturnAccount = async (name, email) => {
     let account = null;
     try {
         if (name !== null) {
-            const checkIfExistNameFirst = await accounts.query().select('email', 'name').whereRaw('LOWER(name) = ?', name.toLowerCase());
+            const checkIfExistNameFirst = await accounts.query().select('email', 'name' ).whereRaw('LOWER(name) = ?', name.toLowerCase());
             if (checkIfExistNameFirst.length < 1) {
               return { status: 400, message: 'Wrong or non-existent account name!' }
             }
@@ -98,6 +98,24 @@ const checkIfExixtsNameOrEmailOrBothAndReturnAccount = async (name, email) => {
     console.log(acc);
     return { status: 200, message: 'ok' }
   }
+
+  const internalOnlyCheckAccountDoNotSendResponseToFront = async (data) => {
+    console.log('oque ta vindo ai?', data)
+    try {
+      const acc = data.id ? await accounts.query().select('*').where({ id: data.id }) : (
+        data.name ? await accounts.query().select('*').where({ name: data.name }) : (
+          await accounts.query().select('*').where({ email: data.email })
+        )
+      )
+      if (!acc || acc === undefined || acc === null || acc?.length < 1) {
+        return false;
+      }
+      return acc;
+    } catch(err) {
+      console.log(err);
+      return { status: 500, message: 'Internal error at trying to get account!' }
+    }
+  }
     return {
         updateHidenCharacterInDB,
         deleteCharacter,
@@ -105,6 +123,7 @@ const checkIfExixtsNameOrEmailOrBothAndReturnAccount = async (name, email) => {
         checkNameAndEmail,
         checkIfExixtsNameOrEmailOrBothAndReturnAccount,
         getAccountInfoRepository,
-        validateJsonTokenRepository
+        validateJsonTokenRepository,
+        internalOnlyCheckAccountDoNotSendResponseToFront
     }
 }
