@@ -114,6 +114,7 @@ const generateToken = (duration, userData) =>{
 }
 
 const tokenValidation = (token) => {
+  console.log('recebendo token', token)
  try {
   const decoded = jwt.verify(token, process.env.TOKEN_GENERATE_SECRET);
   return decoded;
