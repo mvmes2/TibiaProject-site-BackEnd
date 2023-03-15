@@ -2,7 +2,7 @@
 --
 -- Host: localhost    Database: tibiaproject
 -- ------------------------------------------------------
--- Server version	5.5.5-10.4.28-MariaDB
+-- Server version	8.0.32
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -19,7 +19,7 @@
 -- Current Database: `tibiaproject`
 --
 
-CREATE DATABASE /*!32312 IF NOT EXISTS*/ `tibiaproject` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci */;
+CREATE DATABASE /*!32312 IF NOT EXISTS*/ `tibiaproject` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;
 
 USE `tibiaproject`;
 
@@ -31,18 +31,18 @@ DROP TABLE IF EXISTS `account_ban_history`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `account_ban_history` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `account_id` int(11) unsigned NOT NULL,
+  `id` int NOT NULL AUTO_INCREMENT,
+  `account_id` int unsigned NOT NULL,
   `reason` varchar(255) NOT NULL,
-  `banned_at` bigint(20) NOT NULL,
-  `expired_at` bigint(20) NOT NULL,
-  `banned_by` int(11) NOT NULL,
+  `banned_at` bigint NOT NULL,
+  `expired_at` bigint NOT NULL,
+  `banned_by` int NOT NULL,
   PRIMARY KEY (`id`),
   KEY `account_id` (`account_id`),
   KEY `banned_by` (`banned_by`),
   CONSTRAINT `account_bans_history_account_fk` FOREIGN KEY (`account_id`) REFERENCES `accounts` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `account_bans_history_player_fk` FOREIGN KEY (`banned_by`) REFERENCES `players` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -62,16 +62,16 @@ DROP TABLE IF EXISTS `account_bans`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `account_bans` (
-  `account_id` int(11) unsigned NOT NULL,
+  `account_id` int unsigned NOT NULL,
   `reason` varchar(255) NOT NULL,
-  `banned_at` bigint(20) NOT NULL,
-  `expires_at` bigint(20) NOT NULL,
-  `banned_by` int(11) NOT NULL,
+  `banned_at` bigint NOT NULL,
+  `expires_at` bigint NOT NULL,
+  `banned_by` int NOT NULL,
   PRIMARY KEY (`account_id`),
   KEY `banned_by` (`banned_by`),
   CONSTRAINT `account_bans_account_fk` FOREIGN KEY (`account_id`) REFERENCES `accounts` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `account_bans_player_fk` FOREIGN KEY (`banned_by`) REFERENCES `players` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -91,17 +91,17 @@ DROP TABLE IF EXISTS `account_viplist`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `account_viplist` (
-  `account_id` int(11) unsigned NOT NULL COMMENT 'id of account whose viplist entry it is',
-  `player_id` int(11) NOT NULL COMMENT 'id of target player of viplist entry',
+  `account_id` int unsigned NOT NULL COMMENT 'id of account whose viplist entry it is',
+  `player_id` int NOT NULL COMMENT 'id of target player of viplist entry',
   `description` varchar(128) NOT NULL DEFAULT '',
-  `icon` tinyint(2) unsigned NOT NULL DEFAULT 0,
-  `notify` tinyint(1) NOT NULL DEFAULT 0,
+  `icon` tinyint unsigned NOT NULL DEFAULT '0',
+  `notify` tinyint(1) NOT NULL DEFAULT '0',
   UNIQUE KEY `account_viplist_unique` (`account_id`,`player_id`),
   KEY `account_id` (`account_id`),
   KEY `player_id` (`player_id`),
   CONSTRAINT `account_viplist_account_fk` FOREIGN KEY (`account_id`) REFERENCES `accounts` (`id`) ON DELETE CASCADE,
   CONSTRAINT `account_viplist_player_fk` FOREIGN KEY (`player_id`) REFERENCES `players` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -121,37 +121,37 @@ DROP TABLE IF EXISTS `accounts`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `accounts` (
-  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
   `name` varchar(32) NOT NULL,
   `password` varchar(70) NOT NULL,
   `email` varchar(255) NOT NULL DEFAULT '',
-  `created` int(11) NOT NULL DEFAULT 0,
+  `created` int NOT NULL DEFAULT '0',
   `rlname` varchar(255) NOT NULL DEFAULT '',
   `location` varchar(255) NOT NULL DEFAULT '',
   `country` varchar(3) NOT NULL DEFAULT '',
-  `web_lastlogin` int(11) NOT NULL DEFAULT 0,
-  `web_flags` int(11) NOT NULL DEFAULT 0,
+  `web_lastlogin` int NOT NULL DEFAULT '0',
+  `web_flags` int NOT NULL DEFAULT '0',
   `email_hash` varchar(32) NOT NULL DEFAULT '',
   `email_new` varchar(255) NOT NULL DEFAULT '',
-  `email_new_time` int(11) NOT NULL DEFAULT 0,
+  `email_new_time` int NOT NULL DEFAULT '0',
   `email_code` varchar(255) NOT NULL DEFAULT '',
-  `email_next` int(11) NOT NULL DEFAULT 0,
-  `premium_points` int(11) NOT NULL DEFAULT 0,
-  `email_verified` tinyint(1) NOT NULL DEFAULT 0,
+  `email_next` int NOT NULL DEFAULT '0',
+  `premium_points` int NOT NULL DEFAULT '0',
+  `email_verified` tinyint(1) NOT NULL DEFAULT '0',
   `key` varchar(64) NOT NULL DEFAULT '',
-  `blocked` tinyint(1) NOT NULL DEFAULT 0 COMMENT 'internal usage',
-  `premdays` int(11) NOT NULL DEFAULT 0,
-  `lastday` int(10) unsigned NOT NULL DEFAULT 0,
-  `type` tinyint(1) unsigned NOT NULL DEFAULT 1,
-  `coins` int(12) unsigned NOT NULL DEFAULT 0,
-  `tournament_coins` int(12) unsigned NOT NULL DEFAULT 0,
-  `creation` int(11) unsigned NOT NULL DEFAULT 0,
-  `recruiter` int(6) DEFAULT 0,
-  `vote` int(11) NOT NULL DEFAULT 0,
-  `createdAt` bigint(22) NOT NULL DEFAULT 0,
-  `deletedAt` bigint(22) NOT NULL DEFAULT 0,
-  `ban_duration` bigint(22) NOT NULL DEFAULT 0,
-  `isBanned` tinyint(1) NOT NULL DEFAULT 0,
+  `blocked` tinyint(1) NOT NULL DEFAULT '0' COMMENT 'internal usage',
+  `premdays` int NOT NULL DEFAULT '0',
+  `lastday` int unsigned NOT NULL DEFAULT '0',
+  `type` tinyint unsigned NOT NULL DEFAULT '1',
+  `coins` int unsigned NOT NULL DEFAULT '0',
+  `tournament_coins` int unsigned NOT NULL DEFAULT '0',
+  `creation` int unsigned NOT NULL DEFAULT '0',
+  `recruiter` int DEFAULT '0',
+  `vote` int NOT NULL DEFAULT '0',
+  `createdAt` bigint NOT NULL DEFAULT '0',
+  `deletedAt` bigint NOT NULL DEFAULT '0',
+  `ban_duration` bigint NOT NULL DEFAULT '0',
+  `isBanned` tinyint(1) NOT NULL DEFAULT '0',
   `banReason` varchar(255) DEFAULT NULL,
   `loginHash` varchar(45) DEFAULT NULL,
   `recovery_key` varchar(60) DEFAULT NULL,
@@ -160,7 +160,7 @@ CREATE TABLE `accounts` (
   `login_token` varchar(270) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `accounts_unique` (`name`)
-) ENGINE=InnoDB AUTO_INCREMENT=49 DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=50 DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -169,7 +169,7 @@ CREATE TABLE `accounts` (
 
 LOCK TABLES `accounts` WRITE;
 /*!40000 ALTER TABLE `accounts` DISABLE KEYS */;
-INSERT INTO `accounts` VALUES (48,'testumbra','658daa3611f16f1a3c9878acd737457a1816a356','mvmes23@gmail.com',1,'','','bra',1678547821,0,'','',0,'',0,0,1,'',0,0,0,1,0,0,0,0,0,1678547796,0,0,0,NULL,'j13GHaHE','GAJJE72EC00HACH5DE1I1H9','Mvm19018009',NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2Nzg1NDc4MjEsImV4cCI6MTY3ODU1MTQyMX0.9qHxEgWM02vDfDzv9pm8T-xOEa6GfZtDEqcnrZuD2Dg');
+INSERT INTO `accounts` VALUES (48,'anderkrox','d78fe3cac664bfff9bcdc1d714c304ee299e4211','andersonsacani93@gmail.com',1,'','','bra',1678807695,0,'','',0,'',0,0,1,'',0,0,0,5,0,0,0,0,0,1678807669,0,0,0,NULL,'IFJ18BgE','JH32HF5EDAC4A2FAFBFA7GI','Rghu1500',NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2Nzg4MDc2OTUsImV4cCI6MTY3ODgxMTI5NX0.xGTqKyc4iRhjStMh1fXopvGgPHUyVLaV93PT1SAXJt4'),(49,'Marcus','658daa3611f16f1a3c9878acd737457a1816a356','mvmes23@gmail.com',1,'','','bra',1678807720,0,'','',0,'',0,0,1,'',0,0,0,5,0,0,0,0,0,1678807689,0,0,0,NULL,'jB4hh9ha','J38B0FE7IC6IABGDIC0D0G3','Mvm19018009',NULL,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2Nzg4MDc3MjAsImV4cCI6MTY3ODgxMTMyMH0.zJoAFppTvR4fOEUP2kNDzOWSzgnj0smf5Bm-JYY84Ok');
 /*!40000 ALTER TABLE `accounts` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -181,18 +181,18 @@ DROP TABLE IF EXISTS `boosted_boss`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `boosted_boss` (
-  `looktype` int(11) NOT NULL DEFAULT 136,
-  `lookfeet` int(11) NOT NULL DEFAULT 0,
-  `looklegs` int(11) NOT NULL DEFAULT 0,
-  `lookhead` int(11) NOT NULL DEFAULT 0,
-  `lookbody` int(11) NOT NULL DEFAULT 0,
-  `lookaddons` int(11) NOT NULL DEFAULT 0,
-  `lookmount` int(11) DEFAULT 0,
+  `looktype` int NOT NULL DEFAULT '136',
+  `lookfeet` int NOT NULL DEFAULT '0',
+  `looklegs` int NOT NULL DEFAULT '0',
+  `lookhead` int NOT NULL DEFAULT '0',
+  `lookbody` int NOT NULL DEFAULT '0',
+  `lookaddons` int NOT NULL DEFAULT '0',
+  `lookmount` int DEFAULT '0',
   `date` varchar(250) NOT NULL DEFAULT '',
-  `boostname` text DEFAULT NULL,
+  `boostname` text,
   `raceid` varchar(250) NOT NULL DEFAULT '',
   PRIMARY KEY (`date`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -201,7 +201,7 @@ CREATE TABLE `boosted_boss` (
 
 LOCK TABLES `boosted_boss` WRITE;
 /*!40000 ALTER TABLE `boosted_boss` DISABLE KEYS */;
-INSERT INTO `boosted_boss` VALUES (1062,18,94,78,113,3,0,'11','Ghulosh','1608');
+INSERT INTO `boosted_boss` VALUES (1197,0,0,0,0,0,0,'14','Urmahlullu the Weakened','1811');
 /*!40000 ALTER TABLE `boosted_boss` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -213,18 +213,18 @@ DROP TABLE IF EXISTS `boosted_creature`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `boosted_creature` (
-  `looktype` int(11) NOT NULL DEFAULT 136,
-  `lookfeet` int(11) NOT NULL DEFAULT 0,
-  `looklegs` int(11) NOT NULL DEFAULT 0,
-  `lookhead` int(11) NOT NULL DEFAULT 0,
-  `lookbody` int(11) NOT NULL DEFAULT 0,
-  `lookaddons` int(11) NOT NULL DEFAULT 0,
-  `lookmount` int(11) DEFAULT 0,
+  `looktype` int NOT NULL DEFAULT '136',
+  `lookfeet` int NOT NULL DEFAULT '0',
+  `looklegs` int NOT NULL DEFAULT '0',
+  `lookhead` int NOT NULL DEFAULT '0',
+  `lookbody` int NOT NULL DEFAULT '0',
+  `lookaddons` int NOT NULL DEFAULT '0',
+  `lookmount` int DEFAULT '0',
   `date` varchar(250) NOT NULL DEFAULT '',
-  `boostname` text DEFAULT NULL,
+  `boostname` text,
   `raceid` varchar(250) NOT NULL DEFAULT '',
   PRIMARY KEY (`date`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -233,7 +233,7 @@ CREATE TABLE `boosted_creature` (
 
 LOCK TABLES `boosted_creature` WRITE;
 /*!40000 ALTER TABLE `boosted_creature` DISABLE KEYS */;
-INSERT INTO `boosted_creature` VALUES (976,0,0,0,0,0,0,'11','Putrid Mummy','1415');
+INSERT INTO `boosted_creature` VALUES (1071,105,38,57,96,1,0,'14','Falcon Knight','1646');
 /*!40000 ALTER TABLE `boosted_creature` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -245,16 +245,16 @@ DROP TABLE IF EXISTS `coins_transactions`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `coins_transactions` (
-  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `account_id` int(11) unsigned NOT NULL,
-  `type` tinyint(1) unsigned NOT NULL,
-  `amount` int(12) unsigned NOT NULL,
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
+  `account_id` int unsigned NOT NULL,
+  `type` tinyint unsigned NOT NULL,
+  `amount` int unsigned NOT NULL,
   `description` varchar(3500) NOT NULL,
-  `timestamp` timestamp NOT NULL DEFAULT current_timestamp(),
+  `timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `account_id` (`account_id`),
   CONSTRAINT `coins_transactions_account_fk` FOREIGN KEY (`account_id`) REFERENCES `accounts` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -274,15 +274,15 @@ DROP TABLE IF EXISTS `daily_reward_history`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `daily_reward_history` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `daystreak` smallint(2) NOT NULL DEFAULT 0,
-  `player_id` int(11) NOT NULL,
-  `timestamp` int(11) NOT NULL,
+  `id` int NOT NULL AUTO_INCREMENT,
+  `daystreak` smallint NOT NULL DEFAULT '0',
+  `player_id` int NOT NULL,
+  `timestamp` int NOT NULL,
   `description` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `player_id` (`player_id`),
   CONSTRAINT `daily_reward_history_player_fk` FOREIGN KEY (`player_id`) REFERENCES `players` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -302,20 +302,20 @@ DROP TABLE IF EXISTS `forge_history`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `forge_history` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `player_id` int(11) NOT NULL,
-  `action_type` int(11) NOT NULL DEFAULT 0,
+  `id` int NOT NULL AUTO_INCREMENT,
+  `player_id` int NOT NULL,
+  `action_type` int NOT NULL DEFAULT '0',
   `description` text NOT NULL,
-  `is_success` tinyint(4) NOT NULL DEFAULT 0,
-  `bonus` tinyint(4) NOT NULL DEFAULT 0,
-  `done_at` bigint(20) NOT NULL,
-  `done_at_date` datetime DEFAULT current_timestamp(),
-  `cost` bigint(20) unsigned NOT NULL DEFAULT 0,
-  `gained` bigint(20) unsigned NOT NULL DEFAULT 0,
+  `is_success` tinyint NOT NULL DEFAULT '0',
+  `bonus` tinyint NOT NULL DEFAULT '0',
+  `done_at` bigint NOT NULL,
+  `done_at_date` datetime DEFAULT CURRENT_TIMESTAMP,
+  `cost` bigint unsigned NOT NULL DEFAULT '0',
+  `gained` bigint unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   KEY `player_id` (`player_id`),
   CONSTRAINT `forge_history_ibfk_1` FOREIGN KEY (`player_id`) REFERENCES `players` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -338,7 +338,7 @@ CREATE TABLE `global_storage` (
   `key` varchar(32) NOT NULL,
   `value` text NOT NULL,
   UNIQUE KEY `global_storage_unique` (`key`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -359,14 +359,14 @@ DROP TABLE IF EXISTS `guild_invites`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `guild_invites` (
-  `player_id` int(11) NOT NULL DEFAULT 0,
-  `guild_id` int(11) NOT NULL DEFAULT 0,
-  `date` int(11) NOT NULL,
+  `player_id` int NOT NULL DEFAULT '0',
+  `guild_id` int NOT NULL DEFAULT '0',
+  `date` int NOT NULL,
   PRIMARY KEY (`player_id`,`guild_id`),
   KEY `guild_id` (`guild_id`),
   CONSTRAINT `guild_invites_guild_fk` FOREIGN KEY (`guild_id`) REFERENCES `guilds` (`id`) ON DELETE CASCADE,
   CONSTRAINT `guild_invites_player_fk` FOREIGN KEY (`player_id`) REFERENCES `players` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -386,9 +386,9 @@ DROP TABLE IF EXISTS `guild_membership`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `guild_membership` (
-  `player_id` int(11) NOT NULL,
-  `guild_id` int(11) NOT NULL,
-  `rank_id` int(11) NOT NULL,
+  `player_id` int NOT NULL,
+  `guild_id` int NOT NULL,
+  `rank_id` int NOT NULL,
   `nick` varchar(15) NOT NULL DEFAULT '',
   PRIMARY KEY (`player_id`),
   KEY `guild_id` (`guild_id`),
@@ -396,7 +396,7 @@ CREATE TABLE `guild_membership` (
   CONSTRAINT `guild_membership_guild_fk` FOREIGN KEY (`guild_id`) REFERENCES `guilds` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `guild_membership_player_fk` FOREIGN KEY (`player_id`) REFERENCES `players` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `guild_membership_rank_fk` FOREIGN KEY (`rank_id`) REFERENCES `guild_ranks` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -416,14 +416,14 @@ DROP TABLE IF EXISTS `guild_ranks`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `guild_ranks` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `guild_id` int(11) NOT NULL COMMENT 'guild',
+  `id` int NOT NULL AUTO_INCREMENT,
+  `guild_id` int NOT NULL COMMENT 'guild',
   `name` varchar(255) NOT NULL COMMENT 'rank name',
-  `level` int(11) NOT NULL COMMENT 'rank level - leader, vice, member, maybe something else',
+  `level` int NOT NULL COMMENT 'rank level - leader, vice, member, maybe something else',
   PRIMARY KEY (`id`),
   KEY `guild_id` (`guild_id`),
   CONSTRAINT `guild_ranks_fk` FOREIGN KEY (`guild_id`) REFERENCES `guilds` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -443,18 +443,18 @@ DROP TABLE IF EXISTS `guild_wars`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `guild_wars` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `guild1` int(11) NOT NULL DEFAULT 0,
-  `guild2` int(11) NOT NULL DEFAULT 0,
+  `id` int NOT NULL AUTO_INCREMENT,
+  `guild1` int NOT NULL DEFAULT '0',
+  `guild2` int NOT NULL DEFAULT '0',
   `name1` varchar(255) NOT NULL,
   `name2` varchar(255) NOT NULL,
-  `status` tinyint(2) NOT NULL DEFAULT 0,
-  `started` bigint(15) NOT NULL DEFAULT 0,
-  `ended` bigint(15) NOT NULL DEFAULT 0,
+  `status` tinyint NOT NULL DEFAULT '0',
+  `started` bigint NOT NULL DEFAULT '0',
+  `ended` bigint NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   KEY `guild1` (`guild1`),
   KEY `guild2` (`guild2`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -474,22 +474,22 @@ DROP TABLE IF EXISTS `guilds`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `guilds` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `level` int(11) NOT NULL DEFAULT 1,
+  `id` int NOT NULL AUTO_INCREMENT,
+  `level` int NOT NULL DEFAULT '1',
   `name` varchar(255) NOT NULL,
-  `ownerid` int(11) NOT NULL,
-  `creationdata` int(11) NOT NULL,
+  `ownerid` int NOT NULL,
+  `creationdata` int NOT NULL,
   `motd` varchar(255) NOT NULL DEFAULT '',
-  `residence` int(11) NOT NULL DEFAULT 0,
-  `balance` bigint(20) unsigned NOT NULL DEFAULT 0,
-  `points` int(11) NOT NULL DEFAULT 0,
+  `residence` int NOT NULL DEFAULT '0',
+  `balance` bigint unsigned NOT NULL DEFAULT '0',
+  `points` int NOT NULL DEFAULT '0',
   `description` text NOT NULL,
   `logo_name` varchar(255) NOT NULL DEFAULT 'default.gif',
   PRIMARY KEY (`id`),
   UNIQUE KEY `guilds_name_unique` (`name`),
   UNIQUE KEY `guilds_owner_unique` (`ownerid`),
   CONSTRAINT `guilds_ownerid_fk` FOREIGN KEY (`ownerid`) REFERENCES `players` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -528,18 +528,18 @@ DROP TABLE IF EXISTS `guildwar_kills`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `guildwar_kills` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `id` int NOT NULL AUTO_INCREMENT,
   `killer` varchar(50) NOT NULL,
   `target` varchar(50) NOT NULL,
-  `killerguild` int(11) NOT NULL DEFAULT 0,
-  `targetguild` int(11) NOT NULL DEFAULT 0,
-  `warid` int(11) NOT NULL DEFAULT 0,
-  `time` bigint(15) NOT NULL,
+  `killerguild` int NOT NULL DEFAULT '0',
+  `targetguild` int NOT NULL DEFAULT '0',
+  `warid` int NOT NULL DEFAULT '0',
+  `time` bigint NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `guildwar_kills_unique` (`warid`),
   KEY `warid` (`warid`),
   CONSTRAINT `guildwar_kills_warid_fk` FOREIGN KEY (`warid`) REFERENCES `guild_wars` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -559,12 +559,12 @@ DROP TABLE IF EXISTS `house_lists`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `house_lists` (
-  `house_id` int(11) NOT NULL,
-  `listid` int(11) NOT NULL,
+  `house_id` int NOT NULL,
+  `listid` int NOT NULL,
   `list` text NOT NULL,
   KEY `house_id` (`house_id`),
   CONSTRAINT `houses_list_house_fk` FOREIGN KEY (`house_id`) REFERENCES `houses` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -584,24 +584,24 @@ DROP TABLE IF EXISTS `houses`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `houses` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `owner` int(11) NOT NULL,
-  `paid` int(10) unsigned NOT NULL DEFAULT 0,
-  `warnings` int(11) NOT NULL DEFAULT 0,
+  `id` int NOT NULL AUTO_INCREMENT,
+  `owner` int NOT NULL,
+  `paid` int unsigned NOT NULL DEFAULT '0',
+  `warnings` int NOT NULL DEFAULT '0',
   `name` varchar(255) NOT NULL,
-  `rent` int(11) NOT NULL DEFAULT 0,
-  `town_id` int(11) NOT NULL DEFAULT 0,
-  `bid` int(11) NOT NULL DEFAULT 0,
-  `bid_end` int(11) NOT NULL DEFAULT 0,
-  `last_bid` int(11) NOT NULL DEFAULT 0,
-  `highest_bidder` int(11) NOT NULL DEFAULT 0,
-  `size` int(11) NOT NULL DEFAULT 0,
-  `guildid` int(11) DEFAULT NULL,
-  `beds` int(11) NOT NULL DEFAULT 0,
+  `rent` int NOT NULL DEFAULT '0',
+  `town_id` int NOT NULL DEFAULT '0',
+  `bid` int NOT NULL DEFAULT '0',
+  `bid_end` int NOT NULL DEFAULT '0',
+  `last_bid` int NOT NULL DEFAULT '0',
+  `highest_bidder` int NOT NULL DEFAULT '0',
+  `size` int NOT NULL DEFAULT '0',
+  `guildid` int DEFAULT NULL,
+  `beds` int NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   KEY `owner` (`owner`),
   KEY `town_id` (`town_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3687 DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=3687 DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -622,15 +622,15 @@ DROP TABLE IF EXISTS `ip_bans`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `ip_bans` (
-  `ip` int(11) NOT NULL,
+  `ip` int NOT NULL,
   `reason` varchar(255) NOT NULL,
-  `banned_at` bigint(20) NOT NULL,
-  `expires_at` bigint(20) NOT NULL,
-  `banned_by` int(11) NOT NULL,
+  `banned_at` bigint NOT NULL,
+  `expires_at` bigint NOT NULL,
+  `banned_by` int NOT NULL,
   PRIMARY KEY (`ip`),
   KEY `banned_by` (`banned_by`),
   CONSTRAINT `ip_bans_players_fk` FOREIGN KEY (`banned_by`) REFERENCES `players` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -650,20 +650,20 @@ DROP TABLE IF EXISTS `market_history`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `market_history` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `player_id` int(11) NOT NULL,
-  `sale` tinyint(1) NOT NULL DEFAULT 0,
-  `itemtype` int(10) unsigned NOT NULL,
-  `amount` smallint(5) unsigned NOT NULL,
-  `price` bigint(20) unsigned NOT NULL DEFAULT 0,
-  `expires_at` bigint(20) unsigned NOT NULL,
-  `inserted` bigint(20) unsigned NOT NULL,
-  `state` tinyint(1) unsigned NOT NULL,
-  `tier` tinyint(3) unsigned NOT NULL DEFAULT 0,
+  `id` int NOT NULL AUTO_INCREMENT,
+  `player_id` int NOT NULL,
+  `sale` tinyint(1) NOT NULL DEFAULT '0',
+  `itemtype` int unsigned NOT NULL,
+  `amount` smallint unsigned NOT NULL,
+  `price` bigint unsigned NOT NULL DEFAULT '0',
+  `expires_at` bigint unsigned NOT NULL,
+  `inserted` bigint unsigned NOT NULL,
+  `state` tinyint unsigned NOT NULL,
+  `tier` tinyint unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   KEY `player_id` (`player_id`,`sale`),
   CONSTRAINT `market_history_players_fk` FOREIGN KEY (`player_id`) REFERENCES `players` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -683,21 +683,21 @@ DROP TABLE IF EXISTS `market_offers`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `market_offers` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `player_id` int(11) NOT NULL,
-  `sale` tinyint(1) NOT NULL DEFAULT 0,
-  `itemtype` int(10) unsigned NOT NULL,
-  `amount` smallint(5) unsigned NOT NULL,
-  `created` bigint(20) unsigned NOT NULL,
-  `anonymous` tinyint(1) NOT NULL DEFAULT 0,
-  `price` bigint(20) unsigned NOT NULL DEFAULT 0,
-  `tier` tinyint(3) unsigned NOT NULL DEFAULT 0,
+  `id` int NOT NULL AUTO_INCREMENT,
+  `player_id` int NOT NULL,
+  `sale` tinyint(1) NOT NULL DEFAULT '0',
+  `itemtype` int unsigned NOT NULL,
+  `amount` smallint unsigned NOT NULL,
+  `created` bigint unsigned NOT NULL,
+  `anonymous` tinyint(1) NOT NULL DEFAULT '0',
+  `price` bigint unsigned NOT NULL DEFAULT '0',
+  `tier` tinyint unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   KEY `sale` (`sale`,`itemtype`),
   KEY `created` (`created`),
   KEY `player_id` (`player_id`),
   CONSTRAINT `market_offers_players_fk` FOREIGN KEY (`player_id`) REFERENCES `players` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -717,11 +717,11 @@ DROP TABLE IF EXISTS `player_bosstiary`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `player_bosstiary` (
-  `player_id` int(11) NOT NULL,
-  `bossIdSlotOne` int(11) NOT NULL DEFAULT 0,
-  `bossIdSlotTwo` int(11) NOT NULL DEFAULT 0,
-  `removeTimes` int(11) NOT NULL DEFAULT 1
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+  `player_id` int NOT NULL,
+  `bossIdSlotOne` int NOT NULL DEFAULT '0',
+  `bossIdSlotTwo` int NOT NULL DEFAULT '0',
+  `removeTimes` int NOT NULL DEFAULT '1'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -730,7 +730,7 @@ CREATE TABLE `player_bosstiary` (
 
 LOCK TABLES `player_bosstiary` WRITE;
 /*!40000 ALTER TABLE `player_bosstiary` DISABLE KEYS */;
-INSERT INTO `player_bosstiary` VALUES (37,0,0,1),(4,0,0,1),(40,0,0,1),(43,0,0,1),(3,0,0,1),(5,0,0,1),(6,0,0,1),(45,0,0,1),(47,0,0,1),(25,0,0,1),(46,0,0,1),(52,0,0,1),(38,0,0,1),(44,0,0,1),(53,0,0,1);
+INSERT INTO `player_bosstiary` VALUES (37,0,0,1),(4,0,0,1),(40,0,0,1),(43,0,0,1),(3,0,0,1),(5,0,0,1),(6,0,0,1),(45,0,0,1),(25,0,0,1),(38,0,0,1),(46,0,0,1),(44,0,0,1),(47,0,0,1);
 /*!40000 ALTER TABLE `player_bosstiary` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -742,32 +742,32 @@ DROP TABLE IF EXISTS `player_charms`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `player_charms` (
-  `player_guid` int(250) NOT NULL,
+  `player_guid` int NOT NULL,
   `charm_points` varchar(250) DEFAULT NULL,
   `charm_expansion` tinyint(1) DEFAULT NULL,
-  `rune_wound` int(250) DEFAULT NULL,
-  `rune_enflame` int(250) DEFAULT NULL,
-  `rune_poison` int(250) DEFAULT NULL,
-  `rune_freeze` int(250) DEFAULT NULL,
-  `rune_zap` int(250) DEFAULT NULL,
-  `rune_curse` int(250) DEFAULT NULL,
-  `rune_cripple` int(250) DEFAULT NULL,
-  `rune_parry` int(250) DEFAULT NULL,
-  `rune_dodge` int(250) DEFAULT NULL,
-  `rune_adrenaline` int(250) DEFAULT NULL,
-  `rune_numb` int(250) DEFAULT NULL,
-  `rune_cleanse` int(250) DEFAULT NULL,
-  `rune_bless` int(250) DEFAULT NULL,
-  `rune_scavenge` int(250) DEFAULT NULL,
-  `rune_gut` int(250) DEFAULT NULL,
-  `rune_low_blow` int(250) DEFAULT NULL,
-  `rune_divine` int(250) DEFAULT NULL,
-  `rune_vamp` int(250) DEFAULT NULL,
-  `rune_void` int(250) DEFAULT NULL,
+  `rune_wound` int DEFAULT NULL,
+  `rune_enflame` int DEFAULT NULL,
+  `rune_poison` int DEFAULT NULL,
+  `rune_freeze` int DEFAULT NULL,
+  `rune_zap` int DEFAULT NULL,
+  `rune_curse` int DEFAULT NULL,
+  `rune_cripple` int DEFAULT NULL,
+  `rune_parry` int DEFAULT NULL,
+  `rune_dodge` int DEFAULT NULL,
+  `rune_adrenaline` int DEFAULT NULL,
+  `rune_numb` int DEFAULT NULL,
+  `rune_cleanse` int DEFAULT NULL,
+  `rune_bless` int DEFAULT NULL,
+  `rune_scavenge` int DEFAULT NULL,
+  `rune_gut` int DEFAULT NULL,
+  `rune_low_blow` int DEFAULT NULL,
+  `rune_divine` int DEFAULT NULL,
+  `rune_vamp` int DEFAULT NULL,
+  `rune_void` int DEFAULT NULL,
   `UsedRunesBit` varchar(250) DEFAULT NULL,
   `UnlockedRunesBit` varchar(250) DEFAULT NULL,
-  `tracker list` blob DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+  `tracker list` blob
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -776,7 +776,7 @@ CREATE TABLE `player_charms` (
 
 LOCK TABLES `player_charms` WRITE;
 /*!40000 ALTER TABLE `player_charms` DISABLE KEYS */;
-INSERT INTO `player_charms` VALUES (46,'0',0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'0','0',''),(47,'0',0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'0','0',''),(38,'0',0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'0','0',''),(25,'0',0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'0','0',''),(44,'0',0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'0','0',''),(52,'0',0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'0','0',''),(53,'0',0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'0','0','');
+INSERT INTO `player_charms` VALUES (46,'0',0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'0','0',''),(47,'0',0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'0','0',''),(38,'0',0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'0','0',''),(25,'0',0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'0','0',''),(44,'0',0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'0','0',''),(51,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 /*!40000 ALTER TABLE `player_charms` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -788,20 +788,20 @@ DROP TABLE IF EXISTS `player_deaths`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `player_deaths` (
-  `player_id` int(11) NOT NULL,
-  `time` bigint(20) unsigned NOT NULL DEFAULT 0,
-  `level` int(11) NOT NULL DEFAULT 1,
+  `player_id` int NOT NULL,
+  `time` bigint unsigned NOT NULL DEFAULT '0',
+  `level` int NOT NULL DEFAULT '1',
   `killed_by` varchar(255) NOT NULL,
-  `is_player` tinyint(1) NOT NULL DEFAULT 1,
+  `is_player` tinyint(1) NOT NULL DEFAULT '1',
   `mostdamage_by` varchar(100) NOT NULL,
-  `mostdamage_is_player` tinyint(1) NOT NULL DEFAULT 0,
-  `unjustified` tinyint(1) NOT NULL DEFAULT 0,
-  `mostdamage_unjustified` tinyint(1) NOT NULL DEFAULT 0,
+  `mostdamage_is_player` tinyint(1) NOT NULL DEFAULT '0',
+  `unjustified` tinyint(1) NOT NULL DEFAULT '0',
+  `mostdamage_unjustified` tinyint(1) NOT NULL DEFAULT '0',
   KEY `player_id` (`player_id`),
   KEY `killed_by` (`killed_by`),
   KEY `mostdamage_by` (`mostdamage_by`),
   CONSTRAINT `player_deaths_players_fk` FOREIGN KEY (`player_id`) REFERENCES `players` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -821,15 +821,15 @@ DROP TABLE IF EXISTS `player_depotitems`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `player_depotitems` (
-  `player_id` int(11) NOT NULL,
-  `sid` int(11) NOT NULL COMMENT 'any given range eg 0-100 will be reserved for depot lockers and all > 100 will be then normal items inside depots',
-  `pid` int(11) NOT NULL DEFAULT 0,
-  `itemtype` int(11) NOT NULL DEFAULT 0,
-  `count` int(11) NOT NULL DEFAULT 0,
+  `player_id` int NOT NULL,
+  `sid` int NOT NULL COMMENT 'any given range eg 0-100 will be reserved for depot lockers and all > 100 will be then normal items inside depots',
+  `pid` int NOT NULL DEFAULT '0',
+  `itemtype` int NOT NULL DEFAULT '0',
+  `count` int NOT NULL DEFAULT '0',
   `attributes` blob NOT NULL,
   UNIQUE KEY `player_depotitems_unique` (`player_id`,`sid`),
   CONSTRAINT `player_depotitems_players_fk` FOREIGN KEY (`player_id`) REFERENCES `players` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -849,23 +849,23 @@ DROP TABLE IF EXISTS `player_hirelings`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `player_hirelings` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `player_id` int(11) NOT NULL,
+  `id` int NOT NULL AUTO_INCREMENT,
+  `player_id` int NOT NULL,
   `name` varchar(255) DEFAULT NULL,
-  `active` tinyint(3) unsigned NOT NULL DEFAULT 0,
-  `sex` tinyint(3) unsigned NOT NULL DEFAULT 0,
-  `posx` int(11) NOT NULL DEFAULT 0,
-  `posy` int(11) NOT NULL DEFAULT 0,
-  `posz` int(11) NOT NULL DEFAULT 0,
-  `lookbody` int(11) NOT NULL DEFAULT 0,
-  `lookfeet` int(11) NOT NULL DEFAULT 0,
-  `lookhead` int(11) NOT NULL DEFAULT 0,
-  `looklegs` int(11) NOT NULL DEFAULT 0,
-  `looktype` int(11) NOT NULL DEFAULT 136,
+  `active` tinyint unsigned NOT NULL DEFAULT '0',
+  `sex` tinyint unsigned NOT NULL DEFAULT '0',
+  `posx` int NOT NULL DEFAULT '0',
+  `posy` int NOT NULL DEFAULT '0',
+  `posz` int NOT NULL DEFAULT '0',
+  `lookbody` int NOT NULL DEFAULT '0',
+  `lookfeet` int NOT NULL DEFAULT '0',
+  `lookhead` int NOT NULL DEFAULT '0',
+  `looklegs` int NOT NULL DEFAULT '0',
+  `looktype` int NOT NULL DEFAULT '136',
   PRIMARY KEY (`id`),
   KEY `player_id` (`player_id`),
   CONSTRAINT `player_hirelings_ibfk_1` FOREIGN KEY (`player_id`) REFERENCES `players` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -885,15 +885,15 @@ DROP TABLE IF EXISTS `player_inboxitems`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `player_inboxitems` (
-  `player_id` int(11) NOT NULL,
-  `sid` int(11) NOT NULL,
-  `pid` int(11) NOT NULL DEFAULT 0,
-  `itemtype` int(11) NOT NULL DEFAULT 0,
-  `count` int(11) NOT NULL DEFAULT 0,
+  `player_id` int NOT NULL,
+  `sid` int NOT NULL,
+  `pid` int NOT NULL DEFAULT '0',
+  `itemtype` int NOT NULL DEFAULT '0',
+  `count` int NOT NULL DEFAULT '0',
   `attributes` blob NOT NULL,
   UNIQUE KEY `player_inboxitems_unique` (`player_id`,`sid`),
   CONSTRAINT `player_inboxitems_players_fk` FOREIGN KEY (`player_id`) REFERENCES `players` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -913,16 +913,16 @@ DROP TABLE IF EXISTS `player_items`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `player_items` (
-  `player_id` int(11) NOT NULL DEFAULT 0,
-  `pid` int(11) NOT NULL DEFAULT 0,
-  `sid` int(11) NOT NULL DEFAULT 0,
-  `itemtype` int(11) NOT NULL DEFAULT 0,
-  `count` int(11) NOT NULL DEFAULT 0,
-  `attributes` blob DEFAULT NULL,
+  `player_id` int NOT NULL DEFAULT '0',
+  `pid` int NOT NULL DEFAULT '0',
+  `sid` int NOT NULL DEFAULT '0',
+  `itemtype` int NOT NULL DEFAULT '0',
+  `count` int NOT NULL DEFAULT '0',
+  `attributes` blob,
   KEY `player_id` (`player_id`),
   KEY `sid` (`sid`),
   CONSTRAINT `player_items_players_fk` FOREIGN KEY (`player_id`) REFERENCES `players` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -931,7 +931,7 @@ CREATE TABLE `player_items` (
 
 LOCK TABLES `player_items` WRITE;
 /*!40000 ALTER TABLE `player_items` DISABLE KEYS */;
-INSERT INTO `player_items` VALUES (53,3,101,2853,1,_binary '$&\0\0\0Ä'),(53,4,102,3561,1,''),(53,6,103,3270,1,''),(53,11,104,23396,1,''),(53,101,105,2853,1,''),(53,101,106,21401,1,''),(53,105,107,3585,1,_binary ''),(53,105,108,21401,1,''),(53,105,109,3561,1,'');
+INSERT INTO `player_items` VALUES (51,3,101,2853,1,NULL),(51,4,102,3561,1,NULL),(51,101,104,3291,1,NULL),(51,101,105,3270,1,NULL),(51,101,106,3293,1,NULL),(51,101,107,21401,1,NULL),(51,101,108,3585,1,NULL),(52,3,101,2853,1,NULL),(52,4,102,3561,1,NULL),(52,101,104,3291,1,NULL),(52,101,105,3270,1,NULL),(52,101,106,3293,1,NULL),(52,101,107,21401,1,NULL),(52,101,108,3585,1,NULL);
 /*!40000 ALTER TABLE `player_items` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -943,11 +943,11 @@ DROP TABLE IF EXISTS `player_kills`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `player_kills` (
-  `player_id` int(11) NOT NULL,
-  `time` bigint(20) unsigned NOT NULL DEFAULT 0,
-  `target` int(11) NOT NULL,
-  `unavenged` tinyint(1) NOT NULL DEFAULT 0
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+  `player_id` int NOT NULL,
+  `time` bigint unsigned NOT NULL DEFAULT '0',
+  `target` int NOT NULL,
+  `unavenged` tinyint(1) NOT NULL DEFAULT '0'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -967,9 +967,9 @@ DROP TABLE IF EXISTS `player_misc`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `player_misc` (
-  `player_id` int(11) NOT NULL,
+  `player_id` int NOT NULL,
   `info` blob NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -978,7 +978,7 @@ CREATE TABLE `player_misc` (
 
 LOCK TABLES `player_misc` WRITE;
 /*!40000 ALTER TABLE `player_misc` DISABLE KEYS */;
-INSERT INTO `player_misc` VALUES (47,_binary '{}'),(25,_binary '{}'),(46,_binary '{}'),(52,_binary '{}'),(44,_binary '{}'),(38,_binary '{}'),(53,_binary '{}');
+INSERT INTO `player_misc` VALUES (25,_binary '{}'),(38,_binary '{}'),(46,_binary '{}'),(47,_binary '{}'),(44,_binary '{}');
 /*!40000 ALTER TABLE `player_misc` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -990,15 +990,15 @@ DROP TABLE IF EXISTS `player_namelocks`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `player_namelocks` (
-  `player_id` int(11) NOT NULL,
+  `player_id` int NOT NULL,
   `reason` varchar(255) NOT NULL,
-  `namelocked_at` bigint(20) NOT NULL,
-  `namelocked_by` int(11) NOT NULL,
+  `namelocked_at` bigint NOT NULL,
+  `namelocked_by` int NOT NULL,
   UNIQUE KEY `player_namelocks_unique` (`player_id`),
   KEY `namelocked_by` (`namelocked_by`),
   CONSTRAINT `player_namelocks_players2_fk` FOREIGN KEY (`namelocked_by`) REFERENCES `players` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `player_namelocks_players_fk` FOREIGN KEY (`player_id`) REFERENCES `players` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1018,7 +1018,7 @@ DROP TABLE IF EXISTS `player_prey`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `player_prey` (
-  `player_id` int(11) NOT NULL,
+  `player_id` int NOT NULL,
   `slot` tinyint(1) NOT NULL,
   `state` tinyint(1) NOT NULL,
   `raceid` varchar(250) NOT NULL,
@@ -1027,9 +1027,9 @@ CREATE TABLE `player_prey` (
   `bonus_rarity` tinyint(1) NOT NULL,
   `bonus_percentage` varchar(250) NOT NULL,
   `bonus_time` varchar(250) NOT NULL,
-  `free_reroll` bigint(20) NOT NULL,
-  `monster_list` blob DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+  `free_reroll` bigint NOT NULL,
+  `monster_list` blob
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1038,7 +1038,7 @@ CREATE TABLE `player_prey` (
 
 LOCK TABLES `player_prey` WRITE;
 /*!40000 ALTER TABLE `player_prey` DISABLE KEYS */;
-INSERT INTO `player_prey` VALUES (47,0,3,'0',0,0,9,'37','0',1678356688991,_binary '{g5\0ÔøΩÔøΩ\0ÔøΩJ\r'),(47,1,3,'0',0,0,5,'25','0',1678356688992,_binary 'ÔøΩÔøΩ]/\0DNÔøΩ\0ÔøΩÔøΩ\0'),(47,2,0,'0',0,0,2,'16','0',1678356688993,''),(25,0,3,'0',0,1,3,'19','0',1678619373148,_binary '\„O\Œ=\0Æµ~u\0A'),(25,1,3,'0',0,3,3,'19','0',1678619373149,_binary '\0p\04+\0˛\0'),(25,2,0,'0',0,3,3,'19','0',1678619373150,''),(46,0,3,'0',0,1,7,'31','0',1678355163838,_binary 'ÔøΩy0ÔøΩÔøΩ,\0ÔøΩ'),(46,1,3,'0',0,3,7,'31','0',1678355163839,_binary 'H\0z\0t\0ÔøΩÔøΩÔøΩÔøΩ'),(46,2,0,'0',0,0,2,'16','0',1678355163840,''),(52,0,3,'0',0,3,9,'37','0',1678619235513,_binary '}\0\Ï\0{/\0\"SÅ\ﬁ\0'),(52,1,0,'0',0,0,3,'19','0',1678619235514,''),(52,2,0,'0',0,0,2,'16','0',1678619235514,''),(44,0,3,'0',0,3,4,'22','0',1678619615533,_binary '¯\0\ƒÜ3ôv[\0w\0'),(44,1,3,'0',0,0,10,'40','0',1678619615535,_binary '\‰q\0\\\ò\"\0\n∫'),(44,2,0,'0',0,2,7,'31','0',1678619615536,''),(53,0,3,'0',0,1,8,'34','0',1678619856847,_binary 'ø0\0R\0\Z>f'),(53,1,0,'0',0,0,2,'16','0',1678619856848,''),(53,2,0,'0',0,3,5,'25','0',1678619856848,'');
+INSERT INTO `player_prey` VALUES (25,0,3,'0',0,3,4,'22','0',1678564021481,_binary 'v\0I\0UIÔøΩ'),(25,1,3,'0',0,2,10,'40','0',1678564021482,_binary '#aÔøΩÔøΩt\0ÔøΩP\0\0'),(25,2,0,'0',0,3,9,'37','0',1678564021483,''),(38,0,3,'0',0,3,8,'34','0',1678392232646,_binary 'ÔøΩ\0ÔøΩ\0ÔøΩQ\0.>^'),(38,1,3,'0',0,1,4,'22','0',1678392232648,_binary 'ÔøΩyU\0:\0/\0R\0ÔøΩÔøΩ'),(38,2,0,'0',0,0,10,'40','0',1678392232648,''),(46,0,3,'0',0,1,7,'31','0',1678355163838,_binary 'ÔøΩy0ÔøΩÔøΩ,\0ÔøΩ'),(46,1,3,'0',0,3,7,'31','0',1678355163839,_binary 'H\0z\0t\0ÔøΩÔøΩÔøΩÔøΩ'),(46,2,0,'0',0,0,2,'16','0',1678355163840,''),(47,0,3,'0',0,2,2,'16','0',1678879505420,_binary 'qO\0hsjî∂'),(47,1,3,'0',0,0,4,'22','0',1678879505422,_binary '\0æúXr\0ãu>'),(47,2,0,'0',0,2,4,'22','0',1678879505423,'');
 /*!40000 ALTER TABLE `player_prey` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1050,15 +1050,15 @@ DROP TABLE IF EXISTS `player_rewards`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `player_rewards` (
-  `player_id` int(11) NOT NULL,
-  `sid` int(11) NOT NULL,
-  `pid` int(11) NOT NULL DEFAULT 0,
-  `itemtype` int(11) NOT NULL DEFAULT 0,
-  `count` int(11) NOT NULL DEFAULT 0,
+  `player_id` int NOT NULL,
+  `sid` int NOT NULL,
+  `pid` int NOT NULL DEFAULT '0',
+  `itemtype` int NOT NULL DEFAULT '0',
+  `count` int NOT NULL DEFAULT '0',
   `attributes` blob NOT NULL,
   UNIQUE KEY `player_rewards_unique` (`player_id`,`sid`),
   CONSTRAINT `player_rewards_players_fk` FOREIGN KEY (`player_id`) REFERENCES `players` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1078,11 +1078,11 @@ DROP TABLE IF EXISTS `player_spells`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `player_spells` (
-  `player_id` int(11) NOT NULL,
+  `player_id` int NOT NULL,
   `name` varchar(255) NOT NULL,
   KEY `player_id` (`player_id`),
   CONSTRAINT `player_spells_players_fk` FOREIGN KEY (`player_id`) REFERENCES `players` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1102,10 +1102,10 @@ DROP TABLE IF EXISTS `player_stash`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `player_stash` (
-  `player_id` int(16) NOT NULL,
-  `item_id` int(16) NOT NULL,
-  `item_count` int(32) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+  `player_id` int NOT NULL,
+  `item_id` int NOT NULL,
+  `item_count` int NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1125,12 +1125,12 @@ DROP TABLE IF EXISTS `player_storage`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `player_storage` (
-  `player_id` int(11) NOT NULL DEFAULT 0,
-  `key` int(10) unsigned NOT NULL DEFAULT 0,
-  `value` int(11) NOT NULL DEFAULT 0,
+  `player_id` int NOT NULL DEFAULT '0',
+  `key` int unsigned NOT NULL DEFAULT '0',
+  `value` int NOT NULL DEFAULT '0',
   PRIMARY KEY (`player_id`,`key`),
   CONSTRAINT `player_storage_players_fk` FOREIGN KEY (`player_id`) REFERENCES `players` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1139,7 +1139,6 @@ CREATE TABLE `player_storage` (
 
 LOCK TABLES `player_storage` WRITE;
 /*!40000 ALTER TABLE `player_storage` DISABLE KEYS */;
-INSERT INTO `player_storage` VALUES (53,0,1),(53,13413,1),(53,13414,3),(53,14903,0),(53,17101,0),(53,30029,0),(53,1041641512,1),(53,2140322841,1),(53,3276582255,27);
 /*!40000 ALTER TABLE `player_storage` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1151,17 +1150,17 @@ DROP TABLE IF EXISTS `player_taskhunt`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `player_taskhunt` (
-  `player_id` int(11) NOT NULL,
+  `player_id` int NOT NULL,
   `slot` tinyint(1) NOT NULL,
   `state` tinyint(1) NOT NULL,
   `raceid` varchar(250) NOT NULL,
   `upgrade` tinyint(1) NOT NULL,
   `rarity` tinyint(1) NOT NULL,
   `kills` varchar(250) NOT NULL,
-  `disabled_time` bigint(20) NOT NULL,
-  `free_reroll` bigint(20) NOT NULL,
-  `monster_list` blob DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+  `disabled_time` bigint NOT NULL,
+  `free_reroll` bigint NOT NULL,
+  `monster_list` blob
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1170,7 +1169,7 @@ CREATE TABLE `player_taskhunt` (
 
 LOCK TABLES `player_taskhunt` WRITE;
 /*!40000 ALTER TABLE `player_taskhunt` DISABLE KEYS */;
-INSERT INTO `player_taskhunt` VALUES (47,0,2,'0',0,1,'0',0,1678356688993,_binary ',\0&\0jÔøΩ(QHÔøΩ\0'),(47,1,2,'0',0,1,'0',0,1678356688994,_binary 'ÔøΩ\0ÔøΩÔøΩÔøΩ\0ÔøΩÔøΩs'),(47,2,0,'0',0,1,'0',0,1678356688995,''),(25,0,2,'0',0,1,'0',0,1678619373150,_binary '\«\0B\r\√\0˝R'),(25,1,2,'0',0,1,'0',0,1678619373150,_binary 'n\÷\«@\0˝\0\⁄\0>+\0¿'),(25,2,0,'0',0,1,'0',0,1678619373151,''),(46,0,2,'0',0,1,'0',0,1678355163840,_binary '&\0\n,\0ÔøΩTÔøΩÔøΩÔøΩ'),(46,1,2,'0',0,1,'0',0,1678355163841,_binary 'ÔøΩFOÔøΩÔøΩÔøΩÔøΩ8\0'),(46,2,0,'0',0,1,'0',0,1678355163842,''),(52,0,2,'0',0,1,'0',0,1678619235514,_binary '\”^Hhz\0{:'),(52,1,0,'0',0,1,'0',0,1678619235515,''),(52,2,0,'0',0,1,'0',0,1678619235515,''),(44,0,2,'0',0,1,'0',0,1678619615536,_binary '\≈;\nÖ\05\0\⁄\0'),(44,1,2,'0',0,1,'0',0,1678619615537,_binary 'y\0\ˆX\Ú\0˝\0v\0,\0µ'),(44,2,0,'0',0,1,'0',0,1678619615538,''),(53,0,2,'0',0,1,'0',0,1678619856848,_binary '∑\rnt\0DÖ'),(53,1,0,'0',0,1,'0',0,1678619856849,''),(53,2,0,'0',0,1,'0',0,1678619856849,'');
+INSERT INTO `player_taskhunt` VALUES (25,0,2,'0',0,1,'0',0,1678564021483,_binary 'ÔøΩMÔøΩ	ÔøΩ\r'),(25,1,2,'0',0,1,'0',0,1678564021485,_binary 'zÔøΩ\0ÔøΩ\0ÔøΩÔøΩÔøΩ'),(25,2,0,'0',0,1,'0',0,1678564021486,''),(38,0,2,'0',0,1,'0',0,1678392232648,_binary '/\0ÔøΩÔøΩ\0\0ÔøΩÔøΩÔøΩ:'),(38,1,2,'0',0,1,'0',0,1678392232649,_binary 'wÔøΩnÔøΩ(\0|+\0	,\0'),(38,2,0,'0',0,1,'0',0,1678392232650,''),(46,0,2,'0',0,1,'0',0,1678355163840,_binary '&\0\n,\0ÔøΩTÔøΩÔøΩÔøΩ'),(46,1,2,'0',0,1,'0',0,1678355163841,_binary 'ÔøΩFOÔøΩÔøΩÔøΩÔøΩ8\0'),(46,2,0,'0',0,1,'0',0,1678355163842,''),(47,0,2,'0',0,1,'0',0,1678879505423,_binary 'í^+J˚\0\0ëw'),(47,1,2,'0',0,1,'0',0,1678879505424,_binary 'ΩÅ\\Ö\œ\◊\0&í\0'),(47,2,0,'0',0,1,'0',0,1678879505425,'');
 /*!40000 ALTER TABLE `player_taskhunt` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1182,119 +1181,119 @@ DROP TABLE IF EXISTS `players`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `players` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `id` int NOT NULL AUTO_INCREMENT,
   `name` varchar(255) NOT NULL,
-  `group_id` int(11) NOT NULL DEFAULT 1,
-  `account_id` int(11) unsigned NOT NULL DEFAULT 0,
-  `level` int(11) NOT NULL DEFAULT 1,
-  `vocation` int(11) NOT NULL DEFAULT 0,
-  `health` int(11) NOT NULL DEFAULT 150,
-  `healthmax` int(11) NOT NULL DEFAULT 150,
-  `experience` bigint(20) NOT NULL DEFAULT 0,
-  `lookbody` int(11) NOT NULL DEFAULT 113,
-  `lookfeet` int(11) NOT NULL DEFAULT 115,
-  `lookhead` int(11) NOT NULL DEFAULT 95,
-  `looklegs` int(11) NOT NULL DEFAULT 39,
-  `looktype` int(11) NOT NULL DEFAULT 128,
-  `lookaddons` int(11) NOT NULL DEFAULT 0,
-  `maglevel` int(11) NOT NULL DEFAULT 0,
-  `mana` int(11) NOT NULL DEFAULT 50,
-  `manamax` int(11) NOT NULL DEFAULT 50,
-  `manaspent` bigint(20) unsigned NOT NULL DEFAULT 0,
-  `soul` int(10) unsigned NOT NULL DEFAULT 0,
-  `town_id` int(11) NOT NULL DEFAULT 3,
-  `posx` int(11) NOT NULL DEFAULT 0,
-  `posy` int(11) NOT NULL DEFAULT 0,
-  `posz` int(11) NOT NULL DEFAULT 0,
-  `conditions` blob DEFAULT NULL,
-  `cap` int(11) NOT NULL DEFAULT 410,
-  `sex` int(11) NOT NULL DEFAULT 0,
-  `lastlogin` bigint(20) unsigned NOT NULL DEFAULT 0,
-  `lastip` int(10) unsigned NOT NULL DEFAULT 0,
-  `save` tinyint(1) NOT NULL DEFAULT 1,
-  `skull` tinyint(1) NOT NULL DEFAULT 0,
-  `skulltime` bigint(20) NOT NULL DEFAULT 0,
-  `lastlogout` bigint(20) unsigned NOT NULL DEFAULT 0,
-  `blessings` tinyint(2) NOT NULL DEFAULT 0,
-  `blessings1` tinyint(4) NOT NULL DEFAULT 0,
-  `blessings2` tinyint(4) NOT NULL DEFAULT 0,
-  `blessings3` tinyint(4) NOT NULL DEFAULT 0,
-  `blessings4` tinyint(4) NOT NULL DEFAULT 0,
-  `blessings5` tinyint(4) NOT NULL DEFAULT 0,
-  `blessings6` tinyint(4) NOT NULL DEFAULT 0,
-  `blessings7` tinyint(4) NOT NULL DEFAULT 0,
-  `blessings8` tinyint(4) NOT NULL DEFAULT 0,
-  `onlinetime` int(11) NOT NULL DEFAULT 0,
-  `deletion` bigint(15) NOT NULL DEFAULT 0,
-  `balance` bigint(20) unsigned NOT NULL DEFAULT 0,
-  `offlinetraining_time` smallint(5) unsigned NOT NULL DEFAULT 43200,
-  `offlinetraining_skill` tinyint(2) NOT NULL DEFAULT -1,
-  `stamina` smallint(5) unsigned NOT NULL DEFAULT 2520,
-  `skill_fist` int(10) unsigned NOT NULL DEFAULT 10,
-  `skill_fist_tries` bigint(20) unsigned NOT NULL DEFAULT 0,
-  `skill_club` int(10) unsigned NOT NULL DEFAULT 10,
-  `skill_club_tries` bigint(20) unsigned NOT NULL DEFAULT 0,
-  `skill_sword` int(10) unsigned NOT NULL DEFAULT 10,
-  `skill_sword_tries` bigint(20) unsigned NOT NULL DEFAULT 0,
-  `skill_axe` int(10) unsigned NOT NULL DEFAULT 10,
-  `skill_axe_tries` bigint(20) unsigned NOT NULL DEFAULT 0,
-  `skill_dist` int(10) unsigned NOT NULL DEFAULT 10,
-  `skill_dist_tries` bigint(20) unsigned NOT NULL DEFAULT 0,
-  `skill_shielding` int(10) unsigned NOT NULL DEFAULT 10,
-  `skill_shielding_tries` bigint(20) unsigned NOT NULL DEFAULT 0,
-  `skill_fishing` int(10) unsigned NOT NULL DEFAULT 10,
-  `skill_fishing_tries` bigint(20) unsigned NOT NULL DEFAULT 0,
-  `skill_critical_hit_chance` int(10) unsigned NOT NULL DEFAULT 0,
-  `skill_critical_hit_chance_tries` bigint(20) unsigned NOT NULL DEFAULT 0,
-  `skill_critical_hit_damage` int(10) unsigned NOT NULL DEFAULT 0,
-  `skill_critical_hit_damage_tries` bigint(20) unsigned NOT NULL DEFAULT 0,
-  `skill_life_leech_chance` int(10) unsigned NOT NULL DEFAULT 0,
-  `skill_life_leech_chance_tries` bigint(20) unsigned NOT NULL DEFAULT 0,
-  `skill_life_leech_amount` int(10) unsigned NOT NULL DEFAULT 0,
-  `skill_life_leech_amount_tries` bigint(20) unsigned NOT NULL DEFAULT 0,
-  `skill_mana_leech_chance` int(10) unsigned NOT NULL DEFAULT 0,
-  `skill_mana_leech_chance_tries` bigint(20) unsigned NOT NULL DEFAULT 0,
-  `skill_mana_leech_amount` int(10) unsigned NOT NULL DEFAULT 0,
-  `skill_mana_leech_amount_tries` bigint(20) unsigned NOT NULL DEFAULT 0,
-  `skill_criticalhit_chance` bigint(20) unsigned NOT NULL DEFAULT 0,
-  `skill_criticalhit_damage` bigint(20) unsigned NOT NULL DEFAULT 0,
-  `skill_lifeleech_chance` bigint(20) unsigned NOT NULL DEFAULT 0,
-  `skill_lifeleech_amount` bigint(20) unsigned NOT NULL DEFAULT 0,
-  `skill_manaleech_chance` bigint(20) unsigned NOT NULL DEFAULT 0,
-  `skill_manaleech_amount` bigint(20) unsigned NOT NULL DEFAULT 0,
-  `manashield` smallint(5) unsigned NOT NULL DEFAULT 0,
-  `max_manashield` smallint(5) unsigned NOT NULL DEFAULT 0,
-  `xpboost_stamina` smallint(5) DEFAULT NULL,
-  `xpboost_value` tinyint(4) DEFAULT NULL,
-  `marriage_status` bigint(20) unsigned NOT NULL DEFAULT 0,
-  `marriage_spouse` int(11) NOT NULL DEFAULT -1,
-  `bonus_rerolls` bigint(21) NOT NULL DEFAULT 0,
-  `prey_wildcard` bigint(21) NOT NULL DEFAULT 0,
-  `task_points` bigint(21) NOT NULL DEFAULT 0,
-  `quickloot_fallback` tinyint(1) DEFAULT 0,
-  `lookmountbody` tinyint(3) unsigned NOT NULL DEFAULT 0,
-  `lookmountfeet` tinyint(3) unsigned NOT NULL DEFAULT 0,
-  `lookmounthead` tinyint(3) unsigned NOT NULL DEFAULT 0,
-  `lookmountlegs` tinyint(3) unsigned NOT NULL DEFAULT 0,
-  `lookfamiliarstype` int(11) unsigned NOT NULL DEFAULT 0,
-  `isreward` tinyint(1) NOT NULL DEFAULT 1,
-  `istutorial` tinyint(1) NOT NULL DEFAULT 0,
-  `forge_dusts` bigint(21) NOT NULL DEFAULT 0,
-  `forge_dust_level` bigint(21) NOT NULL DEFAULT 100,
-  `created` int(11) NOT NULL DEFAULT 0,
-  `hidden` tinyint(1) NOT NULL DEFAULT 0,
-  `comment` text DEFAULT NULL,
-  `world_id` int(11) NOT NULL DEFAULT 1,
-  `createdAt` bigint(22) NOT NULL DEFAULT 0,
-  `deletedAt` bigint(22) NOT NULL DEFAULT 0,
-  `randomize_mount` smallint(1) NOT NULL DEFAULT 0,
-  `boss_points` int(11) NOT NULL DEFAULT 0,
+  `group_id` int NOT NULL DEFAULT '1',
+  `account_id` int unsigned NOT NULL DEFAULT '0',
+  `level` int NOT NULL DEFAULT '1',
+  `vocation` int NOT NULL DEFAULT '0',
+  `health` int NOT NULL DEFAULT '150',
+  `healthmax` int NOT NULL DEFAULT '150',
+  `experience` bigint NOT NULL DEFAULT '0',
+  `lookbody` int NOT NULL DEFAULT '113',
+  `lookfeet` int NOT NULL DEFAULT '115',
+  `lookhead` int NOT NULL DEFAULT '95',
+  `looklegs` int NOT NULL DEFAULT '39',
+  `looktype` int NOT NULL DEFAULT '128',
+  `lookaddons` int NOT NULL DEFAULT '0',
+  `maglevel` int NOT NULL DEFAULT '0',
+  `mana` int NOT NULL DEFAULT '50',
+  `manamax` int NOT NULL DEFAULT '50',
+  `manaspent` bigint unsigned NOT NULL DEFAULT '0',
+  `soul` int unsigned NOT NULL DEFAULT '0',
+  `town_id` int NOT NULL DEFAULT '3',
+  `posx` int NOT NULL DEFAULT '0',
+  `posy` int NOT NULL DEFAULT '0',
+  `posz` int NOT NULL DEFAULT '0',
+  `conditions` blob,
+  `cap` int NOT NULL DEFAULT '410',
+  `sex` int NOT NULL DEFAULT '0',
+  `lastlogin` bigint unsigned NOT NULL DEFAULT '0',
+  `lastip` int unsigned NOT NULL DEFAULT '0',
+  `save` tinyint(1) NOT NULL DEFAULT '1',
+  `skull` tinyint(1) NOT NULL DEFAULT '0',
+  `skulltime` bigint NOT NULL DEFAULT '0',
+  `lastlogout` bigint unsigned NOT NULL DEFAULT '0',
+  `blessings` tinyint NOT NULL DEFAULT '0',
+  `blessings1` tinyint NOT NULL DEFAULT '0',
+  `blessings2` tinyint NOT NULL DEFAULT '0',
+  `blessings3` tinyint NOT NULL DEFAULT '0',
+  `blessings4` tinyint NOT NULL DEFAULT '0',
+  `blessings5` tinyint NOT NULL DEFAULT '0',
+  `blessings6` tinyint NOT NULL DEFAULT '0',
+  `blessings7` tinyint NOT NULL DEFAULT '0',
+  `blessings8` tinyint NOT NULL DEFAULT '0',
+  `onlinetime` int NOT NULL DEFAULT '0',
+  `deletion` bigint NOT NULL DEFAULT '0',
+  `balance` bigint unsigned NOT NULL DEFAULT '0',
+  `offlinetraining_time` smallint unsigned NOT NULL DEFAULT '43200',
+  `offlinetraining_skill` tinyint NOT NULL DEFAULT '-1',
+  `stamina` smallint unsigned NOT NULL DEFAULT '2520',
+  `skill_fist` int unsigned NOT NULL DEFAULT '10',
+  `skill_fist_tries` bigint unsigned NOT NULL DEFAULT '0',
+  `skill_club` int unsigned NOT NULL DEFAULT '10',
+  `skill_club_tries` bigint unsigned NOT NULL DEFAULT '0',
+  `skill_sword` int unsigned NOT NULL DEFAULT '10',
+  `skill_sword_tries` bigint unsigned NOT NULL DEFAULT '0',
+  `skill_axe` int unsigned NOT NULL DEFAULT '10',
+  `skill_axe_tries` bigint unsigned NOT NULL DEFAULT '0',
+  `skill_dist` int unsigned NOT NULL DEFAULT '10',
+  `skill_dist_tries` bigint unsigned NOT NULL DEFAULT '0',
+  `skill_shielding` int unsigned NOT NULL DEFAULT '10',
+  `skill_shielding_tries` bigint unsigned NOT NULL DEFAULT '0',
+  `skill_fishing` int unsigned NOT NULL DEFAULT '10',
+  `skill_fishing_tries` bigint unsigned NOT NULL DEFAULT '0',
+  `skill_critical_hit_chance` int unsigned NOT NULL DEFAULT '0',
+  `skill_critical_hit_chance_tries` bigint unsigned NOT NULL DEFAULT '0',
+  `skill_critical_hit_damage` int unsigned NOT NULL DEFAULT '0',
+  `skill_critical_hit_damage_tries` bigint unsigned NOT NULL DEFAULT '0',
+  `skill_life_leech_chance` int unsigned NOT NULL DEFAULT '0',
+  `skill_life_leech_chance_tries` bigint unsigned NOT NULL DEFAULT '0',
+  `skill_life_leech_amount` int unsigned NOT NULL DEFAULT '0',
+  `skill_life_leech_amount_tries` bigint unsigned NOT NULL DEFAULT '0',
+  `skill_mana_leech_chance` int unsigned NOT NULL DEFAULT '0',
+  `skill_mana_leech_chance_tries` bigint unsigned NOT NULL DEFAULT '0',
+  `skill_mana_leech_amount` int unsigned NOT NULL DEFAULT '0',
+  `skill_mana_leech_amount_tries` bigint unsigned NOT NULL DEFAULT '0',
+  `skill_criticalhit_chance` bigint unsigned NOT NULL DEFAULT '0',
+  `skill_criticalhit_damage` bigint unsigned NOT NULL DEFAULT '0',
+  `skill_lifeleech_chance` bigint unsigned NOT NULL DEFAULT '0',
+  `skill_lifeleech_amount` bigint unsigned NOT NULL DEFAULT '0',
+  `skill_manaleech_chance` bigint unsigned NOT NULL DEFAULT '0',
+  `skill_manaleech_amount` bigint unsigned NOT NULL DEFAULT '0',
+  `manashield` smallint unsigned NOT NULL DEFAULT '0',
+  `max_manashield` smallint unsigned NOT NULL DEFAULT '0',
+  `xpboost_stamina` smallint DEFAULT NULL,
+  `xpboost_value` tinyint DEFAULT NULL,
+  `marriage_status` bigint unsigned NOT NULL DEFAULT '0',
+  `marriage_spouse` int NOT NULL DEFAULT '-1',
+  `bonus_rerolls` bigint NOT NULL DEFAULT '0',
+  `prey_wildcard` bigint NOT NULL DEFAULT '0',
+  `task_points` bigint NOT NULL DEFAULT '0',
+  `quickloot_fallback` tinyint(1) DEFAULT '0',
+  `lookmountbody` tinyint unsigned NOT NULL DEFAULT '0',
+  `lookmountfeet` tinyint unsigned NOT NULL DEFAULT '0',
+  `lookmounthead` tinyint unsigned NOT NULL DEFAULT '0',
+  `lookmountlegs` tinyint unsigned NOT NULL DEFAULT '0',
+  `lookfamiliarstype` int unsigned NOT NULL DEFAULT '0',
+  `isreward` tinyint(1) NOT NULL DEFAULT '1',
+  `istutorial` tinyint(1) NOT NULL DEFAULT '0',
+  `forge_dusts` bigint NOT NULL DEFAULT '0',
+  `forge_dust_level` bigint NOT NULL DEFAULT '100',
+  `created` int NOT NULL DEFAULT '0',
+  `hidden` tinyint(1) NOT NULL DEFAULT '0',
+  `comment` text,
+  `world_id` int NOT NULL DEFAULT '1',
+  `createdAt` bigint NOT NULL DEFAULT '0',
+  `deletedAt` bigint NOT NULL DEFAULT '0',
+  `randomize_mount` smallint NOT NULL DEFAULT '0',
+  `boss_points` int NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `players_unique` (`name`),
   KEY `account_id` (`account_id`),
   KEY `vocation` (`vocation`),
   CONSTRAINT `players_account_fk` FOREIGN KEY (`account_id`) REFERENCES `accounts` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=54 DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=53 DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1303,7 +1302,7 @@ CREATE TABLE `players` (
 
 LOCK TABLES `players` WRITE;
 /*!40000 ALTER TABLE `players` DISABLE KEYS */;
-INSERT INTO `players` VALUES (53,'gudZila',1,48,1,0,150,150,0,113,115,95,39,128,0,0,50,50,0,0,3,32097,32214,7,_binary '\0 \0\0ˇˇˇˇ`\Í\0\0\0\0\0\0\0\‡.\0\0\0\0\0p\0\0\0\0\0˛',410,1,1678547892,1427374223,1,0,0,1678547894,0,0,1,1,1,1,1,0,0,23,0,0,43200,-1,2520,10,0,10,0,10,0,10,0,10,0,10,0,10,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,1,0,0,100,0,0,NULL,1,1678547835,0,0,0);
+INSERT INTO `players` VALUES (51,'Sacani',6,48,1,0,150,150,0,113,115,95,39,128,0,0,50,50,0,0,3,0,0,0,NULL,410,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,43200,-1,2520,10,0,10,0,10,0,10,0,10,0,10,0,10,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,NULL,NULL,0,-1,0,0,0,0,0,0,0,0,0,1,0,0,100,0,0,NULL,1,1678807950,0,0,0),(52,'MarcusCrassus',6,49,1,0,150,150,0,113,115,95,39,128,0,0,50,50,0,0,3,0,0,0,NULL,410,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,43200,-1,2520,10,0,10,0,10,0,10,0,10,0,10,0,10,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,NULL,NULL,0,-1,0,0,0,0,0,0,0,0,0,1,0,0,100,0,0,NULL,1,1678807954,0,0,0);
 /*!40000 ALTER TABLE `players` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
@@ -1332,14 +1331,14 @@ DROP TABLE IF EXISTS `players_comment`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `players_comment` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `player_id` int(11) NOT NULL,
+  `id` int NOT NULL AUTO_INCREMENT,
+  `player_id` int NOT NULL,
   `comment` varchar(255) DEFAULT NULL,
   `forum_signature` varchar(50) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `players_comment_players_fk` (`player_id`),
   CONSTRAINT `players_comment_players_fk` FOREIGN KEY (`player_id`) REFERENCES `players` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1359,10 +1358,10 @@ DROP TABLE IF EXISTS `players_online`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `players_online` (
-  `player_id` int(11) NOT NULL,
-  `ip` int(11) DEFAULT NULL,
+  `player_id` int NOT NULL,
+  `ip` int DEFAULT NULL,
   PRIMARY KEY (`player_id`)
-) ENGINE=MEMORY DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+) ENGINE=MEMORY DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1385,7 +1384,7 @@ CREATE TABLE `server_config` (
   `config` varchar(50) NOT NULL,
   `value` varchar(256) NOT NULL DEFAULT '',
   PRIMARY KEY (`config`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1394,7 +1393,7 @@ CREATE TABLE `server_config` (
 
 LOCK TABLES `server_config` WRITE;
 /*!40000 ALTER TABLE `server_config` DISABLE KEYS */;
-INSERT INTO `server_config` VALUES ('db_version','28'),('motd_hash','270588929be5485898b3796a2eee346a2b6c6429'),('motd_num','11'),('players_record','529');
+INSERT INTO `server_config` VALUES ('db_version','28'),('motd_hash','da39a3ee5e6b4b0d3255bfef95601890afd80709'),('motd_num','12'),('players_record','529');
 /*!40000 ALTER TABLE `server_config` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1406,19 +1405,19 @@ DROP TABLE IF EXISTS `store_history`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `store_history` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `account_id` int(11) unsigned NOT NULL,
-  `mode` smallint(2) NOT NULL DEFAULT 0,
+  `id` int NOT NULL AUTO_INCREMENT,
+  `account_id` int unsigned NOT NULL,
+  `mode` smallint NOT NULL DEFAULT '0',
   `description` varchar(3500) NOT NULL,
-  `coin_type` tinyint(1) NOT NULL DEFAULT 0,
-  `coin_amount` int(12) NOT NULL,
-  `time` bigint(20) unsigned NOT NULL,
-  `timestamp` int(11) NOT NULL DEFAULT 0,
-  `coins` int(11) NOT NULL DEFAULT 0,
+  `coin_type` tinyint(1) NOT NULL DEFAULT '0',
+  `coin_amount` int NOT NULL,
+  `time` bigint unsigned NOT NULL,
+  `timestamp` int NOT NULL DEFAULT '0',
+  `coins` int NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   KEY `account_id` (`account_id`),
   CONSTRAINT `store_history_account_fk` FOREIGN KEY (`account_id`) REFERENCES `accounts` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=35 DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=35 DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1438,11 +1437,11 @@ DROP TABLE IF EXISTS `test_server_storage`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `test_server_storage` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `player_id` int(11) NOT NULL,
-  `item_id` int(11) NOT NULL,
+  `id` int NOT NULL AUTO_INCREMENT,
+  `player_id` int NOT NULL,
+  `item_id` int NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1463,11 +1462,11 @@ DROP TABLE IF EXISTS `tile_store`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tile_store` (
-  `house_id` int(11) NOT NULL,
+  `house_id` int NOT NULL,
   `data` longblob NOT NULL,
   KEY `house_id` (`house_id`),
   CONSTRAINT `tile_store_account_fk` FOREIGN KEY (`house_id`) REFERENCES `houses` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1488,14 +1487,14 @@ DROP TABLE IF EXISTS `towns`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `towns` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `id` int NOT NULL AUTO_INCREMENT,
   `name` varchar(255) NOT NULL,
-  `posx` int(11) NOT NULL DEFAULT 0,
-  `posy` int(11) NOT NULL DEFAULT 0,
-  `posz` int(11) NOT NULL DEFAULT 0,
+  `posx` int NOT NULL DEFAULT '0',
+  `posy` int NOT NULL DEFAULT '0',
+  `posz` int NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `name` (`name`)
-) ENGINE=InnoDB AUTO_INCREMENT=29 DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=29 DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1516,10 +1515,10 @@ DROP TABLE IF EXISTS `vocations`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `vocations` (
-  `vocation_id` int(11) unsigned NOT NULL,
+  `vocation_id` int unsigned NOT NULL,
   `vocation_name` varchar(25) NOT NULL,
   PRIMARY KEY (`vocation_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1540,16 +1539,16 @@ DROP TABLE IF EXISTS `worlds`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `worlds` (
-  `id` int(11) unsigned NOT NULL,
+  `id` int unsigned NOT NULL,
   `serverName` varchar(45) NOT NULL,
-  `port` int(11) NOT NULL,
+  `port` int NOT NULL,
   `connectionip` varchar(45) NOT NULL,
   `location` varchar(45) NOT NULL,
-  `pvptype` int(11) NOT NULL,
-  `createdAt` bigint(22) NOT NULL,
-  `deletedAt` bigint(22) NOT NULL,
+  `pvptype` int NOT NULL,
+  `createdAt` bigint NOT NULL,
+  `deletedAt` bigint NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1570,15 +1569,15 @@ DROP TABLE IF EXISTS `z_polls`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `z_polls` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `id` int NOT NULL AUTO_INCREMENT,
   `question` varchar(255) NOT NULL,
   `description` varchar(255) NOT NULL,
-  `end` int(11) NOT NULL DEFAULT 0,
-  `start` int(11) NOT NULL DEFAULT 0,
-  `answers` int(11) NOT NULL DEFAULT 0,
-  `votes_all` int(11) NOT NULL DEFAULT 0,
+  `end` int NOT NULL DEFAULT '0',
+  `start` int NOT NULL DEFAULT '0',
+  `answers` int NOT NULL DEFAULT '0',
+  `votes_all` int NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1598,11 +1597,11 @@ DROP TABLE IF EXISTS `z_polls_answers`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `z_polls_answers` (
-  `poll_id` int(11) NOT NULL,
-  `answer_id` int(11) NOT NULL,
+  `poll_id` int NOT NULL,
+  `answer_id` int NOT NULL,
   `answer` varchar(255) NOT NULL,
-  `votes` int(11) NOT NULL DEFAULT 0
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+  `votes` int NOT NULL DEFAULT '0'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1623,4 +1622,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2023-03-11 12:18:59
+-- Dump completed on 2023-03-14 12:34:12

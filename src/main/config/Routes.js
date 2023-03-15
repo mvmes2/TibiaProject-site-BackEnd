@@ -17,4 +17,8 @@ module.exports = app => {
     app.route('/recovery-acc-back-generic').post(app.src.main.controllers.AccountController.recoveryAccountGenericRequest);
     app.route('/get-account-info').post(app.src.main.controllers.AccountController.getAccountInfoRequest);
     app.route('/validate-changePass-token').post(authMiddleware, app.src.main.controllers.AccountController.validateJsonTokenRequest);
+    app.route('/mercado-pago-pix').get(app.src.main.modules.mercadoPago.controllers.MercadoPagoController.MercadoPagoPixController);
+    app.route('/mercado-pago-pix/notification').post(app.src.main.modules.mercadoPago.controllers.MercadoPagoController.MercadoPagoPixNotificationController);
+    
+    
 }
