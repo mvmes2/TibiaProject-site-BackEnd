@@ -99,14 +99,13 @@ module.exports = app => {
     console.log('informações enviadas na criação do personagem no back: ', data)
     data.createdAt = Math.floor(Date.now() / 1000);
     try {
-      console.log(data)
-      const checkNameExist = await players.query().select('name').where({ name: data.name });
+      const checkNameExist = await players.query().select('name').whereRaw('LOWER(name) = ?', data.name.toLowerCase());
       const femaleCharacter = {
         ...data,
         looktype: 136
       }
-      if (!checkNameExist || checkNameExist === undefined || !checkNameExist?.length) {
-        
+      data.name = data.name.charAt(0).toUpperCase() + data.name.slice(1);
+      if (!checkNameExist || checkNameExist === undefined || checkNameExist?.length < 1) {
         await players.query().insert(data.sex === 0 ? femaleCharacter : data);
         const getCreatedPlayer = await players.query().select('id').where({ name: data.name }).first();
 
