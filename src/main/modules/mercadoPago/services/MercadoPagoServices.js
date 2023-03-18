@@ -12,27 +12,23 @@ module.exports = app => {
     console.log('logando payment service: ', data);
     const body = {
       payment_method_id: 'pix',
-      transaction_amount: 1,
-      description: 'Compra de exemplo pix',
-      notification_url: 'http://143.0.20.85:3333/mercado-pago-pix/notification',
-      statement_descriptor: 'Exemplo',
+      transaction_amount: data.value,
+      description: `Tibia Project - ${data.product_name}`,
+      notification_url: `${process.env.BASE_URL_IP}:3333/mercado-pago-pix/notification`,
+      statement_descriptor: 'Tibia Project Coins pack',
       payer: {
-        first_name: 'Test',
-        email: 'cliente@exemplo.com.br',
-        identification: {
-          type: 'CPF',
-          number: '19119119100'
-        }
+        first_name: data.name,
+        email: data.email,
       },
       metadata: {
-        order_id: 'pedido-001',
+        order_id: data.order_id ? (Number(data.order_id) + 1) : 1,
         products: [
           {
-            id: 'produto-001',
-            title: 'Produto de exemplo pix donation',
-            description: 'Descrição do produto de exemplo pix donation',
+            id: data.order_id ? (Number(data.order_id) + 1) : 1,
+            title: data.product_name,
+            description: 'Virtual coins to be used at www.tibiaProject.com',
             quantity: 1,
-            unit_price: 1
+            unit_price: data.value
           }
         ]
       }

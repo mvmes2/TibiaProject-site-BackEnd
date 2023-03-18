@@ -22,6 +22,7 @@ app.use(express.json());
     consign()
     .then("./src/main/utils")
     .then("./src/main/middlewares")
+    .then("./src/main/modules/mercadoPago/repository")
     .then("./src/main/modules/mercadoPago/services")
     .then("./src/main/modules/mercadoPago/")
     .then("./src/main/repository")
