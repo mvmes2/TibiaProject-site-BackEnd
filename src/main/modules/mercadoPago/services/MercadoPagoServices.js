@@ -21,7 +21,7 @@ module.exports = app => {
       payment_method_id: 'pix',
       transaction_amount: data.value,
       description: data.product_name,
-      notification_url: `${process.env.BASE_URL_IP}/mercado-pago-pix/notification`,
+      notification_url: `${process.env.BASE_URL_IP_BACK}/mercado-pago-pix/notification`,
       statement_descriptor: 'Tibia Project',
       payer: {
         first_name: data.name,
