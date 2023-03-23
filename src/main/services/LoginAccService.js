@@ -9,8 +9,6 @@ module.exports = app => {
         }
 
         const acc = exists.acc[0];
-
-        console.log("User banco de dados", exists)
         
         const isPasswordValid = checkPassword(data.password, acc.password);
 
@@ -27,7 +25,7 @@ module.exports = app => {
         }
 
         await updateAcc({ update: updateInfo, id: acc.id });
-    return { status: 200, message: { id: acc.id, loginHash: hash, name: acc.name, login_token: newLoginToken }};
+    return { status: 200, message: { id: acc.id, loginHash: hash, name: acc.name, login_token: newLoginToken, email: acc.email }};
 }
     return {
         LoginAccService,

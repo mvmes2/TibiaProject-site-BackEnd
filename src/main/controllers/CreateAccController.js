@@ -22,7 +22,7 @@ module.exports = (app) => {
       if (returnal.status === 200) {
         const newToken = generateToken(120, data);
         console.log("cade data?", data);
-        const link = `${process.env.BASE_URL_IP}:3000/create-account/validate/${newToken}`;
+        const link = `${process.env.BASE_URL_IP}/create-account/validate/${newToken}`;
         projectMailer.welcomeAndValidate(
           data.email,
           "Welcome to TibiaProject",

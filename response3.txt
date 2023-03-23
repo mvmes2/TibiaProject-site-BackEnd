@@ -1,0 +1,13 @@
+{
+  host: '143.0.20.85:3333',
+  'user-agent': 'MercadoPago WebHook v1.0 payment',
+  'content-length': '187',
+  accept: 'application/json',
+  connection: 'keep-alive',
+  'content-type': 'application/json',
+  'x-request-id': '62004f36-33c7-4dbc-b3ee-bcc0ef41b57e',
+  'x-rest-pool-name': 'pool_unknown',
+  'x-socket-timeout': '25000',
+  'x-trace-digest-20': 'yCwWDMBDbm/QH0bKjSjpss3YhMuP6shSyWYuGXrbLqxXnxr1RXz4ru8G3H6Uby2/hnEJiFraruBWqAP3r7195g==',
+  'accept-encoding': 'gzip'
+}

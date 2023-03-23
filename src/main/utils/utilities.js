@@ -1,9 +1,11 @@
 const jsSHA = require('jssha');
 const jwt = require('jsonwebtoken');
 const mailer = require('../modules/mailer');
+const { addMinutes, format } = require('date-fns');
 const instagram_logo = 'https://res.cloudinary.com/dqncp7bg6/image/upload/v1678229806/instagram_nrqx0k.png';
 const youtube_logo = 'https://res.cloudinary.com/dqncp7bg6/image/upload/c_pad,b_auto:predominant,fl_preserve_transparency/v1678229812/youtube_buxwrq.jpg';
 const discord_logo = 'https://res.cloudinary.com/dqncp7bg6/image/upload/v1678229803/discord_rh9nrm.png';
+
 
 
 const encryptPassword = (password) => {
@@ -124,6 +126,13 @@ const tokenValidation = (token) => {
  }
 }
 
+function generateExpirationDateMinutsFromNowIsoFormat(minuts) {
+  const currentDate = new Date();
+  const expirationDate = addMinutes(currentDate, minuts);
+  const timeZoneOffset = -currentDate.getTimezoneOffset() / 60;
+  const timeZoneOffsetFormatted = timeZoneOffset >= 0 ? `+${timeZoneOffset.toString().padStart(2, '0')}:00` : `-${(-timeZoneOffset).toString().padStart(2, '0')}:00`;
+  return format(expirationDate, `yyyy-MM-dd'T'HH:mm:ss.SSS${timeZoneOffsetFormatted}`);
+}
 
 module.exports = {
     checkPassword,
@@ -133,5 +142,6 @@ module.exports = {
     formatDateToTimeStampEpoch,
     projectMailer,
     generateToken,
-    tokenValidation
+    tokenValidation,
+    generateExpirationDateMinutsFromNowIsoFormat
 }
