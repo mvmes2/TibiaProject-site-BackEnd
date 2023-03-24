@@ -1,0 +1,5 @@
+TypeError: io.emit is not a function
+    at C:\Projetos\Projetos\tibiaProjectNewSite\TibiaProject-site-BackEnd\src\main\modules\mercadoPago\services\MercadoPagoServices.js:129:16
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async ReturnPixNotificationService (C:\Projetos\Projetos\tibiaProjectNewSite\TibiaProject-site-BackEnd\src\main\modules\mercadoPago\services\MercadoPagoServices.js:105:7)
+    at async MercadoPagoPixNotificationController (C:\Projetos\Projetos\tibiaProjectNewSite\TibiaProject-site-BackEnd\src\main\modules\mercadoPago\controllers\MercadoPagoController.js:27:18)

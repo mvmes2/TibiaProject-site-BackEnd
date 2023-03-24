@@ -21,7 +21,6 @@ module.exports = (app) => {
       const returnal = await checkNameAndEmail(dataWithoutPass2);
       if (returnal.status === 200) {
         const newToken = generateToken(120, data);
-        console.log("cade data?", data);
         const link = `${process.env.BASE_URL_IP_FRONT}/create-account/validate/${newToken}`;
         projectMailer.welcomeAndValidate(
           data.email,

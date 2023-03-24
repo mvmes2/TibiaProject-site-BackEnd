@@ -98,6 +98,22 @@ const projectMailer = {
         },
       });
   },
+  coinsPurchase: function sendEmailTo(account_email, account_name, coins) {
+    mailer.sendMail({
+        from: "tibiaprojectbr@gmail.com",        
+        to: account_email,
+        subject: 'Coins Purchase',
+        template: "main/resources/emailTemplates/coinsPurchaseEmail",
+        context: {
+          account_email,
+          account_name,
+          coins,
+          youtube_logo,
+          instagram_logo,
+          discord_logo,
+        },
+      });
+  },
 }
 
 const generateToken = (duration, userData) =>{
@@ -126,14 +142,6 @@ const tokenValidation = (token) => {
  }
 }
 
-function generateExpirationDateMinutsFromNowIsoFormat(minuts) {
-  const currentDate = new Date();
-  const expirationDate = addMinutes(currentDate, minuts);
-  const timeZoneOffset = -currentDate.getTimezoneOffset() / 60;
-  const timeZoneOffsetFormatted = timeZoneOffset >= 0 ? `+${timeZoneOffset.toString().padStart(2, '0')}:00` : `-${(-timeZoneOffset).toString().padStart(2, '0')}:00`;
-  return format(expirationDate, `yyyy-MM-dd'T'HH:mm:ss.SSS${timeZoneOffsetFormatted}`);
-}
-
 module.exports = {
     checkPassword,
     hashGenerator,
@@ -142,6 +150,5 @@ module.exports = {
     formatDateToTimeStampEpoch,
     projectMailer,
     generateToken,
-    tokenValidation,
-    generateExpirationDateMinutsFromNowIsoFormat
+    tokenValidation
 }

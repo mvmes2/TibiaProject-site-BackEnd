@@ -2,22 +2,43 @@ const express = require('express');
 const cors = require('cors');
 const consign = require('consign');
 const app = express();
+const http = require('http');
+const server = http.createServer(app);
+const { io } = require('./socket');
 
-app.use(cors());
+const userSockets = {};
+
+io.attach(server);
+
 app.use(express.json());
 
-// app.use((req, res, next) => {
-//     console.log('Host Log: req vindo de: ',req.headers.host)
-// const allowedOrigin = "localhost:3333"; //origem permitida para se solicitar requisições da nossa api.
-//     req.header("Access-Control-Allow-Origin", allowedOrigin);
+app.use(cors());
 
-//     //garantia de que apenas allowed origin consegue fazer requisições a nossa api.
-//     if (req.headers.host === allowedOrigin) {
-// 		next();
-// 	 } else {
-// 	 	res.status(401).send('f')
-// 	 }
-// });
+io.on("connection", (socket) => {
+    console.log("Usuário conectado:", socket.id);
+  
+    socket.on("user_connected", ({ userId }) => {
+        console.log("Usuário conectado com ID:", userId, "e socket ID:", socket.id);
+        userSockets[userId] = socket.id;
+      console.log("Objeto userSockets atualizado:", userSockets);
+    });
+  
+    socket.on("disconnect", () => {
+      console.log("Usuário desconectado:", socket.id);
+
+      // remova a associação do id do usuario do socket
+      const userId = Object.keys(userSockets).find((key) => userSockets[key] === socket.id);
+      if (userId) {
+        delete userSockets[userId];
+        console.log(userSockets)
+      }
+    });
+  });
+
+  module.exports = {
+    io,
+    userSockets,
+  };
 
     consign()
     .then("./src/main/utils")
@@ -32,7 +53,7 @@ app.use(express.json());
     .into(app);
 
 const PORT = 3333;
-app.listen(PORT, () => {
+server.listen(PORT, () => {
     console.log(`BackEnd Rodando na porta: ${PORT}!!`);
 })
 

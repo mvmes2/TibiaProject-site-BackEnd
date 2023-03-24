@@ -1,0 +1,39 @@
+{
+    "message": "Request failed with status code 404",
+    "name": "AxiosError",
+    "stack": "AxiosError: Request failed with status code 404\n    at settle (C:\\Projetos\\Projetos\\tibiaProjectNewSite\\TibiaProject-site-BackEnd\\node_modules\\axios\\dist\\node\\axios.cjs:1900:12)\n    at Unzip.handleStreamEnd (C:\\Projetos\\Projetos\\tibiaProjectNewSite\\TibiaProject-site-BackEnd\\node_modules\\axios\\dist\\node\\axios.cjs:2952:11)\n    at Unzip.emit (node:events:525:35)\n    at endReadableNT (node:internal/streams/readable:1359:12)\n    at process.processTicksAndRejections (node:internal/process/task_queues:82:21)",
+    "config": {
+        "transitional": {
+            "silentJSONParsing": true,
+            "forcedJSONParsing": true,
+            "clarifyTimeoutError": false
+        },
+        "adapter": [
+            "xhr",
+            "http"
+        ],
+        "transformRequest": [
+            null
+        ],
+        "transformResponse": [
+            null
+        ],
+        "timeout": 0,
+        "xsrfCookieName": "XSRF-TOKEN",
+        "xsrfHeaderName": "X-XSRF-TOKEN",
+        "maxContentLength": -1,
+        "maxBodyLength": -1,
+        "env": {},
+        "headers": {
+            "Accept": "application/json, text/plain, */*",
+            "Authorization": "Bearer APP_USR-5828005154303913-032303-4b89506d266c19f0cec56620582df92c-1336933741",
+            "User-Agent": "axios/1.3.4",
+            "Accept-Encoding": "gzip, compress, deflate, br"
+        },
+        "baseURL": "https://api.mercadopago.com/v1",
+        "method": "get",
+        "url": "/payments/56029044229"
+    },
+    "code": "ERR_BAD_REQUEST",
+    "status": 404
+}

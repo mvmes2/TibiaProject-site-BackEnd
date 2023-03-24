@@ -1,7 +1,6 @@
 require('dotenv').config();
 const fs = require('fs');
 const util = require('util');
-const { generateExpirationDateMinutsFromNowIsoFormat } = require('../../../utils/utilities');
 
 const { api } = require('./api');
 module.exports = app => {
@@ -17,7 +16,6 @@ module.exports = app => {
     let respuest = { status: 500, message: 'Internal error at payment!' };
     try {
     const body = {
-      date_of_expiration: generateExpirationDateMinutsFromNowIsoFormat(30),
       payment_method_id: 'pix',
       transaction_amount: data.value,
       description: data.product_name,
@@ -74,8 +72,10 @@ module.exports = app => {
   }
 
   const ReturnPixNotificationService = async (data) => { 
+    const paymentId = data?.data?.id;
     try {
-      const paymentId = data?.data?.id;
+      console.log('to recebendo o que? ', JSON.stringify(data))
+      console.log('to recebendo o que de action? ', data.action)
 
     if (data?.action === 'payment.created' && GLOBAL_USER_DATA_TO_PAYMENT !== null) {
       GLOBAL_USER_DATA_TO_PAYMENT.transaction_id = paymentId
@@ -84,6 +84,7 @@ module.exports = app => {
       const newPaymentInsert = {
         account_id: GLOBAL_USER_DATA_TO_PAYMENT.account_id,
         account_name: GLOBAL_USER_DATA_TO_PAYMENT.name,
+        account_email: GLOBAL_USER_DATA_TO_PAYMENT.email,
         transaction_id: Number(GLOBAL_USER_DATA_TO_PAYMENT.transaction_id),
         transaction_type: 'pix',
         product_name: GLOBAL_USER_DATA_TO_PAYMENT.product_name,
@@ -98,9 +99,10 @@ module.exports = app => {
       GLOBAL_USER_DATA_TO_PAYMENT = null;
       return { status: 200, message: 'ok' }
     }
-    if (data?.action === 'payment.updated') {
-
+    if (data?.action === 'payment.updated' && paymentId) {
+      console.log('qual id sendo updatado?? ', paymentId)
       await api.get(`/payments/${paymentId}`, { headers }).then((resp) => {
+        console.log('to recebendo o que de status? ', resp.data.status)
 
         if (resp.data.status === 'cancelled') {
           console.log('payment cancelled: ', resp?.data?.id);
@@ -122,20 +124,35 @@ module.exports = app => {
 
           setTimeout(async () => {
             await insertCoinsAtAccountToApprovedPayment(approvedID);
-          }, 1000);
-
+          }, 1000);       
         }
 
         return { status: 200, message: 'ok' }
 
       }).catch((err) => {
-        console.log(err);
+        const responseText = util.inspect(err, { depth: null });
+          fs.writeFile('errorApiCall-notificationPixPayments-Log.txt', responseText, (err) => {
+            if (err) {
+              console.error('Erro ao escrever arquivo:', err);
+            } else {
+              console.log('Arquivo errorApiCall-notificationPixPayments-Log.txt foi criado com sucesso.');
+            }
+          })
+        console.log('errorApiCall-notificationPixPayments-Log');
       })
     }
    
     return { status: 200, message: 'ok' };
     } catch(err) {
-      console.log(err);
+      const responseText = util.inspect(err, { depth: null });
+          fs.writeFile('errorTryCatch-notificationPixPayments-Log.txt', responseText, (err) => {
+            if (err) {
+              console.error('Erro ao escrever arquivo:', err);
+            } else {
+              console.log('Arquivo errorTryCatchLog.txt foi criado com sucesso.');
+            }
+          })
+        console.log('errorTryCatch-notificationPixPayments-Log');
       return { status: 500, message: 'Internal error' }
     }
   }
