@@ -1,6 +1,22 @@
 const { accounts, players, players_online, player_deaths, player_items, players_comment } = require('../models/projectModels');
+const { convertPremiumTimeToDaysLeft, updateLastDayTimeStampEpochFromGivenDays } = require('../utils/utilities');
 
 module.exports = app => {
+
+  const updateAcc = async (data) => {
+    const findAccountFirst = await accounts.query().select('id').where({ id: data.id });
+    if (findAccountFirst.length < 1) {
+      return { status: 500, message: 'Internal error on trying update your account, account not found, open a ticket or call admin!' }
+    }
+    try {
+      await accounts.query().update(data.update).where({ id: data.id });
+      return { status: 200, message: 'Account updated successfully!' };
+    } catch (err) {
+      console.log(err);
+      return { status: 500, message: 'Something went wrong, call administration or open a ticket!' }
+    }
+  }
+
   const InsertNewAccount = async (data) => {
     const checkIfExistEmailFirst = await accounts.query().select('email').where({ email: data.email });
     const checkIfExistNameFirst = await accounts.query().select('email').whereRaw('LOWER(name) = ?', data.name.toLowerCase());
@@ -20,20 +36,6 @@ module.exports = app => {
     } catch (err) {
       console.log(err)
       return { status: 500, message: err }
-    }
-  }
-
-  const updateAcc = async (data) => {
-    const findAccountFirst = await accounts.query().select('id').where({ id: data.id });
-    if (findAccountFirst.length < 1) {
-      return { status: 500, message: 'Internal error on trying update your account, account not found, open a ticket or call admin!' }
-    }
-    try {
-      await accounts.query().update(data.update).where({ id: data.id });
-      return { status: 200, message: 'Account updated successfully!' };
-    } catch (err) {
-      console.log(err);
-      return { status: 500, message: 'Something went wrong, call administration or open a ticket!' }
     }
   }
 
@@ -58,7 +60,33 @@ module.exports = app => {
       }
     };
 
-    const acc = await accounts.query().select('name', 'email', 'country', 'lastday', 'coins', 'isBanned', 'banReason', 'premdays', 'createdAt').where({ id: Number(data.id) }).first();
+    const acc = await accounts.query().select('id', 'name', 'email', 'country', 'lastday', 'coins', 'isBanned', 'banReason', 'premdays', 'createdAt', 'day_end_premmy').where({ id: Number(data.id) }).first();
+
+      if (Number(acc.premdays) > 0) {
+        if (acc.day_end_premmy !== 0 && acc.premdays > 0) {
+
+          const dataToUpdatePremDays = {
+            id: acc.id,
+            update: {
+              premdays: convertPremiumTimeToDaysLeft(Number(acc.day_end_premmy))
+            }
+          }
+          await updateAcc(dataToUpdatePremDays);
+
+          if (Number(Date.now()) >= (Number(acc.day_end_premmy) * 1000)) {
+            const updatedLastDays = (updateLastDayTimeStampEpochFromGivenDays(Number(acc.premdays), Number(acc.day_end_premmy)) + 86400);
+
+            const dataToUpdateLastDay = {
+              id: acc.id,
+              update: {
+                day_end_premmy: updatedLastDays,
+              }
+            }
+            await updateAcc(dataToUpdateLastDay);
+          }
+        }
+      }
+
     const characters = await players.query()
       .join('worlds', 'players.world_id', '=', 'worlds.id')
       .join('vocations', 'players.vocation', 'vocations.vocation_id')
@@ -85,9 +113,9 @@ module.exports = app => {
       }
       editedCharList.push(newCharInfo);
     }
-
+    const accUpdatedPremiumTime = await accounts.query().select('id', 'name', 'email', 'country', 'lastday', 'coins', 'isBanned', 'banReason', 'premdays', 'createdAt', 'day_end_premmy').where({ id: Number(data.id) }).first();
     const accInfo = {
-      ...acc,
+      ...accUpdatedPremiumTime,
       editedCharList,
     }
 

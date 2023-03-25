@@ -142,6 +142,28 @@ const tokenValidation = (token) => {
  }
 }
 
+const convertPremiumTimeToDaysLeft = (lastDay) => {
+  const todayTimestamp = Math.floor(Date.now() / 1000);
+  const diffInSeconds = lastDay - todayTimestamp;
+  const diffInDays = Math.floor(diffInSeconds / 86400);
+
+  return diffInDays;
+};
+
+const updateLastDayTimeStampEpochFromGivenDays = (days, lastDay) => {
+
+  const lastDayMilis = lastDay ? lastDay * 1000 : Date.now();
+  const lastDayNewDate = new Date(lastDayMilis);
+
+  const daysToAdd = days;
+
+  lastDayNewDate.setDate(lastDayNewDate.getDate() + daysToAdd);
+
+  const newTimeStampEpoch = Math.floor(lastDayNewDate.getTime() / 1000);
+
+  return newTimeStampEpoch;
+};
+
 module.exports = {
     checkPassword,
     hashGenerator,
@@ -150,5 +172,7 @@ module.exports = {
     formatDateToTimeStampEpoch,
     projectMailer,
     generateToken,
-    tokenValidation
+    tokenValidation,
+    convertPremiumTimeToDaysLeft,
+    updateLastDayTimeStampEpochFromGivenDays
 }

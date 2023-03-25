@@ -1,6 +1,6 @@
 module.exports = app => {
     const { checkValidLoginHash, createCharacterSerice, validateCharacterService, deleteCharacterService, 
-        updateHidenCharacterService, updateCharacterCommentService, recoveryAccountGenericService, validateJsonTokenService } = app.src.main.services.AccountService;
+        updateHidenCharacterService, updateCharacterCommentService, recoveryAccountGenericService } = app.src.main.services.AccountService;
     const { updateAcc } = app.src.main.repository.UserRepository;
     const { getAccountInfoRepository } = app.src.main.repository.AccountRepository;
 

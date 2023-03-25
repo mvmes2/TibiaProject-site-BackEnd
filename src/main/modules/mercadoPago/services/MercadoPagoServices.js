@@ -87,6 +87,8 @@ module.exports = app => {
         account_email: GLOBAL_USER_DATA_TO_PAYMENT.email,
         transaction_id: Number(GLOBAL_USER_DATA_TO_PAYMENT.transaction_id),
         transaction_type: 'pix',
+        payment_currency: 'BRL',
+        payment_company: 'Mercado Pago',
         product_name: GLOBAL_USER_DATA_TO_PAYMENT.product_name,
         unity_value: GLOBAL_USER_DATA_TO_PAYMENT.value,
         total_value: GLOBAL_USER_DATA_TO_PAYMENT.value,

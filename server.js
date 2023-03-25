@@ -12,7 +12,12 @@ io.attach(server);
 
 app.use(express.json());
 
-app.use(cors());
+const corsOptions = {
+  origin: '*', // Substitua por sua URL de origem
+  optionsSuccessStatus: 200, // Para navegadores legados (IE11, várias versões do Android)
+};
+
+app.use(cors(corsOptions));
 
 io.on("connection", (socket) => {
     console.log("Usuário conectado:", socket.id);
@@ -46,6 +51,9 @@ io.on("connection", (socket) => {
     .then("./src/main/modules/mercadoPago/repository")
     .then("./src/main/modules/mercadoPago/services")
     .then("./src/main/modules/mercadoPago/")
+    .then("./src/main/modules/stripes/repository")
+    .then("./src/main/modules/stripes/services")
+    .then("./src/main/modules/stripes/")
     .then("./src/main/repository")
     .then("./src/main/services")
     .then("./src/main/controllers")

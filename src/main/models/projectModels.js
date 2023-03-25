@@ -35,9 +35,9 @@ class products extends Model {
     static tableName = 'products'
 }
 
-class mercado_pago_payments extends Model {
-    static tableName = 'mercado_pago_payments'
+class payments extends Model {
+    static tableName = 'payments'
 }
 
 module.exports = { players_online, accounts, players, player_deaths, worlds, player_items, 
-    players_comment, products, mercado_pago_payments }
+    players_comment, products, payments }
