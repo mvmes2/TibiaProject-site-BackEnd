@@ -24,7 +24,7 @@ module.exports = app => {
       unity_value: data.unity_value,
       total_value: (Number(data.unity_value) * Number(data.exchangeRate)),
       coins_quantity: data.coins_quantity,
-      fee_percentage: data.currency === 'BRL' ? 4.5 : 6.2,
+      fee_percentage: data.currency === 'BRL' ? 5 : 6.5,
       status: 'approved',
       created_date: Math.floor(Date.now() / 1000),
       approved_date: Math.floor(Date.now() / 1000)
