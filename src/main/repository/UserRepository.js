@@ -40,7 +40,7 @@ module.exports = app => {
   }
 
   const checkIfAccExists = async (data) => {
-    const exists = await accounts.query().select('email', 'id', 'password', 'name').where({ email: data });
+    const exists = await accounts.query().select('email', 'id', 'password', 'name', 'loginHash').where({ email: data });
     if (!exists || exists === undefined || exists?.length < 1) {
       return { bool: false };
     } else {

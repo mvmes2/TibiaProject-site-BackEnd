@@ -16,7 +16,8 @@ const getProductsList = async () => {
 const GetPaymentListLastIDRepository = async () => {
   try {
     const paymentListLastId = await payments.query().select('id').orderBy('id', 'desc').first();
-    return { status: 200, message: paymentListLastId };
+    console.log('cheguei aqui? ', paymentListLastId)
+    return { status: 200, message: paymentListLastId === undefined ? {id: 0} : paymentListLastId };
   } catch (err) {
     console.log(err);
     return { status: 500, message: 'Internal error, close the website, and try again, or call Administration!' }
@@ -60,12 +61,15 @@ const insertCoinsAtAccountToApprovedPayment = async (paymentID) => {
       .whereNotNull('approved_date')
       .whereNull('coins_paid_date');
 
-    if (!getAccountToInsertCoins || getAccountToInsertCoins === undefined || getAccountToInsertCoins === null || getAccountToInsertCoins?.length < 1) {
+      console.log('como estou recebendo o id?', paymentID)
+      console.log('qual conta vai vir? vai dar certo? ', getAccountToInsertCoins)
+
+    if (getAccountToInsertCoins?.length < 1) {
       try{
-        throw new Error('Payment ID do not exists!')
+        throw new Error('Payment ID do not exists or payment id have already been paid, check your email!')
       }catch(err){
         console.log(err)
-        return { status: 500, message: 'Payment ID do not exists!' }
+        return { status: 404, message: 'Payment ID do not exists or payment id have already been paid, check your email!' }
       }
     } else {
       const accToPay = getAccountToInsertCoins[0];

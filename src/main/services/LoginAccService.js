@@ -15,8 +15,9 @@ module.exports = app => {
         if (!isPasswordValid) { return { status: 400, message: 'Wrong passwrod, if you forgot your password please use account recovery!' } };
 
        const hash = hashGenerator(8);
-
-       const newLoginToken = generateToken(60, )
+       acc.loginHash = hash;
+       const {password, ...accwithoutPassword} = acc;
+       const newLoginToken = generateToken(30, accwithoutPassword)
 
         const updateInfo = {
             loginHash: hash,
