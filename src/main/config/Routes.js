@@ -18,11 +18,14 @@ module.exports = app => {
     app.route('/get-account-info').post(app.src.main.controllers.AccountController.getAccountInfoRequest);
     app.route('/validate-changePass-token').post(authMiddleware, app.src.main.controllers.AccountController.validateJsonTokenRequest);
     app.route('/validate-token').get(authMiddleware, app.src.main.controllers.AccountController.validateJsonTokenRequest);
-    app.route('/mercado-pago-pix/create-payment').post(app.src.main.modules.mercadoPago.controllers.MercadoPagoController.MercadoPagoPixCreatePaymnentController);
+    app.route('/mercado-pago-pix/create-payment').post(authMiddleware, app.src.main.modules.mercadoPago.controllers.MercadoPagoController.MercadoPagoPixCreatePaymnentController);
     app.route('/mercado-pago-pix/notification').post(app.src.main.modules.mercadoPago.controllers.MercadoPagoController.MercadoPagoPixNotificationController);
     app.route('/mercado-pago-pix/get-products').get(authMiddleware, app.src.main.modules.mercadoPago.controllers.MercadoPagoController.MercadoPagoGetProductsListController);
     app.route('/mercado-pago-pix/get-PaymentList-Last-id').get(authMiddleware, app.src.main.modules.mercadoPago.controllers.MercadoPagoController.MercadoPagoGetPaymentListLastIDController);
     app.route('/stripes-create-payment').post(authMiddleware, app.src.main.modules.stripes.controllers.StripesController.StripesCreateCheckoutController);
     app.route('/stripes-insert-payment').post(authMiddleware, app.src.main.modules.stripes.controllers.StripesController.StripesinsertNewPaymentController);
-    app.route('/stripes-insertCoins').post(authMiddleware, app.src.main.modules.stripes.controllers.StripesController.StrpesInsertCoinsToApprovedPayment); 
+    app.route('/stripes-insertCoins').post(authMiddleware, app.src.main.modules.stripes.controllers.StripesController.StrpesInsertCoinsToApprovedPayment);
+    app.route('/paypal-create-payment').post(authMiddleware, app.src.main.modules.paypal.controllers.PaypalController.PaypalCreatePaymnentController);
+    app.route('/paypal-capture-complete-payment').post(authMiddleware, app.src.main.modules.paypal.controllers.PaypalController.PaypalCaptureAndCompletePayment);
+    
 }

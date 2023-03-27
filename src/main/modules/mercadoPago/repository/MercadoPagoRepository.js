@@ -24,6 +24,8 @@ const GetPaymentListLastIDRepository = async () => {
 }
 
 const insertNewPayment = async (data) => {
+  console.log(data);
+  data.transaction_id = data.transaction_id.toString();
   try {
     await payments.query().insert(data);
   } catch (err) {
@@ -34,7 +36,7 @@ const insertNewPayment = async (data) => {
 
 const updatePayment = async (data) => {
   try {
-    await payments.query().update(data.update).where({ transaction_id: Number(data.transaction_id) });
+    await payments.query().update(data.update).where({ transaction_id: data.transaction_id.toString() });
   } catch (err) {
     console.log(err);
     return { status: 500, message: 'Internal error!' }
@@ -43,7 +45,7 @@ const updatePayment = async (data) => {
 
 const deleteCancelledPayment = async (data) => {
   try {
-    await payments.query().delete().where({ transaction_id: Number(data.transaction_id) });
+    await payments.query().delete().where({ transaction_id: data.transaction_id.toString() });
   } catch (err) {
     console.log(err);
     return { status: 500, message: 'Internal error!' }
@@ -54,19 +56,24 @@ const insertCoinsAtAccountToApprovedPayment = async (paymentID) => {
   console.log('consolando paymentID pra inserção de coins: ', paymentID);
   try {
     const getAccountToInsertCoins = await payments.query().select('account_id', 'coins_quantity', 'account_email', 'account_name')
-      .where({ transaction_id: !paymentID.id ? Number(paymentID) : paymentID.id })
+      .where({ transaction_id: !paymentID.id ? paymentID.toString() : paymentID.id.toString() })
       .whereNotNull('approved_date')
       .whereNull('coins_paid_date');
 
     if (!getAccountToInsertCoins || getAccountToInsertCoins === undefined || getAccountToInsertCoins === null || getAccountToInsertCoins?.length < 1) {
-      throw new Error('Payment ID do not exists!')
+      try{
+        throw new Error('Payment ID do not exists!')
+      }catch(err){
+        console.log(err)
+        return { status: 500, message: 'Payment ID do not exists!' }
+      }
     } else {
       const accToPay = getAccountToInsertCoins[0];
       const getPreviousAmmountToSumm = await accounts.query().select('coins').where({ id: accToPay.account_id }).first();
       console.log('como ta vindo os coins antes? ', getPreviousAmmountToSumm)
       console.log('quanto vai dar a brincadeira atual? ', (Number(getPreviousAmmountToSumm.coins) + Number(accToPay.coins_quantity)));
       await accounts.query().update({ coins: (Number(getPreviousAmmountToSumm.coins) + Number(accToPay.coins_quantity)) }).where({ id: accToPay.account_id });
-      await payments.query().update({ coins_paid_date: Date.now() / 1000 }).where({ transaction_id: !paymentID.id ? Number(paymentID) : paymentID.id });
+      await payments.query().update({ coins_paid_date: Date.now() / 1000 }).where({ transaction_id: !paymentID.id ? paymentID.toString() : paymentID.id.toString() });
       try {
         projectMailer.coinsPurchase(accToPay.account_email, accToPay.account_name, accToPay.coins_quantity);
         console.log('email de pagamento enviado!');

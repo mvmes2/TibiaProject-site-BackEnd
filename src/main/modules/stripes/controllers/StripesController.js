@@ -10,7 +10,8 @@ module.exports = app => {
   const { insertCoinsAtAccountToApprovedPayment } = app.src.main.modules.mercadoPago.repository.MercadoPagoRepository;
 
   const StripesCreateCheckoutController = async (req, res) => {
-    const data = req.body;
+    try {
+      const data = req.body;
 
     const dataToTokenIfSuccess = {
       account_id: data.account_id,
@@ -33,9 +34,13 @@ module.exports = app => {
 
     const product = await stripe.products.create({name: data.product_name});
 
+    console.log(data)
+
+    console.log('valor convertido: ', ((Math.ceil((Number(data.unity_value) * Number(data.exchangeRate)))) * 100))
+
     const price = await stripe.prices.create({
       product: product.id,
-      unit_amount: Math.ceil((Number(data.unity_value) * Number(data.exchangeRate)) * 100),
+      unit_amount: (Math.ceil(((Number(data.unity_value) * Number(data.exchangeRate)) * 100))),
       currency: data.currency.toLowerCase(),
     });
     console.log(price);
@@ -53,6 +58,10 @@ module.exports = app => {
     });
     
     res.status(200).json({ url: session.url });
+    } catch(err) {
+      console.log(err)
+      res.status(500).send('internal error');
+    }
   };
 
   const StripesinsertNewPaymentController = async (req, res) => {

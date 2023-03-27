@@ -5,6 +5,7 @@ const { addMinutes, format } = require('date-fns');
 const instagram_logo = 'https://res.cloudinary.com/dqncp7bg6/image/upload/v1678229806/instagram_nrqx0k.png';
 const youtube_logo = 'https://res.cloudinary.com/dqncp7bg6/image/upload/c_pad,b_auto:predominant,fl_preserve_transparency/v1678229812/youtube_buxwrq.jpg';
 const discord_logo = 'https://res.cloudinary.com/dqncp7bg6/image/upload/v1678229803/discord_rh9nrm.png';
+const axios = require('axios');
 
 
 
@@ -164,6 +165,10 @@ const updateLastDayTimeStampEpochFromGivenDays = (days, lastDay) => {
   return newTimeStampEpoch;
 };
 
+const paypalApi = axios.create({
+  baseURL: process.env.PAYPAL_API_BASE_URL,
+});
+
 module.exports = {
     checkPassword,
     hashGenerator,
@@ -174,5 +179,6 @@ module.exports = {
     generateToken,
     tokenValidation,
     convertPremiumTimeToDaysLeft,
-    updateLastDayTimeStampEpochFromGivenDays
+    updateLastDayTimeStampEpochFromGivenDays,
+    paypalApi,
 }

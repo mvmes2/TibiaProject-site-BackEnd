@@ -5,13 +5,14 @@ const app = express();
 const http = require('http');
 const server = http.createServer(app);
 const { io } = require('./socket');
+const morgan = require('morgan');
 
 const userSockets = {};
 
 io.attach(server);
 
 app.use(express.json());
-
+app.use(morgan('dev'));
 const corsOptions = {
   origin: '*', // Substitua por sua URL de origem
   optionsSuccessStatus: 200, // Para navegadores legados (IE11, várias versões do Android)
@@ -54,6 +55,9 @@ io.on("connection", (socket) => {
     .then("./src/main/modules/stripes/repository")
     .then("./src/main/modules/stripes/services")
     .then("./src/main/modules/stripes/")
+    .then("./src/main/modules/paypal/repository")
+    .then("./src/main/modules/paypal/controllers")
+    .then("./src/main/modules/paypal/")
     .then("./src/main/repository")
     .then("./src/main/services")
     .then("./src/main/controllers")

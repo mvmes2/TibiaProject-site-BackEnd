@@ -49,8 +49,8 @@ module.exports = app => {
   }
 
   const validateLoginHash = async (data) => {
-
-    const validHash = await accounts.query().select('loginHash').where({ id: Number(data.id) }).first();
+    try {
+      const validHash = await accounts.query().select('loginHash').where({ id: Number(data.id) }).first();
 
     if (!data?.loginHash || !validHash || validHash === undefined) { return { status: 403, message: 'error at login hash' } }
 
@@ -61,6 +61,7 @@ module.exports = app => {
     };
 
     const acc = await accounts.query().select('id', 'name', 'email', 'country', 'lastday', 'coins', 'isBanned', 'banReason', 'premdays', 'createdAt', 'day_end_premmy').where({ id: Number(data.id) }).first();
+    
 
       if (Number(acc.premdays) > 0) {
         if (acc.day_end_premmy !== 0 && acc.premdays > 0) {
@@ -72,18 +73,18 @@ module.exports = app => {
             }
           }
           await updateAcc(dataToUpdatePremDays);
+        }
+        if (Number(Date.now()) >= (Number(acc.day_end_premmy) * 1000) || Number(acc.day_end_premmy) === 0) {
+          console.log('é 0 mesmo')
+          const updatedLastDays = (updateLastDayTimeStampEpochFromGivenDays(Number(acc.premdays), Number(acc.day_end_premmy)) + 86400);
 
-          if (Number(Date.now()) >= (Number(acc.day_end_premmy) * 1000)) {
-            const updatedLastDays = (updateLastDayTimeStampEpochFromGivenDays(Number(acc.premdays), Number(acc.day_end_premmy)) + 86400);
-
-            const dataToUpdateLastDay = {
-              id: acc.id,
-              update: {
-                day_end_premmy: updatedLastDays,
-              }
+          const dataToUpdateLastDay = {
+            id: acc.id,
+            update: {
+              day_end_premmy: updatedLastDays,
             }
-            await updateAcc(dataToUpdateLastDay);
           }
+          await updateAcc(dataToUpdateLastDay);
         }
       }
 
@@ -120,6 +121,10 @@ module.exports = app => {
     }
 
     return { status: 200, message: accInfo };
+    } catch(err) {
+      console.log(err);
+      return { status: 500, message: 'Internal error' };
+    }
   }
 
   const createNewCharacterDB = async (data) => {
