@@ -160,6 +160,17 @@ const tokenValidation = (token) => {
  }
 }
 
+const AdmintokenValidation = (token) => {
+  console.log('recebendo token', token)
+ try {
+  const decoded = jwt.verify(token, process.env.TOKEN_GENERATE_SECRET_ADMIN);
+  return decoded;
+ } catch(err) {
+  console.log(err);
+  return false;
+ }
+}
+
 const convertPremiumTimeToDaysLeft = (lastDay) => {
   const todayTimestamp = Math.floor(Date.now() / 1000);
   const diffInSeconds = lastDay - todayTimestamp;
@@ -198,5 +209,6 @@ module.exports = {
     convertPremiumTimeToDaysLeft,
     updateLastDayTimeStampEpochFromGivenDays,
     paypalApi,
-    generateTokenAdmin
+    generateTokenAdmin,
+    AdmintokenValidation
 }

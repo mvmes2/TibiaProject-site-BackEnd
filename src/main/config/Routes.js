@@ -1,4 +1,5 @@
 const authMiddleware = require('../middlewares/AuthMiddleware');
+const AdminAuthMiddleware = require('../middlewares/AdminAuthMiddleware');
 
 module.exports = app => {
     app.route('/teste').get(app.src.main.controllers.ServerTestResponseController.TesteRequest);
@@ -26,8 +27,10 @@ module.exports = app => {
     app.route('/stripes-insert-payment').post(authMiddleware, app.src.main.modules.stripes.controllers.StripesController.StripesinsertNewPaymentController);
     app.route('/stripes-insertCoins').post(authMiddleware, app.src.main.modules.stripes.controllers.StripesController.StrpesInsertCoinsToApprovedPayment);
     app.route('/paypal-create-payment').post(authMiddleware, app.src.main.modules.paypal.controllers.PaypalController.PaypalCreatePaymnentController);
-    app.route('/paypal-capture-complete-payment').post(authMiddleware, app.src.main.modules.paypal.controllers.PaypalController.PaypalCaptureAndCompletePayment);
+    app.route('/paypal-capture-complete-payment').post(authMiddleware, app.src.main.modules.paypal.controllers.PaypalController.PaypalCaptureAndCompletePayment);    
     app.route('/admin-login').post(app.src.main.controllers.AdminController.LoginAdminAccRequest);
+    app.route('/validate-token-admin').get(AdminAuthMiddleware, app.src.main.controllers.AdminController.AdminValidateJsonTokenRequest);
+
 
     
     
