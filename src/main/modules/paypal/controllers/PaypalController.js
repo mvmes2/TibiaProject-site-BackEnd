@@ -34,7 +34,7 @@ module.exports = app => {
 				{
 					amount: {
 						currency_code: "BRL",
-						value: `${data.value}.00`
+						value: `${data.value}`
 					},
 					description: data.product_name,
 				}

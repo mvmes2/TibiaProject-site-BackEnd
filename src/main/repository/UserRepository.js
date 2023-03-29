@@ -40,19 +40,26 @@ module.exports = app => {
   }
 
   const checkIfAccExists = async (data) => {
-    const exists = await accounts.query().select('email', 'id', 'password', 'name', 'loginHash').where({ email: data });
+    try {
+      const exists = await accounts.query().select('email', 'id', 'password', 'name', 'loginHash').where({ email: data });
     if (!exists || exists === undefined || exists?.length < 1) {
       return { bool: false };
     } else {
       return { acc: exists, bool: true };
     }
+    } catch(err) {
+      console.log('erro ao tentar validar account em checkIfExists userRepository...', err)
+    }
   }
 
   const validateLoginHash = async (data) => {
+    console.log(data)
     try {
-      const validHash = await accounts.query().select('loginHash').where({ id: Number(data.id) }).first();
+      if (!data?.loginHash || !data.id) { return { status: 403, message: 'You need to Login!' } }
 
-    if (!data?.loginHash || !validHash || validHash === undefined) { return { status: 403, message: 'error at login hash' } }
+      const validHash = await accounts.query().select('loginHash').where({ id: data.id }).first();
+
+    if ( !validHash || validHash === undefined) { return { status: 403, message: 'error at login hash' } }
 
     if (validHash.loginHash.trim() !== data?.loginHash.trim()) {
       return {
@@ -61,9 +68,27 @@ module.exports = app => {
     };
 
     const acc = await accounts.query().select('id', 'name', 'email', 'country', 'lastday', 'coins', 'isBanned', 'banReason', 'premdays', 'createdAt', 'day_end_premmy').where({ id: Number(data.id) }).first();
-    
 
       if (Number(acc.premdays) > 0) {
+
+        if (Number(Date.now()) >= (Number(acc.day_end_premmy) * 1000) || Number(acc.day_end_premmy) === 0 || acc.premdays !== convertPremiumTimeToDaysLeft(Number(acc.day_end_premmy))) {
+
+          let daysDifference = null;
+          if (Number(acc.day_end_premmy) !== 0) {
+            daysDifference = (Number(acc.premdays) - Number(convertPremiumTimeToDaysLeft(Number(acc.day_end_premmy))));
+          }
+
+          const updatedLastDays = (updateLastDayTimeStampEpochFromGivenDays(Number(acc.day_end_premmy) !== 0 ? daysDifference : acc.premdays, Number(acc.day_end_premmy)));
+
+          const dataToUpdateLastDay = {
+            id: acc.id,
+            update: {
+              day_end_premmy: updatedLastDays,
+            }
+          }
+          await updateAcc(dataToUpdateLastDay);
+        }
+
         if (acc.day_end_premmy !== 0 && acc.premdays > 0) {
 
           const dataToUpdatePremDays = {
@@ -73,18 +98,6 @@ module.exports = app => {
             }
           }
           await updateAcc(dataToUpdatePremDays);
-        }
-        if (Number(Date.now()) >= (Number(acc.day_end_premmy) * 1000) || Number(acc.day_end_premmy) === 0) {
-          console.log('é 0 mesmo')
-          const updatedLastDays = (updateLastDayTimeStampEpochFromGivenDays(Number(acc.premdays), Number(acc.day_end_premmy)) + 86400);
-
-          const dataToUpdateLastDay = {
-            id: acc.id,
-            update: {
-              day_end_premmy: updatedLastDays,
-            }
-          }
-          await updateAcc(dataToUpdateLastDay);
         }
       }
 

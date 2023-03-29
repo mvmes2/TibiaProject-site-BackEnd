@@ -132,6 +132,23 @@ const generateToken = (duration, userData) =>{
     return generatedUserToken;
 }
 
+const generateTokenAdmin = (duration, userData) =>{
+  const JWTCONFIG = {
+    expiresIn: `${duration}m`,
+    algorithm: 'HS256'
+  }
+
+  const generatedAdminToken = jwt.sign({ 
+    data: userData},
+    process.env.TOKEN_GENERATE_SECRET_ADMIN,
+    JWTCONFIG
+    );
+
+    return generatedAdminToken;
+}
+
+
+
 const tokenValidation = (token) => {
   console.log('recebendo token', token)
  try {
@@ -181,4 +198,5 @@ module.exports = {
     convertPremiumTimeToDaysLeft,
     updateLastDayTimeStampEpochFromGivenDays,
     paypalApi,
+    generateTokenAdmin
 }

@@ -27,5 +27,8 @@ module.exports = app => {
     app.route('/stripes-insertCoins').post(authMiddleware, app.src.main.modules.stripes.controllers.StripesController.StrpesInsertCoinsToApprovedPayment);
     app.route('/paypal-create-payment').post(authMiddleware, app.src.main.modules.paypal.controllers.PaypalController.PaypalCreatePaymnentController);
     app.route('/paypal-capture-complete-payment').post(authMiddleware, app.src.main.modules.paypal.controllers.PaypalController.PaypalCaptureAndCompletePayment);
+    app.route('/admin-login').post(app.src.main.controllers.AdminController.LoginAdminAccRequest);
+
+    
     
 }
