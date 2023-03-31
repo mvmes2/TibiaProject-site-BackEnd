@@ -20,7 +20,7 @@ app.use((req, res, next) => {
 app.use(express.json());
 app.use(morgan('dev'));
 const corsOptions = {
-  origin: '*', // Substitua por sua URL de origem
+  origin: '*' , // Substitua por sua URL de origem
   optionsSuccessStatus: 200, // Para navegadores legados (IE11, várias versões do Android)
 };
 
