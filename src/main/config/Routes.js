@@ -2,6 +2,7 @@ const authMiddleware = require('../middlewares/AuthMiddleware');
 
 module.exports = app => {
     app.route('/teste').get(app.src.main.controllers.ServerTestResponseController.TesteRequest);
+    app.route('/news').get(app.src.main.controllers.ServerTestResponseController.PrismicListNews);
     app.route('/create-acc').post(app.src.main.controllers.CreateAccController.CreateAccRequest);
     app.route('/log-in').post(app.src.main.controllers.LoginAccController.LoginAccRequest);
     app.route('/acc-validation').post(app.src.main.controllers.AccountController.validateAccountRequest);

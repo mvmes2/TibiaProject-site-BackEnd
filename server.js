@@ -6,10 +6,16 @@ const http = require('http');
 const server = http.createServer(app);
 const { io } = require('./socket');
 const morgan = require('morgan');
+const prismicH = require('@prismicio/helpers')
 
 const userSockets = {};
-
 io.attach(server);
+app.use((req, res, next) => {
+  res.locals.ctx = {
+    prismicH,
+  }
+  next()
+})
 
 app.use(express.json());
 app.use(morgan('dev'));
@@ -47,6 +53,7 @@ io.on("connection", (socket) => {
   };
 
     consign()
+    .then("./src/main/config/prismicConfig.js")
     .then("./src/main/utils")
     .then("./src/main/middlewares")
     .then("./src/main/modules/mercadoPago/repository")
