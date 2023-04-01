@@ -71,7 +71,7 @@ module.exports = app => {
 
       if (Number(acc.premdays) > 0) {
 
-        if (Number(Date.now()) > (Number(acc.day_end_premmy) * 1000) || Number(acc.day_end_premmy) == 0 || acc.premdays > convertPremiumTimeToDaysLeft(Number(acc.day_end_premmy))) {
+        if (Number(Date.now()) > (Number(acc.day_end_premmy) * 1000) || Number(acc.day_end_premmy) == 0 || Number(acc.premdays) > (convertPremiumTimeToDaysLeft((Number(acc.day_end_premmy) + 4640)))) {
 
           let daysDifference = null;
           if (Number(acc.day_end_premmy) !== 0) {
