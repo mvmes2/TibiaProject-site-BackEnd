@@ -67,11 +67,13 @@ module.exports = app => {
       }
     };
 
-    const acc = await accounts.query().select('id', 'name', 'email', 'country', 'lastday', 'coins', 'isBanned', 'banReason', 'premdays', 'createdAt', 'day_end_premmy', 'web_lastlogin').where({ id: Number(data.id) }).first();
+    const acc = await accounts.query().select('id', 'name', 'email', 'country', 'lastday', 'coins', 'isBanned', 
+    'banReason', 'premdays', 'createdAt', 'day_end_premmy', 'web_lastlogin', 'web_flags', 'type')
+    .where({ id: Number(data.id) }).first();
 
       if (Number(acc.premdays) > 0) {
 
-        if (Number(Date.now()) > (Number(acc.day_end_premmy) * 1000) || Number(acc.day_end_premmy) == 0 || Number(acc.premdays) > (convertPremiumTimeToDaysLeft((Number(acc.day_end_premmy) + 4640)))) {
+        if (Number(Date.now()) > (Number(acc.day_end_premmy) * 1000) || Number(acc.day_end_premmy) == 0 || Number(acc.premdays) > Number(convertPremiumTimeToDaysLeft((Number(acc.day_end_premmy) + (29 * 86400)))) ) {
 
           let daysDifference = null;
           if (Number(acc.day_end_premmy) !== 0) {
@@ -127,7 +129,9 @@ module.exports = app => {
       }
       editedCharList.push(newCharInfo);
     }
-    const accUpdatedPremiumTime = await accounts.query().select('id', 'name', 'email', 'country', 'lastday', 'coins', 'isBanned', 'banReason', 'premdays', 'createdAt', 'day_end_premmy', 'web_lastlogin').where({ id: Number(data.id) }).first();
+    const accUpdatedPremiumTime = await accounts.query().select('id', 'name', 'email', 'country', 'lastday', 'coins', 
+    'isBanned', 'banReason', 'premdays', 'createdAt', 'day_end_premmy', 'web_lastlogin', 'web_flags', 'type')
+    .where({ id: Number(data.id) }).first();
     const accInfo = {
       ...accUpdatedPremiumTime,
       editedCharList,
@@ -246,6 +250,28 @@ module.exports = app => {
         return { status: 500, message: 'erro interno, contate a administração ou abra um ticket!' }
       }
     }
+  };
+
+  const getlAllPlayersToHighscoreRepository = async (data) => {
+    try {
+      const highScores = await players.query()
+    .join('worlds', 'players.world_id', '=', 'worlds.id')
+    .join('vocations', 'players.vocation', 'vocations.vocation_id')
+    .join('accounts', 'players.account_id', '=', 'accounts.id')
+    .select('players.id', 'players.name', 'players.level', 'vocation_name as vocation', 'worlds.serverName as world',
+    'players.hidden', 'accounts.country', 'players.skill_fist', 'players.skill_club', 'players.skill_sword', 
+    'players.skill_axe', 'players.skill_dist', 'players.skill_shielding', 
+    'players.skill_fishing', 'players.experience', 'players.maglevel')
+    .where( 'players.group_id', '<', 5 )
+    .where({ 'players.deletedAt': 0 })
+    .orderBy(data, 'desc')
+    .limit(100);
+
+    return { status: 200, message: JSON.stringify(highScores) }
+    } catch (err) {
+      console.log(err)
+      return { status: 500, message: 'Internal errror' }
+    }
   }
 
  
@@ -257,5 +283,6 @@ module.exports = app => {
     validateLoginHash,
     createNewCharacterDB,
     checkCharacterOwnerAtDB,
+    getlAllPlayersToHighscoreRepository
   }
 }
