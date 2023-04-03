@@ -1,7 +1,7 @@
 module.exports = app => {
     const { checkValidLoginHash, createCharacterSerice, validateCharacterService, deleteCharacterService, 
         updateHidenCharacterService, updateCharacterCommentService, recoveryAccountGenericService } = app.src.main.services.AccountService;
-    const { updateAcc } = app.src.main.repository.UserRepository;
+    const { updateAcc, getlAllPlayersToHighscoreRepository } = app.src.main.repository.UserRepository;
     const { getAccountInfoRepository } = app.src.main.repository.AccountRepository;
 
     const validateAccountRequest = async (req, res) => {
@@ -65,6 +65,13 @@ const validateJsonTokenRequest = async (req, res) => {
     return res.status(200).send({message: 'okla', user: req.user});
 }
 
+const getlAllPlayersToHighscoreController = async (req, res) => {
+    const data = req.body.queryparam;
+    console.log(data)
+    const resp = await getlAllPlayersToHighscoreRepository(data);
+    return res.status(resp.status).send({message: resp.message});
+}
+
     return {
         createCharacterRequest,
         validateAccountRequest,
@@ -75,6 +82,7 @@ const validateJsonTokenRequest = async (req, res) => {
         updateRKRequest,
         recoveryAccountGenericRequest,
         getAccountInfoRequest,
-        validateJsonTokenRequest
+        validateJsonTokenRequest,
+        getlAllPlayersToHighscoreController
     }
 }
