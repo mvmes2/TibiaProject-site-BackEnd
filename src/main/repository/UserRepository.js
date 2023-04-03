@@ -73,33 +73,35 @@ module.exports = app => {
 
       if (Number(acc.premdays) > 0) {
 
-        if (Number(Date.now()) > (Number(acc.day_end_premmy) * 1000) || Number(acc.day_end_premmy) == 0 || Number(acc.premdays) > Number(convertPremiumTimeToDaysLeft((Number(acc.day_end_premmy) + (29 * 86400)))) ) {
-
-          let daysDifference = null;
-          if (Number(acc.day_end_premmy) !== 0) {
-            daysDifference = (Number(acc.premdays) - Number(convertPremiumTimeToDaysLeft(Number(acc.day_end_premmy))));
-          }
-
-          const updatedLastDays = (updateLastDayTimeStampEpochFromGivenDays(Number(acc.day_end_premmy) !== 0 ? daysDifference : acc.premdays, Number(acc.day_end_premmy)));
-
-          const dataToUpdateLastDay = {
-            id: acc.id,
-            update: {
-              day_end_premmy: updatedLastDays,
-            }
-          }
-          await updateAcc(dataToUpdateLastDay);
-        }
-
         if (acc.day_end_premmy !== 0 && acc.premdays > 0) {
 
           const dataToUpdatePremDays = {
             id: acc.id,
             update: {
-              premdays: convertPremiumTimeToDaysLeft(Number(acc.day_end_premmy))
+              premdays: convertPremiumTimeToDaysLeft((Number(acc.day_end_premmy) + 4640))
             }
           }
           await updateAcc(dataToUpdatePremDays);
+        }
+
+        const accToUpdate = await accounts.query().select('*').where({ id: Number(data.id) }).first();
+
+        if (Number(Date.now()) > (Number(accToUpdate.day_end_premmy) * 1000) || Number(accToUpdate.day_end_premmy) == 0 || Number(accToUpdate.premdays) > Number(convertPremiumTimeToDaysLeft((Number(accToUpdate.day_end_premmy) + (29 * 86400)))) ) {
+
+          let daysDifference = null;
+          if (Number(acc.day_end_premmy) !== 0) {
+            daysDifference = (Number(accToUpdate.premdays) - Number(convertPremiumTimeToDaysLeft(Number(accToUpdate.day_end_premmy))));
+          }
+
+          const updatedLastDays = (updateLastDayTimeStampEpochFromGivenDays(Number(accToUpdate.day_end_premmy) !== 0 ? daysDifference : accToUpdate.premdays, Number(accToUpdate.day_end_premmy)));
+
+          const dataToUpdateLastDay = {
+            id: accToUpdate.id,
+            update: {
+              day_end_premmy: updatedLastDays,
+            }
+          }
+          await updateAcc(dataToUpdateLastDay);
         }
       }
 

@@ -66,7 +66,7 @@ const validateJsonTokenRequest = async (req, res) => {
 }
 
 const getlAllPlayersToHighscoreController = async (req, res) => {
-    const data = req.headers.queryparam;
+    const data = req.body.queryparam;
     console.log(data)
     const resp = await getlAllPlayersToHighscoreRepository(data);
     return res.status(resp.status).send({message: resp.message});

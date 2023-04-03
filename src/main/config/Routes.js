@@ -31,7 +31,7 @@ module.exports = app => {
     app.route('/paypal-capture-complete-payment').post(authMiddleware, app.src.main.modules.paypal.controllers.PaypalController.PaypalCaptureAndCompletePayment);    
     app.route('/admin-login').post(app.src.main.controllers.AdminController.LoginAdminAccRequest);
     app.route('/validate-token-admin').get(AdminAuthMiddleware, app.src.main.controllers.AdminController.AdminValidateJsonTokenRequest);
-    app.route('/getHighScores-players').get(app.src.main.controllers.AccountController.getlAllPlayersToHighscoreController);
+    app.route('/getHighScores-players').post(app.src.main.controllers.AccountController.getlAllPlayersToHighscoreController);
     
 
 
