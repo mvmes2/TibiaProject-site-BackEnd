@@ -3,7 +3,8 @@ const AdminAuthMiddleware = require('../middlewares/AdminAuthMiddleware');
 
 module.exports = app => {
     app.route('/teste').get(app.src.main.controllers.ServerTestResponseController.TesteRequest);
-    app.route('/news').get(app.src.main.controllers.ServerTestResponseController.PrismicListNews);
+    app.route('/news').get(app.src.main.controllers.ServerTestResponseController.ListNews);
+    app.route('/news-tickers').get(app.src.main.controllers.ServerTestResponseController.ListNewsTickers);
     app.route('/create-acc').post(app.src.main.controllers.CreateAccController.CreateAccRequest);
     app.route('/log-in').post(app.src.main.controllers.LoginAccController.LoginAccRequest);
     app.route('/acc-validation').post(app.src.main.controllers.AccountController.validateAccountRequest);

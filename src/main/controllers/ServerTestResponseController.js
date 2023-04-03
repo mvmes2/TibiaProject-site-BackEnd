@@ -7,7 +7,43 @@ module.exports = (app) => {
     res.status(resp.status).send({ data: resp.data });
   };
 
-  const PrismicListNews = async (req, res) => {
+  const ListNewsTickers = async (req, res) => {
+    const { limit = 5 } = req.params;
+
+    try {
+
+      const allDocuments = await client.getAllByType("news-tickers", {
+        orderings: {
+          field: "document.last_publication_date",
+          direction: "desc",
+        },
+        limit
+      })
+
+      const listAllDocuments = allDocuments.reduce((acc, doc) => {
+
+        const arr = acc
+
+        const formattedDoc = {
+          id: doc.id,
+          slug: doc.uid,
+          createdAt: doc.first_publication_date,
+          updatedAt: doc.last_publication_date,
+          content: prismicH.asHTML(doc.data['content-tickers']),
+        }
+        arr.push(formattedDoc)
+
+        return arr
+      }, [])
+
+      res.status(202).send({ message: listAllDocuments })
+    } catch (err) {
+      res.status(400).send({ message: "Server problem, could not list News" });
+
+    }
+  }
+
+  const ListNews = async (req, res) => {
     const { limit = 10 } = req.params;
 
     try {
@@ -24,10 +60,7 @@ module.exports = (app) => {
 
         const tituloHeader = prismicH.asHTML(doc.data.titulo_news);
 
-        fullHtml += `<header id="headerNews">${tituloHeader}</header>`;
-
         doc.data.content.map((content, i, arr) => {
-          console.log(content);
           const imageContent = prismicH.asImageSrc(
             content.image_content
           );
@@ -45,7 +78,7 @@ module.exports = (app) => {
 
           if (imageContent)
             fullHtml += `
-          <img src="${imageContent}" />`;
+          <img src="${imageContent}" className="image-side" />`;
 
           const textContent = prismicH.asHTML(content.text_content);
 
@@ -64,6 +97,7 @@ module.exports = (app) => {
           createdAt: doc.first_publication_date,
           updatedAt: doc.last_publication_date,
           nameGM: doc.name_gm,
+          titulo: tituloHeader,
           content: fullHtml,
         };
 
@@ -77,6 +111,7 @@ module.exports = (app) => {
   };
   return {
     TesteRequest,
-    PrismicListNews,
+    ListNews,
+    ListNewsTickers
   };
 };
