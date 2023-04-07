@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const consign = require('consign');
+const path = require('path');
 const app = express();
 const http = require('http');
 const server = http.createServer(app);
@@ -19,12 +20,23 @@ app.use((req, res, next) => {
 
 app.use(express.json());
 app.use(morgan('dev'));
+
+app.get('/client/version.txt', (req, res) => {
+
+  res.sendFile(path.join(__dirname, 'client', 'version.txt'));
+});
+app.get('/client/client.zip', (req, res) => {
+  res.sendFile(path.join(__dirname, 'client', 'client.zip'));
+});
+
 const corsOptions = {
   origin: '*' , // Substitua por sua URL de origem
   optionsSuccessStatus: 200, // Para navegadores legados (IE11, várias versões do Android)
 };
 
 app.use(cors(corsOptions));
+
+app.use(express.static(__dirname + '/client'));
 
 io.on("connection", (socket) => {
     console.log("Usuário conectado:", socket.id);
