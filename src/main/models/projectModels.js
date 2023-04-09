@@ -39,5 +39,17 @@ class payments extends Model {
     static tableName = 'payments'
 }
 
+class tickets extends Model {
+    static tableName = 'tickets'
+}
+
+class tickets_response extends Model {
+    static tableName = 'tickets_response'
+}
+
+class tickets_images extends Model {
+    static tableName = 'tickets_images'
+}
+
 module.exports = { players_online, accounts, players, player_deaths, worlds, player_items, 
-    players_comment, products, payments }
+    players_comment, products, payments, tickets, tickets_response, tickets_images }

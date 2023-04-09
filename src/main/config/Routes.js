@@ -1,5 +1,7 @@
 const authMiddleware = require('../middlewares/AuthMiddleware');
 const AdminAuthMiddleware = require('../middlewares/AdminAuthMiddleware');
+const multer = require('multer');
+const { upload, compressImagesMiddleware } = require('./multerConfig');
 
 module.exports = app => {
     app.route('/teste').get(app.src.main.controllers.ServerTestResponseController.TesteRequest);
@@ -29,13 +31,27 @@ module.exports = app => {
     app.route('/stripes-insert-payment').post(authMiddleware, app.src.main.modules.stripes.controllers.StripesController.StripesinsertNewPaymentController);
     app.route('/stripes-insertCoins').post(authMiddleware, app.src.main.modules.stripes.controllers.StripesController.StrpesInsertCoinsToApprovedPayment);
     app.route('/paypal-create-payment').post(authMiddleware, app.src.main.modules.paypal.controllers.PaypalController.PaypalCreatePaymnentController);
-    app.route('/paypal-capture-complete-payment').post(authMiddleware, app.src.main.modules.paypal.controllers.PaypalController.PaypalCaptureAndCompletePayment);    
+    app.route('/paypal-capture-complete-payment').post(authMiddleware, app.src.main.modules.paypal.controllers.PaypalController.PaypalCaptureAndCompletePayment);
+    app.route('/getHighScores-players').post(app.src.main.controllers.AccountController.getlAllPlayersToHighscoreController);
+    app.route('/getTicketList').post(authMiddleware, app.src.main.controllers.TicketsController.GetTicketListRequest);
+    app.route('/createNewTicket').post(authMiddleware, upload, compressImagesMiddleware, app.src.main.controllers.TicketsController.CreateNewTicket);
+    app.route('/getTicketListLastId').get(authMiddleware, app.src.main.controllers.TicketsController.GetTicketListLastIdRequest);
+    app.route('/getTicket').post(authMiddleware, app.src.main.controllers.TicketsController.GetTicketRequest); 
+
+    /////////////////////////////////////////////////// Admin Routes //////////////////////////////////////////////////////////
+
     app.route('/admin-login').post(app.src.main.controllers.AdminController.LoginAdminAccRequest);
     app.route('/validate-token-admin').get(AdminAuthMiddleware, app.src.main.controllers.AdminController.AdminValidateJsonTokenRequest);
-    app.route('/getHighScores-players').post(app.src.main.controllers.AccountController.getlAllPlayersToHighscoreController);
-    
-
-
+    app.route('/AdminGet-ticketList').get(AdminAuthMiddleware, app.src.main.controllers.AdminController.AdmingetTicketListRequest);
+    app.route('/AdminGet-ticket').post(AdminAuthMiddleware, app.src.main.controllers.AdminController.AdminGetTicketRequest);
     
     
+    //////Error MiddleWare/////
+    app.use((err, req, res, next) => {
+        if (err instanceof multer.MulterError || err.message === 'Invalid file type. Only JPEG and PNG files are allowed.') {
+          return res.status(400).json({ error: err.message });
+        }
+      
+        next(err);
+      });
 }

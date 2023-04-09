@@ -8,16 +8,31 @@ const server = http.createServer(app);
 const { io } = require('./socket');
 const morgan = require('morgan');
 const prismicH = require('@prismicio/helpers')
+const compression = require('compression');
 
 const userSockets = {};
+
 io.attach(server);
+
+app.use(compression());
+
+app.use('/tickets-images/compressed', express.static(path.join(__dirname, 'src', 'main', 'resources', 'tickets-images', 'compressed')));
+
+function setCacheHeaders(req, res, next) {
+  if (req.url.startsWith('/tickets-images/compressed')) {
+    res.setHeader('Cache-Control', 'public, max-age=86400'); // 24 horas
+  }
+  next();
+}
+
+app.use(setCacheHeaders);
+
 app.use((req, res, next) => {
   res.locals.ctx = {
     prismicH,
   }
   next()
 })
-
 app.use(express.json());
 app.use(morgan('dev'));
 
