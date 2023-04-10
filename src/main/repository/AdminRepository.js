@@ -49,7 +49,7 @@ const getTicketRepository = async (data) => {
 	try {
 		const ticket = await tickets.query().select('*').where({ id: data.id }).first();
 		const ticketImages = await tickets_images.query().select('*').where({ ticket_id: data.id });
-		const ticketReponses = await tickets_response.query().select('*').where({ id: data.id });
+		const ticketReponses = await tickets_response.query().select('*').where({ ticket_id: data.id });
 		const newTicketToRender = {
 			...ticket,
 			ticketImages,

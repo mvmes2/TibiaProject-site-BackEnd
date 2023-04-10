@@ -41,7 +41,7 @@ const CreateNewTicketInDB = async (data, files) => {
 					ticket_id: (Number(ticket.id)),
 					image_name: file.filename
 				}
-			ticketImage = await tickets_images.query().insert(newTicketImage);
+				ticketImage = await tickets_images.query().insert(newTicketImage);
 			})
 			console.log('kd imagens?  ', ticketImage)
 		}
@@ -57,7 +57,8 @@ const getTicket = async (data) => {
 	try {
 		const ticket = await tickets.query().select('*').where({ id: data.id }).first();
 		const ticketImages = await tickets_images.query().select('*').where({ ticket_id: data.id });
-		const ticketReponses = await tickets_response.query().select('*').where({ id: data.id });
+		const ticketReponses = await tickets_response.query().select('*').where({ ticket_id: data.id });
+
 		const newTicketToRender = {
 			...ticket,
 			ticketImages,
@@ -70,9 +71,31 @@ const getTicket = async (data) => {
 	}
 }
 
+const updateTicketsRepository = async (data) => {
+	try {
+		await tickets.query().update(data.update).where({ id: data.id });
+		return { status: 200, message: 'ticket updated!' }
+	} catch (err) {
+		console.log('Error while trying to update ticket at: updateTicketsRepository... ', err);
+		return { status: 500, message: 'Internal error' }
+	}
+}
+
+const insertNewTicketResponseRepository = async (data) => {
+	try {
+		await tickets_response.query().insert(data);
+		return { status: 201, message: 'response inserted!' }
+	} catch (err) {
+		console.log('Error while trying to insert ticketResponse at: insertNewTicketResponseRepository... ', err);
+		return { status: 500, message: 'Internal error' }
+	}
+}
+
 module.exports = {
 	getTicketListFromUser,
 	CreateNewTicketInDB,
 	getLastIdFromTicketList,
-	getTicket
+	getTicket,
+	updateTicketsRepository,
+	insertNewTicketResponseRepository
 }

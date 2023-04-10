@@ -44,6 +44,8 @@ module.exports = app => {
     app.route('/validate-token-admin').get(AdminAuthMiddleware, app.src.main.controllers.AdminController.AdminValidateJsonTokenRequest);
     app.route('/AdminGet-ticketList').get(AdminAuthMiddleware, app.src.main.controllers.AdminController.AdmingetTicketListRequest);
     app.route('/AdminGet-ticket').post(AdminAuthMiddleware, app.src.main.controllers.AdminController.AdminGetTicketRequest);
+    app.route('/Admin-ticket-update').post(AdminAuthMiddleware, app.src.main.controllers.TicketsController.TicketUpdateRequest);
+    app.route('/Admin-ticket-insert-new-response').post(AdminAuthMiddleware, app.src.main.controllers.TicketsController.TicketInsertNewResponseRequest);
     
     
     //////Error MiddleWare/////

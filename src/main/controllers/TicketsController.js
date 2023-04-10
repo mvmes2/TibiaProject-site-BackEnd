@@ -1,5 +1,6 @@
 module.exports = app => {
-	const { getTicketListFromUser, CreateNewTicketInDB, getLastIdFromTicketList, getTicket } = app.src.main.repository.TicketsRepository;
+	const { getTicketListFromUser, CreateNewTicketInDB, getLastIdFromTicketList, getTicket, 
+		updateTicketsRepository, insertNewTicketResponseRepository } = app.src.main.repository.TicketsRepository;
 
 	const GetTicketListRequest = async (req, res) => {
 		const data = req.body;
@@ -28,10 +29,24 @@ module.exports = app => {
 		res.status(resp.status).send({ message: resp.message });
 	}
 
+	const TicketUpdateRequest = async (req, res) =>{
+		const data = req.body;
+		const resp = await updateTicketsRepository(data);
+		res.status(resp.status).send({ message: resp.message });
+	}
+
+	const TicketInsertNewResponseRequest = async (req, res) =>{
+		const data = req.body;
+		const resp = await insertNewTicketResponseRepository(data);
+		res.status(resp.status).send({ message: resp.message });
+	}
+
 	return {
 		GetTicketListRequest,
 		CreateNewTicket,
 		GetTicketListLastIdRequest,
-		GetTicketRequest
+		GetTicketRequest,
+		TicketUpdateRequest,
+		TicketInsertNewResponseRequest
 	}
 }
