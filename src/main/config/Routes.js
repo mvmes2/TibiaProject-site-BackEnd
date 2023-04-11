@@ -36,7 +36,9 @@ module.exports = app => {
     app.route('/getTicketList').post(authMiddleware, app.src.main.controllers.TicketsController.GetTicketListRequest);
     app.route('/createNewTicket').post(authMiddleware, upload, compressImagesMiddleware, app.src.main.controllers.TicketsController.CreateNewTicket);
     app.route('/getTicketListLastId').get(authMiddleware, app.src.main.controllers.TicketsController.GetTicketListLastIdRequest);
-    app.route('/getTicket').post(authMiddleware, app.src.main.controllers.TicketsController.GetTicketRequest); 
+    app.route('/getTicket').post(authMiddleware, app.src.main.controllers.TicketsController.GetTicketRequest);
+    app.route('/User-ticket-update').post(authMiddleware, app.src.main.controllers.TicketsController.UserTicketUpdateRequest);
+    app.route('/User-ticket-insert-new-response').post(authMiddleware, upload, compressImagesMiddleware, app.src.main.controllers.TicketsController.UserTicketInsertNewResponseRequest);
 
     /////////////////////////////////////////////////// Admin Routes //////////////////////////////////////////////////////////
 
@@ -44,8 +46,10 @@ module.exports = app => {
     app.route('/validate-token-admin').get(AdminAuthMiddleware, app.src.main.controllers.AdminController.AdminValidateJsonTokenRequest);
     app.route('/AdminGet-ticketList').get(AdminAuthMiddleware, app.src.main.controllers.AdminController.AdmingetTicketListRequest);
     app.route('/AdminGet-ticket').post(AdminAuthMiddleware, app.src.main.controllers.AdminController.AdminGetTicketRequest);
-    app.route('/Admin-ticket-update').post(AdminAuthMiddleware, app.src.main.controllers.TicketsController.TicketUpdateRequest);
-    app.route('/Admin-ticket-insert-new-response').post(AdminAuthMiddleware, app.src.main.controllers.TicketsController.TicketInsertNewResponseRequest);
+    app.route('/Admin-ticket-update').post(AdminAuthMiddleware, app.src.main.controllers.TicketsController.AdminTicketUpdateRequest);
+    app.route('/Admin-ticket-insert-new-response').post(AdminAuthMiddleware, app.src.main.controllers.TicketsController.AdminTicketInsertNewResponseRequest);
+    app.route('/Admin-ticket-delete').post(AdminAuthMiddleware, app.src.main.controllers.TicketsController.AdminOnDeleteTicketRequest);
+    
     
     
     //////Error MiddleWare/////

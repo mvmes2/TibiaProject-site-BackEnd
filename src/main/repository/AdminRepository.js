@@ -1,4 +1,4 @@
-const { worlds, players, accounts, tickets, tickets_images, tickets_response } = require('../models/projectModels');
+const { worlds, players, accounts, tickets, tickets_images, tickets_response, tickets_response_images } = require('../models/projectModels');
 const { generateTokenAdmin, checkPassword } = require('../utils/utilities');
 
 const AdminLoginRepository = async (data) => {
@@ -23,7 +23,7 @@ const AdminLoginRepository = async (data) => {
 
 		const { password, ...withoutPassword } = adminAcc;
 
-		const adminToken = generateTokenAdmin(60, withoutPassword);
+		const adminToken = generateTokenAdmin(320, withoutPassword);
 
 		return { status: 200, message: adminToken }
 
@@ -50,10 +50,19 @@ const getTicketRepository = async (data) => {
 		const ticket = await tickets.query().select('*').where({ id: data.id }).first();
 		const ticketImages = await tickets_images.query().select('*').where({ ticket_id: data.id });
 		const ticketReponses = await tickets_response.query().select('*').where({ ticket_id: data.id });
+		const responseImagesArr = await Promise.all(
+			ticketReponses.map(async (response) => {
+					const images = await tickets_response_images.query().select('*').where({ response_id: Number(response.id) });
+					console.log('tem images? ', images);
+					return images;
+			})
+	);
+	const responseImages = responseImagesArr.flat();
 		const newTicketToRender = {
 			...ticket,
 			ticketImages,
-			ticketReponses
+			ticketReponses,
+			responseImages
 		}
 		return { status: 200, message: newTicketToRender };
 	} catch (err) {

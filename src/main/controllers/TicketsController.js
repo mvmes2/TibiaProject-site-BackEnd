@@ -1,6 +1,7 @@
 module.exports = app => {
 	const { getTicketListFromUser, CreateNewTicketInDB, getLastIdFromTicketList, getTicket, 
-		updateTicketsRepository, insertNewTicketResponseRepository } = app.src.main.repository.TicketsRepository;
+		updateTicketsRepository, insertNewTicketResponseRepository, AdminOnDeleteTicketRepository } = app.src.main.repository.TicketsRepository;
+		const { AdminTicketInsertNewResponseService } = app.src.main.services.TicketsService;
 
 	const GetTicketListRequest = async (req, res) => {
 		const data = req.body;
@@ -29,15 +30,36 @@ module.exports = app => {
 		res.status(resp.status).send({ message: resp.message });
 	}
 
-	const TicketUpdateRequest = async (req, res) =>{
+	const AdminTicketUpdateRequest = async (req, res) =>{
 		const data = req.body;
 		const resp = await updateTicketsRepository(data);
 		res.status(resp.status).send({ message: resp.message });
 	}
 
-	const TicketInsertNewResponseRequest = async (req, res) =>{
+	const AdminTicketInsertNewResponseRequest = async (req, res) =>{
+		const { email_info, ...rest } = req.body;
+		
+		const resp = await AdminTicketInsertNewResponseService(rest, email_info);
+		res.status(resp.status).send({ message: resp.message });
+	}
+
+	const UserTicketUpdateRequest = async (req, res) =>{
 		const data = req.body;
-		const resp = await insertNewTicketResponseRepository(data);
+		const resp = await updateTicketsRepository(data);
+		res.status(resp.status).send({ message: resp.message });
+	}
+
+	const UserTicketInsertNewResponseRequest = async (req, res) =>{
+		const files = req.files;
+		const data = req.body;
+		console.log('o que ta vindo no data? ', data)
+		const resp = await insertNewTicketResponseRepository(data, files);
+		res.status(resp.status).send({ message: resp.message });
+	}
+
+	const AdminOnDeleteTicketRequest = async (req, res) => {
+		const data = req.body;
+		const resp = await AdminOnDeleteTicketRepository(data);
 		res.status(resp.status).send({ message: resp.message });
 	}
 
@@ -46,7 +68,10 @@ module.exports = app => {
 		CreateNewTicket,
 		GetTicketListLastIdRequest,
 		GetTicketRequest,
-		TicketUpdateRequest,
-		TicketInsertNewResponseRequest
+		AdminTicketUpdateRequest,
+		AdminTicketInsertNewResponseRequest,
+		UserTicketUpdateRequest,
+		UserTicketInsertNewResponseRequest,
+		AdminOnDeleteTicketRequest
 	}
 }

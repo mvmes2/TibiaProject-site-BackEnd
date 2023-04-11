@@ -49,7 +49,7 @@ module.exports = app => {
         console.log('retorno', returnal);
         const acc = returnal.message[0];
         console.log(acc);
-        const newToken = generateToken(30, acc)
+        const newToken = generateToken(120, acc)
         const link = `${process.env.BASE_URL_IP_FRONT}/account-changepassword/${hashGenerator(16)}-${acc.id}`;
         try {
           projectMailer.changePassword(

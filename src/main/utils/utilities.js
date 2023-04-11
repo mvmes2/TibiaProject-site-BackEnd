@@ -115,6 +115,24 @@ const projectMailer = {
         },
       });
   },
+  TicketResponse: function sendEmailTo(account_email, ticket_id, ticket_type, response_date, link) {
+    mailer.sendMail({
+        from: "tibiaprojectbr@gmail.com",       
+        to: account_email,
+        subject: 'Ticket response',
+        template: "main/resources/emailTemplates/TicketRepliedEmail",
+        context: {
+          account_email,
+          ticket_id,
+          ticket_type,
+          response_date,
+          link,
+          youtube_logo,
+          instagram_logo,
+          discord_logo,
+        },
+      });
+  },
 }
 
 const generateToken = (duration, userData) =>{
@@ -197,6 +215,26 @@ const paypalApi = axios.create({
   baseURL: process.env.PAYPAL_API_BASE_URL,
 });
 
+const convertDate = (dateTimeStamp, param) => {
+  const dateToConvert = new Date(dateTimeStamp * 1000);
+  const convertedDate = !param
+    ? `${
+        dateToConvert.getDate().toString().length < 2 ? 0 : ""
+      }${dateToConvert.getDate()}/${
+        dateToConvert.getMonth().toString().length < 2 ? 0 : ""
+      }${dateToConvert.getMonth() + 1}/${dateToConvert.getFullYear()} - ${
+        dateToConvert.getHours().toString().length < 2 ? 0 : ""
+      }${dateToConvert.getHours()}:${
+        dateToConvert.getMinutes().toString().length < 2 ? 0 : ""
+      }${dateToConvert.getMinutes()}`
+    : `${
+        dateToConvert.getDate().toString().length < 2 ? 0 : ""
+      }${dateToConvert.getDate()}/${
+        dateToConvert.getMonth().toString().length < 2 ? 0 : ""
+      }${dateToConvert.getMonth() + 1}/${dateToConvert.getFullYear()}`;
+  return convertedDate;
+};
+
 module.exports = {
     checkPassword,
     hashGenerator,
@@ -210,5 +248,6 @@ module.exports = {
     updateLastDayTimeStampEpochFromGivenDays,
     paypalApi,
     generateTokenAdmin,
-    AdmintokenValidation
+    AdmintokenValidation,
+    convertDate
 }
