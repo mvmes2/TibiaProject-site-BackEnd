@@ -40,6 +40,8 @@ module.exports = app => {
     app.route('/User-ticket-update').post(authMiddleware, app.src.main.controllers.TicketsController.UserTicketUpdateRequest);
     app.route('/User-ticket-insert-new-response').post(authMiddleware, upload, compressImagesMiddleware, app.src.main.controllers.TicketsController.UserTicketInsertNewResponseRequest);
     app.route('/User-update-account-password').post(authMiddleware, app.src.main.controllers.AccountController.updateAccountPasswordRequest);
+    app.route('/User-get-top-five-players').get(authMiddleware, app.src.main.controllers.WorldsController.getWorldWideTopFivePlayersRequest);
+    
     
 
     /////////////////////////////////////////////////// Admin Routes //////////////////////////////////////////////////////////

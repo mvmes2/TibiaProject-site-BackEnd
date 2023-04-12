@@ -21,7 +21,22 @@ const getAllWorldsCharactersFromDB = async () => {
   }
 }
 
+const getWorldWideTopFivePlayersRepository = async () => {
+  try {
+    const topFivePlayers = await players.query()
+  .join('worlds', 'players.world_id', '=', 'worlds.id')
+  .select('players.name', 'players.level', 'worlds.serverName as world')
+  .where('group_id', '<', 4)
+  .orderBy('players.level', 'desc').limit(5);
+  return { status: 200, message: topFivePlayers }
+  } catch (err) {
+    console.log('erro ao tentar pegar os top 5 players em: getWorldWideTopFivePlayersRepository ', err);
+    return { status: 500, message: 'internal error' }
+  }
+}
+
 module.exports = {
   getWorldListFromDB,
-  getAllWorldsCharactersFromDB
+  getAllWorldsCharactersFromDB,
+  getWorldWideTopFivePlayersRepository
 }
