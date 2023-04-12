@@ -127,6 +127,19 @@ module.exports = app => {
     return { status: 200, message: 'ok' }
   }
 
+  const updateAccountPasswordService = async (data) => {
+    console.log('como ta vindo o data? ', data)
+    const dataToUpdate = {
+      id: data.id,
+      update: {
+        password: encryptPassword(data.password1),
+        password2: data.password2
+      }
+    }
+    const resp = await updateAcc(dataToUpdate);
+    return { status: resp.status, message: resp.message };
+  }
+
   return {
     checkValidLoginHash,
     createCharacterSerice,
@@ -135,6 +148,7 @@ module.exports = app => {
     updateHidenCharacterService,
     updateCharacterCommentService,
     recoveryAccountGenericService,
-    validateJsonTokenService
+    validateJsonTokenService,
+    updateAccountPasswordService
   }
 }
