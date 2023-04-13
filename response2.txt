@@ -1,0 +1,146 @@
+{
+  id: 56068176708,
+  date_created: '2023-03-23T01:48:16.453-04:00',
+  date_approved: null,
+  date_last_updated: '2023-03-23T01:48:16.453-04:00',
+  date_of_expiration: '2023-03-23T02:18:15.935-04:00',
+  money_release_date: null,
+  money_release_status: null,
+  operation_type: 'regular_payment',
+  issuer_id: null,
+  payment_method_id: 'pix',
+  payment_type_id: 'bank_transfer',
+  payment_method: { id: 'pix', type: 'bank_transfer' },
+  status: 'pending',
+  status_detail: 'pending_waiting_transfer',
+  currency_id: 'BRL',
+  description: '10 coins pack',
+  live_mode: true,
+  sponsor_id: null,
+  authorization_code: null,
+  money_release_schema: null,
+  taxes_amount: 0,
+  counter_currency: null,
+  brand_id: null,
+  shipping_amount: 0,
+  build_version: '2.137.4',
+  pos_id: null,
+  store_id: null,
+  integrator_id: null,
+  platform_id: null,
+  corporation_id: null,
+  payer: {
+    type: null,
+    id: '1336746374',
+    operator_id: null,
+    email: null,
+    identification: { type: null, number: null },
+    phone: { area_code: null, number: null, extension: null },
+    first_name: null,
+    last_name: null,
+    entity_type: null
+  },
+  collector_id: 153008473,
+  marketplace_owner: null,
+  metadata: {
+    order_id: 1,
+    products: [
+      {
+        quantity: 1,
+        description: 'Virtual coins to be used at www.tibiaProject.com',
+        id: 1,
+        title: '10 coins pack',
+        unit_price: 12
+      }
+    ]
+  },
+  additional_info: {
+    available_balance: null,
+    nsu_processadora: null,
+    authentication_code: null
+  },
+  order: {},
+  external_reference: null,
+  transaction_amount: 12,
+  transaction_amount_refunded: 0,
+  coupon_amount: 0,
+  differential_pricing_id: null,
+  financing_group: null,
+  deduction_schema: null,
+  callback_url: null,
+  installments: 1,
+  transaction_details: {
+    payment_method_reference_id: null,
+    acquirer_reference: null,
+    net_received_amount: 0,
+    total_paid_amount: 12,
+    overpaid_amount: 0,
+    external_resource_url: null,
+    installment_amount: 0,
+    financial_institution: null,
+    payable_deferral_period: null,
+    bank_transfer_id: null,
+    transaction_id: null
+  },
+  fee_details: [],
+  charges_details: [
+    {
+      id: '56068176708-001',
+      name: 'mercadopago_fee',
+      type: 'fee',
+      accounts: { from: 'collector', to: 'mp' },
+      client_id: 0,
+      date_created: '2023-03-23T01:48:16.455-04:00',
+      last_updated: '2023-03-23T01:48:16.455-04:00',
+      amounts: { original: 0.12, refunded: 0 },
+      metadata: {},
+      reserve_id: null,
+      refund_charges: []
+    }
+  ],
+  captured: true,
+  binary_mode: false,
+  call_for_authorize_id: null,
+  statement_descriptor: null,
+  card: {},
+  notification_url: 'http://143.0.20.85:3333/mercado-pago-pix/notification',
+  refunds: [],
+  processing_mode: 'aggregator',
+  merchant_account_id: null,
+  merchant_number: null,
+  acquirer_reconciliation: [],
+  point_of_interaction: {
+    type: 'OPENPLATFORM',
+    business_info: { unit: 'online_payments', sub_unit: 'default' },
+    location: { state_id: null, source: null },
+    application_data: { name: null, version: null },
+    transaction_data: {
+      qr_code: '00020126450014br.gov.bcb.pix0123manthovaniusa@gmail.com520400005303986540512.005802BR5925MARCOSVINICIUSMANTOVANIES6008So Paulo62240520mpqrinter56068176708630451F3',
+      bank_transfer_id: null,
+      transaction_id: null,
+      e2e_id: null,
+      financial_institution: null,
+      ticket_url: 'https://www.mercadopago.com.br/payments/56068176708/ticket?caller_id=1336746374&hash=40e87935-cc94-4b43-9896-c45182131098',
+      bank_info: {
+        payer: {
+          account_id: null,
+          id: null,
+          long_name: null,
+          external_account_id: null
+        },
+        collector: {
+          account_id: null,
+          long_name: null,
+          account_holder_name: 'Marcos Vinicius Mantovani E Silva',
+          transfer_account_id: null
+        },
+        is_same_bank_account_owner: null,
+        origin_bank_id: null,
+        origin_wallet_id: null
+      },
+      qr_code_base64: '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'
+    }
+  },
+  accounts_info: null,
+  tags: null
+}

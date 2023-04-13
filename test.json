@@ -1,0 +1,174 @@
+{
+    "acquirer_reconciliation": [],
+    "additional_info": {
+        "authentication_code": null,
+        "available_balance": null,
+        "nsu_processadora": null
+    },
+    "authorization_code": null,
+    "binary_mode": false,
+    "brand_id": null,
+    "build_version": "2.136.0",
+    "call_for_authorize_id": null,
+    "callback_url": null,
+    "captured": true,
+    "card": {},
+    "charges_details": [
+        {
+            "accounts": {
+                "from": "collector",
+                "to": "mp"
+            },
+            "amounts": {
+                "original": 0.01,
+                "refunded": 0
+            },
+            "client_id": 0,
+            "date_created": "2023-03-14T20:00:28.000-04:00",
+            "id": "55742492149-001",
+            "last_updated": "2023-03-14T20:00:28.000-04:00",
+            "metadata": {},
+            "name": "mercadopago_fee",
+            "refund_charges": [],
+            "reserve_id": null,
+            "type": "fee"
+        }
+    ],
+    "collector_id": 153008473,
+    "corporation_id": null,
+    "counter_currency": null,
+    "coupon_amount": 0,
+    "currency_id": "BRL",
+    "date_approved": null,
+    "date_created": "2023-03-14T20:00:28.000-04:00",
+    "date_last_updated": "2023-03-14T20:00:37.000-04:00",
+    "date_of_expiration": "2023-03-15T20:00:28.000-04:00",
+    "deduction_schema": null,
+    "description": "Compra de exemplo pix",
+    "differential_pricing_id": null,
+    "external_reference": null,
+    "fee_details": [],
+    "financing_group": null,
+    "id": 55742492149,
+    "installments": 1,
+    "integrator_id": null,
+    "issuer_id": null,
+    "live_mode": true,
+    "marketplace_owner": null,
+    "merchant_account_id": null,
+    "merchant_number": null,
+    "metadata": {
+        "order_id": "pedido-001",
+        "products": [
+            {
+                "quantity": 1,
+                "description": "Descrição do produto de exemplo pix donation",
+                "id": "produto-001",
+                "title": "Produto de exemplo pix donation",
+                "unit_price": 1
+            }
+        ]
+    },
+    "money_release_date": null,
+    "money_release_schema": null,
+    "money_release_status": null,
+    "notification_url": "http://143.0.20.85:3333/mercado-pago-pix/notification",
+    "operation_type": "regular_payment",
+    "order": {},
+    "payer": {
+        "email": null,
+        "entity_type": null,
+        "first_name": null,
+        "id": "1330703620",
+        "identification": {
+            "number": null,
+            "type": null
+        },
+        "last_name": null,
+        "operator_id": null,
+        "phone": {
+            "area_code": null,
+            "extension": null,
+            "number": null
+        },
+        "type": null
+    },
+    "payment_method": {
+        "id": "pix",
+        "type": "bank_transfer"
+    },
+    "payment_method_id": "pix",
+    "payment_type_id": "bank_transfer",
+    "platform_id": null,
+    "point_of_interaction": {
+        "application_data": {
+            "name": null,
+            "version": null
+        },
+        "business_info": {
+            "sub_unit": "default",
+            "unit": "online_payments"
+        },
+        "location": {
+            "source": null,
+            "state_id": null
+        },
+        "transaction_data": {
+            "bank_info": {
+                "collector": {
+                    "account_holder_name": "Marcos Vinicius Mantovani E Silva",
+                    "account_id": null,
+                    "long_name": null,
+                    "transfer_account_id": null
+                },
+                "is_same_bank_account_owner": null,
+                "origin_bank_id": null,
+                "origin_wallet_id": null,
+                "payer": {
+                    "account_id": null,
+                    "external_account_id": null,
+                    "id": null,
+                    "long_name": null
+                }
+            },
+            "bank_transfer_id": null,
+            "e2e_id": null,
+            "financial_institution": null,
+            "infringement_notification": {
+                "status": null,
+                "type": null
+            },
+            "qr_code": "00020126450014br.gov.bcb.pix0123manthovaniusa@gmail.com52040000530398654041.005802BR5925MARCOSVINICIUSMANTOVANIES6008So Paulo62240520mpqrinter5574249214963046709",
+            "qr_code_base64": "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",
+            "ticket_url": "https://www.mercadopago.com.br/payments/55742492149/ticket?caller_id=1330703620&hash=ee5afc8e-26b8-4422-8d87-fb5dcc006559",
+            "transaction_id": null
+        },
+        "type": "OPENPLATFORM"
+    },
+    "pos_id": null,
+    "processing_mode": "aggregator",
+    "refunds": [],
+    "shipping_amount": 0,
+    "sponsor_id": null,
+    "statement_descriptor": null,
+    "status": "pending",
+    "status_detail": "pending_waiting_transfer",
+    "store_id": null,
+    "tags": null,
+    "taxes_amount": 0,
+    "transaction_amount": 1,
+    "transaction_amount_refunded": 0,
+    "transaction_details": {
+        "acquirer_reference": null,
+        "bank_transfer_id": null,
+        "external_resource_url": null,
+        "financial_institution": null,
+        "installment_amount": 0,
+        "net_received_amount": 0,
+        "overpaid_amount": 0,
+        "payable_deferral_period": null,
+        "payment_method_reference_id": null,
+        "total_paid_amount": 1,
+        "transaction_id": null
+    }
+}
