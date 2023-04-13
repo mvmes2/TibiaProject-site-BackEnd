@@ -30,6 +30,7 @@ module.exports = app => {
     }
     try {
       data.createdAt = Math.floor(Date.now() / 1000);
+      data.coins = 1500;
       const resp = await accounts.query().insert(data);
       const { id, ...rests } = resp;
       return { status: 201, message: id };
