@@ -1,9 +1,9 @@
+const http = require('http');
 const express = require('express');
 const cors = require('cors');
 const consign = require('consign');
 const path = require('path');
 const app = express();
-const http = require('http');
 const server = http.createServer(app);
 const { io } = require('./socket');
 const morgan = require('morgan');
