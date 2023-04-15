@@ -55,5 +55,10 @@ class tickets_response_images extends Model {
     static tableName = 'tickets_response_images'
 }
 
+class players_titles extends Model {
+    static tableName = 'players_titles'
+}
+
 module.exports = { players_online, accounts, players, player_deaths, worlds, player_items, 
-    players_comment, products, payments, tickets, tickets_response, tickets_images, tickets_response_images }
+    players_comment, products, payments, tickets, tickets_response, tickets_images, 
+    tickets_response_images, players_titles }

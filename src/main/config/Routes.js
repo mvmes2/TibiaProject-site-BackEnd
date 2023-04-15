@@ -41,6 +41,8 @@ module.exports = app => {
     app.route('/User-ticket-insert-new-response').post(authMiddleware, upload, compressImagesMiddleware, app.src.main.controllers.TicketsController.UserTicketInsertNewResponseRequest);
     app.route('/User-update-account-password').post(authMiddleware, app.src.main.controllers.AccountController.updateAccountPasswordRequest);
     app.route('/User-get-top-five-players').get(app.src.main.controllers.WorldsController.getWorldWideTopFivePlayersRequest);
+    app.route('/User-get-character-titles').post(authMiddleware, app.src.main.controllers.AccountController.getCharacterTitlesRequest);
+    app.route('/User-update-character-title').post(authMiddleware, app.src.main.controllers.AccountController.updateCharacterTitleInUseRequest);
     
     
 

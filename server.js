@@ -117,7 +117,7 @@ consign()
   .then("./src/main/config/Routes.js")
   .into(app);
 
-const PORT = 8880;
+const PORT = 3333;
 server.listen(PORT, () => {
     console.log(`BackEnd Rodando na porta: ${PORT}!!`);
 });

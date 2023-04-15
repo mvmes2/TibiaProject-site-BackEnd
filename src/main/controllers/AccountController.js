@@ -1,8 +1,8 @@
 module.exports = app => {
 	const { checkValidLoginHash, createCharacterSerice, validateCharacterService, deleteCharacterService,
-		updateHidenCharacterService, updateCharacterCommentService, recoveryAccountGenericService , 
+		updateHidenCharacterService, updateCharacterCommentService, recoveryAccountGenericService,
 		updateAccountPasswordService } = app.src.main.services.AccountService;
-	const { updateAcc, getlAllPlayersToHighscoreRepository } = app.src.main.repository.UserRepository;
+	const { updateAcc, getlAllPlayersToHighscoreRepository, getCharacterTitlesRepo, updateCharacterTitleInUseRepo } = app.src.main.repository.UserRepository;
 	const { getAccountInfoRepository } = app.src.main.repository.AccountRepository;
 
 	const validateAccountRequest = async (req, res) => {
@@ -79,6 +79,18 @@ module.exports = app => {
 		return res.status(resp.status).send({ message: resp.message });
 	}
 
+	const getCharacterTitlesRequest = async (req, res) => {
+		const data = req.body;
+		const resp = await getCharacterTitlesRepo(data);
+		return res.status(resp.status).send({ message: resp.message }); 
+	}
+
+	const updateCharacterTitleInUseRequest = async (req, res) => {
+		const data = req.body;
+		const resp = await updateCharacterTitleInUseRepo(data);
+		return res.status(resp.status).send({ message: resp.message }); 
+	}
+
 	return {
 		createCharacterRequest,
 		validateAccountRequest,
@@ -91,6 +103,8 @@ module.exports = app => {
 		getAccountInfoRequest,
 		validateJsonTokenRequest,
 		getlAllPlayersToHighscoreController,
-		updateAccountPasswordRequest
+		updateAccountPasswordRequest,
+		updateCharacterTitleInUseRequest,
+		getCharacterTitlesRequest
 	}
 }
