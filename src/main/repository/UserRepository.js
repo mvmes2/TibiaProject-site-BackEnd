@@ -203,14 +203,14 @@ module.exports = app => {
     }
     if (checkCharacterOwner === undefined || checkCharacterOwner === null) {
       try {
-
+        console.log('qual o nome dessa mierda? ', data.name.toLowerCase())
         const found = await players.query()
           .join('worlds', 'players.world_id', '=', 'worlds.id')
           .join('vocations', 'players.vocation', 'vocations.vocation_id')
           .select('players.id', 'players.account_id', 'players.hidden', 'players.name', 'players.level', 'vocation_name as vocation', 'sex', 'lastlogin', 'lastip', 'worlds.serverName as world', 'players.createdAt', 'group_id', 'players.hidden')
-          .where({ name: data.name })
+          .whereRaw('LOWER(players.name) = ?', data.name.toLowerCase())
           .where({ 'players.deletedAt': 0 }).first();
-
+        console.log('Mista ta ai???', found)
         const deathList = await player_deaths.query()
           .select('time', 'level', 'killed_by', 'unjustified', 'is_player', 'mostdamage_by')
           .where({ player_id: found.id }).orderBy('time', 'desc').limit(15);
