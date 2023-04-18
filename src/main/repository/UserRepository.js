@@ -117,7 +117,7 @@ module.exports = app => {
       const editedCharList = [];
 
       for (x in characters) {
-        const deathList = await player_deaths.query().select('time', 'level', 'killed_by', 'unjustified', 'is_player', 'mostdamage_by').where({ player_id: characters[x].id });
+        const deathList = await player_deaths.query().select('*').where({ player_id: characters[x].id });
         const online = await players_online.query().select('*').where({ player_id: characters[x].id });
         const comment = await players_comment.query().select('comment').where({ player_id: characters[x].id }).first();
 
@@ -212,7 +212,7 @@ module.exports = app => {
           .where({ 'players.deletedAt': 0 }).first();
         console.log('Mista ta ai???', found)
         const deathList = await player_deaths.query()
-          .select('time', 'level', 'killed_by', 'unjustified', 'is_player', 'mostdamage_by')
+          .select('*')
           .where({ player_id: found.id }).orderBy('time', 'desc').limit(15);
         const online = await players_online.query().select('*').where({ player_id: found.id }).first();
         const comment = await players_comment.query().select('comment').where({ player_id: found.id }).first();
@@ -233,7 +233,7 @@ module.exports = app => {
     } else {
       try {
         const deathList = await player_deaths.query()
-          .select('time', 'level', 'killed_by', 'unjustified', 'is_player', 'mostdamage_by')
+          .select('*')
           .where({ player_id: checkCharacterOwner.id }).orderBy('time', 'desc').limit(15);
         const online = await players_online.query().select('*').where({ player_id: checkCharacterOwner.id }).first();
         const comment = await players_comment.query().select('comment').where({ player_id: checkCharacterOwner.id }).first();
