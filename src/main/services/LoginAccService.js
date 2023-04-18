@@ -26,7 +26,7 @@ module.exports = app => {
         }
 
         await updateAcc({ update: updateInfo, id: acc.id });
-    return { status: 200, message: { id: acc.id, loginHash: hash, name: acc.name, login_token: newLoginToken, email: acc.email }};
+    return { status: 200, message: { id: acc.id, loginHash: hash, name: acc.name, login_token: newLoginToken, email: acc.email, country:acc.country }};
 }
     return {
         LoginAccService,
