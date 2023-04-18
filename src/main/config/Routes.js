@@ -55,6 +55,9 @@ module.exports = app => {
     app.route('/Admin-ticket-update').post(AdminAuthMiddleware, app.src.main.controllers.TicketsController.AdminTicketUpdateRequest);
     app.route('/Admin-ticket-insert-new-response').post(AdminAuthMiddleware, app.src.main.controllers.TicketsController.AdminTicketInsertNewResponseRequest);
     app.route('/Admin-ticket-delete').post(AdminAuthMiddleware, app.src.main.controllers.TicketsController.AdminOnDeleteTicketRequest);
+    app.route('/Admin-get-client-version').get(AdminAuthMiddleware, app.src.main.controllers.ClientVersionController.GetClientVersionRequest);
+    app.route('/Admin-update-client-version').post(AdminAuthMiddleware, app.src.main.controllers.ClientVersionController.UpdateClientVersionRequest);
+    
     
     
     
