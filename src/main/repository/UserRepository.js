@@ -185,6 +185,8 @@ module.exports = app => {
   }
 
   const checkCharacterOwnerAtDB = async (data) => {
+    data.name = data.name.replaceAll('-', ' ');
+    console.log(data.name)
     const checkOnlyPlayerNameFirst = await players.query().select('name', 'account_id').where({ name: data.name });
 
     if (checkOnlyPlayerNameFirst.length < 1) { return { status: 404, message: 'Character does not exists!' } }
