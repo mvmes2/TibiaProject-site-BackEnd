@@ -3,7 +3,7 @@ module.exports = app => {
 		updateHidenCharacterService, updateCharacterCommentService, recoveryAccountGenericService,
 		updateAccountPasswordService } = app.src.main.services.AccountService;
 	const { updateAcc, getlAllPlayersToHighscoreRepository, getCharacterTitlesRepo, updateCharacterTitleInUseRepo } = app.src.main.repository.UserRepository;
-	const { getAccountInfoRepository } = app.src.main.repository.AccountRepository;
+	const { getAccountInfoRepository, getCharacterListFromAccount } = app.src.main.repository.AccountRepository;
 
 	const validateAccountRequest = async (req, res) => {
 		const data = req.body;
@@ -91,6 +91,12 @@ module.exports = app => {
 		return res.status(resp.status).send({ message: resp.message }); 
 	}
 
+	const getCharacterListFromAccountRequest = async (req, res) => {
+		const data = req.body;
+		const resp = await getCharacterListFromAccount(data);
+		return res.status(resp.status).send({ message: resp.message });
+	}
+
 	return {
 		createCharacterRequest,
 		validateAccountRequest,
@@ -105,6 +111,7 @@ module.exports = app => {
 		getlAllPlayersToHighscoreController,
 		updateAccountPasswordRequest,
 		updateCharacterTitleInUseRequest,
-		getCharacterTitlesRequest
+		getCharacterTitlesRequest,
+		getCharacterListFromAccountRequest
 	}
 }
