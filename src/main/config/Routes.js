@@ -45,7 +45,7 @@ module.exports = app => {
     app.route('/User-update-character-title').post(authMiddleware, app.src.main.controllers.AccountController.updateCharacterTitleInUseRequest);
     app.route('/User-get-guildList').get(app.src.main.controllers.GuildsController.GetGuildListRequest);
     app.route('/User-get-characterList').post(authMiddleware, app.src.main.controllers.AccountController.getCharacterListFromAccountRequest);
-    app.route('/User-get-guildMembersList').post(authMiddleware, app.src.main.controllers.GuildsController.GetGuildMemberListRequest);
+    app.route('/User-get-guildMembersList').post(app.src.main.controllers.GuildsController.GetGuildMemberListRequest);
     
     
     
