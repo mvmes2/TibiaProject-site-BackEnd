@@ -116,6 +116,17 @@ const checkIfExixtsNameOrEmailOrBothAndReturnAccount = async (name, email) => {
       return { status: 500, message: 'Internal error at trying to get account!' }
     }
   }
+
+  const getCharacterListFromAccount = async (data) => {
+    try {
+      const characterList = await players.query().select('id', 'name').where({ account_id: data.id }).where({ world_id: data.world_id });
+      return { status: 200, message: characterList }
+    } catch (err) {
+      console.log('error while trying to retrieve Characterlist at: getCharacterListFromAccount, ', err);
+      return { status: 500, message: 'Internal error at trying to get account!' }
+    }
+  }
+
     return {
         updateHidenCharacterInDB,
         deleteCharacter,
@@ -124,6 +135,7 @@ const checkIfExixtsNameOrEmailOrBothAndReturnAccount = async (name, email) => {
         checkIfExixtsNameOrEmailOrBothAndReturnAccount,
         getAccountInfoRepository,
         validateJsonTokenRepository,
-        internalOnlyCheckAccountDoNotSendResponseToFront
+        internalOnlyCheckAccountDoNotSendResponseToFront,
+        getCharacterListFromAccount
     }
 }

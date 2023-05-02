@@ -43,6 +43,11 @@ module.exports = app => {
     app.route('/User-get-top-five-players').get(app.src.main.controllers.WorldsController.getWorldWideTopFivePlayersRequest);
     app.route('/User-get-character-titles').post(app.src.main.controllers.AccountController.getCharacterTitlesRequest);
     app.route('/User-update-character-title').post(authMiddleware, app.src.main.controllers.AccountController.updateCharacterTitleInUseRequest);
+    app.route('/User-get-guildList').get(app.src.main.controllers.GuildsController.GetGuildListRequest);
+    app.route('/User-get-characterList').post(authMiddleware, app.src.main.controllers.AccountController.getCharacterListFromAccountRequest);
+    app.route('/User-get-guildMembersList').post(authMiddleware, app.src.main.controllers.GuildsController.GetGuildMemberListRequest);
+    
+    
     
     
 
@@ -55,6 +60,9 @@ module.exports = app => {
     app.route('/Admin-ticket-update').post(AdminAuthMiddleware, app.src.main.controllers.TicketsController.AdminTicketUpdateRequest);
     app.route('/Admin-ticket-insert-new-response').post(AdminAuthMiddleware, app.src.main.controllers.TicketsController.AdminTicketInsertNewResponseRequest);
     app.route('/Admin-ticket-delete').post(AdminAuthMiddleware, app.src.main.controllers.TicketsController.AdminOnDeleteTicketRequest);
+    app.route('/Admin-get-client-version').get(AdminAuthMiddleware, app.src.main.controllers.ClientVersionController.GetClientVersionRequest);
+    app.route('/Admin-update-client-version').post(AdminAuthMiddleware, app.src.main.controllers.ClientVersionController.UpdateClientVersionRequest);
+    
     
     
     

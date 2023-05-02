@@ -63,13 +63,13 @@ const getTicket = async (data) => {
 
 		const responseImagesArr = await Promise.all(
 			ticketReponses.map(async (response) => {
-					const images = await tickets_response_images.query().select('*').where({ response_id: Number(response.id) });
-					console.log('tem images? ', images);
-					return images;
+				const images = await tickets_response_images.query().select('*').where({ response_id: Number(response.id) });
+				console.log('tem images? ', images);
+				return images;
 			})
-	);
+		);
 
-	const responseImages = responseImagesArr.flat();
+		const responseImages = responseImagesArr.flat();
 
 		const newTicketToRender = {
 			...ticket,
