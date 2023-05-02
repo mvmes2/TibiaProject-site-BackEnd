@@ -11,7 +11,6 @@ module.exports = (app) => {
     const { limit = 5 } = req.params;
 
     try {
-
       const allDocuments = await client.getAllByType("news-tickers", {
         orderings: {
           field: "document.last_publication_date",
@@ -38,6 +37,7 @@ module.exports = (app) => {
 
       res.status(202).send({ message: listAllDocuments })
     } catch (err) {
+      console.log(err)
       res.status(400).send({ message: "Server problem, could not list News" });
 
     }

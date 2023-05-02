@@ -23,7 +23,6 @@ app.use(compression());
 
 app.use((req, res, next) => {
   req.url = req.url.replace('/api', '');
-  console.log('ovooo ', req.url)
   next();
 });
 
