@@ -119,7 +119,7 @@ const checkIfExixtsNameOrEmailOrBothAndReturnAccount = async (name, email) => {
 
   const getCharacterListFromAccount = async (data) => {
     try {
-      const characterList = await players.query().select('id', 'name').where({ account_id: data.id }).where({ world_id: data.world_id });
+      const characterList = await players.query().select('id', 'name', 'world_id').where({ account_id: data.id }).where({ world_id: data.world_id });
       return { status: 200, message: characterList }
     } catch (err) {
       console.log('error while trying to retrieve Characterlist at: getCharacterListFromAccount, ', err);

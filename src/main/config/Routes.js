@@ -45,9 +45,16 @@ module.exports = app => {
     app.route('/User-update-character-title').post(authMiddleware, app.src.main.controllers.AccountController.updateCharacterTitleInUseRequest);
     app.route('/User-get-guildList').get(app.src.main.controllers.GuildsController.GetGuildListRequest);
     app.route('/User-get-characterList').post(authMiddleware, app.src.main.controllers.AccountController.getCharacterListFromAccountRequest);
-    app.route('/User-get-guildMembersList').post(app.src.main.controllers.GuildsController.GetGuildMemberListRequest);
-    
-    
+    app.route('/User-get-guildInformations').post(app.src.main.controllers.GuildsController.GetGuildInformationsRequest);
+    app.route('/User-accept-guild-invitation').post(authMiddleware, app.src.main.controllers.GuildsController.GetGuildAcceptInvitationRequest);
+    app.route('/User-remove-player-from-guild').post(authMiddleware, app.src.main.controllers.GuildsController.GuildOnDeleteCharRequest);
+    app.route('/User-get-AllWorld-Players').post(authMiddleware, app.src.main.controllers.WorldsController.getAllPlayersFromWorldRequest);
+    app.route('/User-invite-newPlayer').post(authMiddleware, app.src.main.controllers.GuildsController.newGuildInviteRequest);
+    app.route('/User-guild-invite-cancel').post(authMiddleware, app.src.main.controllers.GuildsController.guildInviteCancelRequest);
+    app.route('/User-guild-update-member').post(authMiddleware, app.src.main.controllers.GuildsController.guildUpdateMemberRequest);
+    app.route('/User-guild-createNew-rank').post(authMiddleware, app.src.main.controllers.GuildsController.guildCreateNewRankRequest);
+    app.route('/User-guild-changeRank-name').post(authMiddleware, app.src.main.controllers.GuildsController.guildChangeRankNameRequest);
+    app.route('/User-guild-deleteRank').post(authMiddleware, app.src.main.controllers.GuildsController.guildDeleteRankRequest);
     
     
 

@@ -17,7 +17,7 @@ module.exports = app => {
        const hash = hashGenerator(8);
        acc.loginHash = hash;
        const {password, ...accwithoutPassword} = acc;
-       const newLoginToken = generateToken(30, accwithoutPassword)
+       const newLoginToken = generateToken(1440, accwithoutPassword)
 
         const updateInfo = {
             loginHash: hash,

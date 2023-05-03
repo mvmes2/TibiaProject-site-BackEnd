@@ -1,6 +1,6 @@
 module.exports = app => {
 	const { GetWorldsListService, getAllWorldsCharactersService } = app.src.main.services.WorldsService;
-	const { getWorldWideTopFivePlayersRepository } = app.src.main.repository.WorldsRepository;
+	const { getWorldWideTopFivePlayersRepository, getAllPlayersFromWorld } = app.src.main.repository.WorldsRepository;
 	const GetWorldListRequest = async (req, res) => {
 		const resp = await GetWorldsListService()
 		res.status(resp.status).send({ message: resp.message });
@@ -16,9 +16,16 @@ module.exports = app => {
 		res.status(resp.status).send({ message: resp.message });
 	}
 
+	const getAllPlayersFromWorldRequest = async (req, res) => {
+		const data = req.body;
+		const resp = await getAllPlayersFromWorld(data)
+		res.status(resp.status).send({ message: resp.message });
+	}
+
 	return {
 		GetWorldListRequest,
 		getAllWorldsCharactersRequest,
-		getWorldWideTopFivePlayersRequest
+		getWorldWideTopFivePlayersRequest,
+		getAllPlayersFromWorldRequest
 	}
 }
