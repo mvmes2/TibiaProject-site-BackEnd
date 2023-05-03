@@ -2,7 +2,7 @@ const { worlds, players } = require('../models/projectModels');
 
 const getWorldListFromDB = async () => {
   try {
-    const worldList = await worlds.query().select('*');
+    const worldList = await worlds.query().select('id', 'serverName', 'pvptype', 'location');
     return { status: 200, message: worldList };
   } catch (err) {
     console.log(err);

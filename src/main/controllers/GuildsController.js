@@ -1,7 +1,7 @@
 module.exports = app => {
-	const { getGuildList, getGuildInformation, guildAcceptInvitation, characterToRemoveFromGuild, 
-		newGuildInvite, guildInviteCancel, guildUpdateMember, guildCreateNewRank, 
-		guildChangeRankName, guildDeleteRank } = app.src.main.repository.GuildsRepository;
+	const { getGuildList, getGuildInformation, guildAcceptInvitation, characterToRemoveFromGuild,
+		newGuildInvite, guildInviteCancel, guildUpdateMember, guildCreateNewRank,
+		guildChangeRankName, guildDeleteRank, createNewGuild } = app.src.main.repository.GuildsRepository;
 
 	const GetGuildListRequest = async (req, res) => {
 		const resp = await getGuildList()
@@ -63,6 +63,12 @@ module.exports = app => {
 		res.status(resp.status).send({ message: resp.message });
 	}
 
+	const createNewGuildRequest = async (req, res) => {
+		const data = req.body;
+		const resp = await createNewGuild(data)
+		res.status(resp.status).send({ message: resp.message });
+	}
+
 	
 
 	return {
@@ -75,6 +81,7 @@ module.exports = app => {
 		guildUpdateMemberRequest,
 		guildCreateNewRankRequest,
 		guildChangeRankNameRequest,
-		guildDeleteRankRequest
+		guildDeleteRankRequest,
+		createNewGuildRequest
 	}
 }
