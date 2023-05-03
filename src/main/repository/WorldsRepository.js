@@ -2,7 +2,7 @@ const { worlds, players } = require('../models/projectModels');
 
 const getWorldListFromDB = async () => {
   try {
-    const worldList = await worlds.query().select('*');
+    const worldList = await worlds.query().select('id', 'serverName', 'pvptype', 'location');
     return { status: 200, message: worldList };
   } catch (err) {
     console.log(err);
@@ -36,8 +36,20 @@ const getWorldWideTopFivePlayersRepository = async () => {
   }
 }
 
+const getAllPlayersFromWorld = async (data) => {
+  try {
+    const charlist = await players.query().select('id', 'name').where({ world_id: data.world_id }).where('group_id', '<', 4);
+
+    return { status: 200, message: JSON.stringify(charlist) };
+  } catch (err) {
+    console.log(err);
+    return { status: 500, message: 'Internal error, close the website, and try again, or call Administration!' }
+  }
+}
+
 module.exports = {
   getWorldListFromDB,
   getAllWorldsCharactersFromDB,
-  getWorldWideTopFivePlayersRepository
+  getWorldWideTopFivePlayersRepository,
+  getAllPlayersFromWorld
 }

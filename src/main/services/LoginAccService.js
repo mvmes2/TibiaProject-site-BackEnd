@@ -17,7 +17,7 @@ module.exports = app => {
        const hash = hashGenerator(8);
        acc.loginHash = hash;
        const {password, ...accwithoutPassword} = acc;
-       const newLoginToken = generateToken(30, accwithoutPassword)
+       const newLoginToken = generateToken(1440, accwithoutPassword)
 
         const updateInfo = {
             loginHash: hash,
@@ -26,7 +26,7 @@ module.exports = app => {
         }
 
         await updateAcc({ update: updateInfo, id: acc.id });
-    return { status: 200, message: { id: acc.id, loginHash: hash, name: acc.name, login_token: newLoginToken, email: acc.email, country:acc.country }};
+    return { status: 200, message: { id: acc.id, loginHash: hash, name: acc.name, login_token: newLoginToken, email: acc.email, country:acc.country, coins: acc.coins }};
 }
     return {
         LoginAccService,

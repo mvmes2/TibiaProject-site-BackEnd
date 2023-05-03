@@ -23,7 +23,7 @@ const AdminLoginRepository = async (data) => {
 
 		const { password, ...withoutPassword } = adminAcc;
 
-		const adminToken = generateTokenAdmin(320, withoutPassword);
+		const adminToken = generateTokenAdmin(1440, withoutPassword);
 
 		return { status: 200, message: adminToken }
 
