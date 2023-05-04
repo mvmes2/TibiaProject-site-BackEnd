@@ -43,7 +43,7 @@ module.exports = app => {
 
   const checkIfAccExists = async (data) => {
     try {
-      const exists = await accounts.query().select('email', 'id', 'password', 'name', 'loginHash', 'country').where({ email: data });
+      const exists = await accounts.query().select('email', 'id', 'password', 'name', 'loginHash', 'country', 'coins').where({ email: data });
       if (!exists || exists === undefined || exists?.length < 1) {
         return { bool: false };
       } else {
@@ -187,6 +187,7 @@ module.exports = app => {
   const checkCharacterOwnerAtDB = async (data) => {
     data.name = data.name.replaceAll('-', ' ');
     console.log(data.name)
+    console.log('qual a dataaa???????????????????????? ', data.name)
     const checkOnlyPlayerNameFirst = await players.query().select('name', 'account_id').where({ name: data.name });
 
     if (checkOnlyPlayerNameFirst.length < 1) { return { status: 404, message: 'Character does not exists!' } }
@@ -209,10 +210,10 @@ module.exports = app => {
         const found = await players.query()
           .join('worlds', 'players.world_id', '=', 'worlds.id')
           .join('vocations', 'players.vocation', 'vocations.vocation_id')
-          .select('players.id', 'players.account_id', 'players.hidden', 'players.name', 'players.level', 'vocation_name as vocation', 'sex', 'lastlogin', 'lastip', 'worlds.serverName as world', 'players.createdAt', 'group_id', 'players.hidden')
+          .select('players.id', 'players.account_id', 'players.hidden', 'players.name', 'players.level', 'vocation_name as vocation', 'sex', 'lastlogin', 'lastip', 'worlds.serverName as world', 'players.createdAt', 'group_id')
           .whereRaw('LOWER(players.name) = ?', data.name.toLowerCase())
           .where({ 'players.deletedAt': 0 }).first();
-        console.log('Mista ta ai???', found)
+        console.log('Mista ta ai???????????????????????????????', found)
         const deathList = await player_deaths.query()
           .select('*')
           .where({ player_id: found.id }).orderBy('time', 'desc').limit(15);
