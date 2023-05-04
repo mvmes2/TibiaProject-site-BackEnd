@@ -113,7 +113,7 @@ const guildUpdateMember = async (data) => {
       const getFormerLeaderId = await players.query().select('id').where({ name: data.former_player_name }).where({ account_id: data.former_player_account_id }).first();
 
       await guild_membership.query().update({ rank_id: getMemberRank.id }).where({ player_id: getFormerLeaderId.id }).where({ guild_id: data.guild_id });
-      await guilds.query().update({ ownerid: data.player_id });
+      await guilds.query().update({ ownerid: data.player_id }).where({ id: data.guild_id });
     }
     await guild_membership.query().update(data.update).where({ player_id: data.player_id }).where({ guild_id: data.guild_id });
     
@@ -140,8 +140,9 @@ const guildCreateNewRank = async (data) => {
 }
 
 const guildChangeRankName = async (data) => {
+  console.log(' o que ta vindo no data de ?... ', data)
   try {
-    await guild_ranks.query().update(data.update).where({ id: data.id });
+    await guild_ranks.query().update(data.update).where({ id: data.id }).where({ guild_id: data.guild_id });
     return { status: 200, message: 'Guild Rank Name Changed!' };
   } catch (err) {
     console.log('internal error while trying to change rank name at: guildChangeRankName, ', err);
@@ -180,7 +181,7 @@ const createNewGuild = async (data) => {
       }
 
       const guildCreated = await guilds.query().insert(data.insert);
-      const getLeaderRankId = await guild_ranks.query().select('id').where({ level: 3 }).where({ name: 'The Leader' }).first();
+      const getLeaderRankId = await guild_ranks.query().select('id').where({ level: 3 }).where({ name: 'The Leader' }).where({ guild_id: guildCreated.id }).first();
       console.log('o que temos em rankLeaderId?  ', getLeaderRankId)
       console.log('o que temos em guildCreated pegar id?  ', guildCreated)
       await guild_membership.query(). insert({ player_id: data.insert.ownerid, guild_id: guildCreated.id, rank_id: getLeaderRankId.id });
