@@ -56,11 +56,13 @@ module.exports = (app) => {
       });
 
       const newAllDocuments = allDocuments.reduce((acc, doc) => {
-        let fullHtml = ``;
-
+        
         const tituloHeader = prismicH.asHTML(doc.data.titulo_news);
-
+        const allContents = []
+        
         doc.data.content.map((content, i, arr) => {
+          let fullHtml = ``;
+
           const imageContent = prismicH.asImageSrc(
             content.image_content
           );
@@ -89,6 +91,8 @@ module.exports = (app) => {
           if (i === arr.length - 1) {
             fullHtml += `</div>`;
           }
+
+          allContents.push(fullHtml)
         });
 
         const docFormatted = {
@@ -98,7 +102,7 @@ module.exports = (app) => {
           updatedAt: doc.last_publication_date,
           nameGM: doc.name_gm,
           titulo: tituloHeader,
-          content: fullHtml,
+          content: allContents,
         };
 
         return [...acc, docFormatted];
