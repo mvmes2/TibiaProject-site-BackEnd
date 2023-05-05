@@ -186,6 +186,8 @@ const createNewGuild = async (data) => {
       console.log('o que temos em guildCreated pegar id?  ', guildCreated)
       await guild_membership.query(). insert({ player_id: data.insert.ownerid, guild_id: guildCreated.id, rank_id: getLeaderRankId.id });
       return { status: 201, message: 'Guild Created!' }
+    } else {
+      return { status: 403, message: 'This account do not have 5 coins to pay.' }
     }
   } catch (err) {
     console.log('internal error while trying to create guild at: createNewGuild, ', err);
