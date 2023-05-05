@@ -7,6 +7,28 @@ module.exports = (app) => {
     res.status(resp.status).send({ data: resp.data });
   };
 
+  const ListAllNews = async (req, res) => {
+
+    try {
+      const allNewsTickers = await client.getAllByType("news-tickers", {
+        orderings: {
+          field: "document.last_publication_date",
+          direction: "desc",
+        }
+      })
+      const allNews = await client.getAllByType("news-post", {
+        orderings: {
+          field: "document.last_publication_date",
+          direction: "desc",
+        }
+      })
+
+    } catch (err) {
+      res.status(400).send({ message: "Server problem, could not list News" });
+
+    }
+  }
+
   const ListNewsTickers = async (req, res) => {
     const { limit = 5 } = req.params;
 
