@@ -1,4 +1,4 @@
-const { players, players_comment, accounts } = require('./../models/projectModels');
+const { players, players_comment, accounts, guild_membership, guilds } = require('./../models/projectModels');
 module.exports = app => {
     const deleteCharacter = async (data) => {
         try {
@@ -120,7 +120,21 @@ const checkIfExixtsNameOrEmailOrBothAndReturnAccount = async (name, email) => {
   const getCharacterListFromAccount = async (data) => {
     try {
       const characterList = await players.query().select('id', 'name', 'world_id', 'level').where({ account_id: data.id }).where({ world_id: data.world_id });
-      return { status: 200, message: characterList }
+      const editedCharList = [];
+
+      for (x in characterList) {
+        const guildMember = await guild_membership.query().select('guild_id').where({ player_id: characterList[x].id }).first();
+        let guildName = null;
+        if (guildMember) {
+          guildName = await guilds.query().select('name').where({ id: guildMember.guild_id }).first();
+        }
+        const newChar = {
+          ...characterList[x],
+          guild: guildName?.name
+        }
+        editedCharList.push(newChar);
+      }
+      return { status: 200, message: editedCharList }
     } catch (err) {
       console.log('error while trying to retrieve Characterlist at: getCharacterListFromAccount, ', err);
       return { status: 500, message: 'Internal error at trying to get account!' }

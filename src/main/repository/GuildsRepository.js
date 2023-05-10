@@ -82,8 +82,12 @@ const characterToRemoveFromGuild = async (data) => {
 const newGuildInvite = async (data) => {
   try {
     const CheckIfHaveGuild = await guild_membership.query().select('player_id').where({ player_id: data.player_id });
+    const CheckIfHaveInvite = await guild_invites.query().select('player_id').where({ player_id: data.player_id });
     if (CheckIfHaveGuild?.length > 0) {
       return { status: 403, message: 'Player already in a guild! cannot be invited.' };
+    }
+    if (CheckIfHaveInvite?.length > 0) {
+      return { status: 403, message: 'Player already invited to a guild!' };
     }
     await guild_invites.query().insert(data);
     return { status: 200, message: 'Character invited to Guild' };

@@ -1,5 +1,5 @@
 const { accounts, players, players_online, player_deaths, player_items,
-  players_comment, players_titles } = require('../models/projectModels');
+  players_comment, players_titles, guild_membership, guilds, guild_ranks } = require('../models/projectModels');
 const { convertPremiumTimeToDaysLeft, updateLastDayTimeStampEpochFromGivenDays } = require('../utils/utilities');
 
 module.exports = app => {
@@ -196,7 +196,7 @@ module.exports = app => {
       checkCharacterOwner = await players.query()
         .join('worlds', 'players.world_id', '=', 'worlds.id')
         .join('vocations', 'players.vocation', 'vocations.vocation_id')
-        .select('players.id', 'players.account_id', 'players.hidden', 'players.name', 'players.level', 'vocation_name as vocation', 'sex', 'lastlogin', 'lastip', 'worlds.serverName as world', 'players.createdAt', 'group_id', 'players.hidden')
+        .select('players.id', 'players.account_id', 'players.hidden', 'players.name', 'players.level', 'vocation_name as vocation', 'sex', 'lastlogin', 'lastip', 'worlds.serverName as world', 'worlds.id as world_id', 'players.createdAt', 'group_id', 'players.hidden')
         .where({ name: data.name })
         .where({ account_id: data.account_id })
         .where({ 'players.deletedAt': 0 }).first();
@@ -210,16 +210,19 @@ module.exports = app => {
         const found = await players.query()
           .join('worlds', 'players.world_id', '=', 'worlds.id')
           .join('vocations', 'players.vocation', 'vocations.vocation_id')
-          .select('players.id', 'players.account_id', 'players.hidden', 'players.name', 'players.level', 'vocation_name as vocation', 'sex', 'lastlogin', 'lastip', 'worlds.serverName as world', 'players.createdAt', 'group_id')
+          .select('players.id', 'players.account_id', 'players.hidden', 'players.name', 'players.level', 'vocation_name as vocation', 'sex', 'lastlogin', 'lastip', 'worlds.serverName as world', 'worlds.id as world_id', 'players.createdAt', 'group_id')
           .whereRaw('LOWER(players.name) = ?', data.name.toLowerCase())
           .where({ 'players.deletedAt': 0 }).first();
-        console.log('Mista ta ai???????????????????????????????', found)
         const deathList = await player_deaths.query()
           .select('*')
           .where({ player_id: found.id }).orderBy('time', 'desc').limit(15);
         const online = await players_online.query().select('*').where({ player_id: found.id }).first();
         const comment = await players_comment.query().select('comment').where({ player_id: found.id }).first();
         const accountCharList = await players.query().select('name', 'hidden').where({ account_id: found.account_id });
+        const guild = await guild_membership.query().select('player_id', 'guild_id', 'rank_id').where({ player_id: found.id }).first();
+        const memberRank = guild ? ( await guild_ranks.query().select('name').where({ id: guild.rank_id }).first() ) : '';
+        const GuildName = guild ? ( await guilds.query().select('name', 'id').where({ id: guild.guild_id }).first() ) : '';
+        console.log('wetf guild_id???', GuildName)
         const characterOwnershipFalse = {
           ...found,
           deathList,
@@ -227,6 +230,9 @@ module.exports = app => {
           accountCharList: found.hidden === 0 ? accountCharList : [],
           comment: comment?.comment,
           isOnline: online?.player_id ? true : false,
+          guild: GuildName.name,
+          guild_rank: memberRank.name,
+          guild_id: GuildName.id
         }
         return { status: 200, message: characterOwnershipFalse, owner: false }
       } catch (err) {
@@ -241,6 +247,10 @@ module.exports = app => {
         const online = await players_online.query().select('*').where({ player_id: checkCharacterOwner.id }).first();
         const comment = await players_comment.query().select('comment').where({ player_id: checkCharacterOwner.id }).first();
         const accountCharList = await players.query().select('name', 'hidden').where({ account_id: checkCharacterOwner.account_id });
+        const guild = await guild_membership.query().select('player_id', 'guild_id', 'rank_id').where({ player_id: checkCharacterOwner.id }).first();
+        const memberRank = guild ? ( await guild_ranks.query().select('name').where({ id: guild.rank_id }).first() ) : '';
+        const GuildName = guild ? ( await guilds.query().select('name', 'id').where({ id: guild.guild_id }).first() ) : '';
+        console.log('wetf guild_id???', GuildName)
         const characterOwnershipTrue = {
           ...checkCharacterOwner,
           deathList,
@@ -248,6 +258,9 @@ module.exports = app => {
           accountCharList: checkCharacterOwner.hidden === 0 ? accountCharList : [],
           comment: comment?.comment,
           isOnline: online?.player_id ? true : false,
+          guild: GuildName.name,
+          guild_rank: memberRank.name,
+          guild_id: GuildName.id
         }
         return { status: 200, message: characterOwnershipTrue }
       } catch (err) {
