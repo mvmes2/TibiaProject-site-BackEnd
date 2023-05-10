@@ -12,6 +12,7 @@ module.exports = app => {
 		const data = req.body;
 		const resp = await getGuildInformation(data)
 		res.status(resp.status).send({ message: resp.message });
+		// yes
 	}
 
 	const GetGuildAcceptInvitationRequest = async (req, res) => {
