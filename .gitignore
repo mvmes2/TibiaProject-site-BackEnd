@@ -6,6 +6,6 @@ client.zip
 /src/main/resources/tickets-images/compressed/*
 /downloads/*
 /client/*
+client/*
 server.js
 ./server.js
-/server.js
