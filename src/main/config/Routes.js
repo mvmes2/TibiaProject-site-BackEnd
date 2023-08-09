@@ -57,6 +57,8 @@ module.exports = app => {
     app.route('/User-guild-deleteRank').post(authMiddleware, app.src.main.controllers.GuildsController.guildDeleteRankRequest);
     app.route('/User-get-accountInfo').post(authMiddleware, app.src.main.controllers.AccountController.getInfoFromAccountRequest);
     app.route('/User-guild-createGuild').post(authMiddleware, app.src.main.controllers.GuildsController.createNewGuildRequest);
+    app.route('/User-players-quantity').get(app.src.main.controllers.AccountController.getPlayerQuantity);
+    
     
     
     

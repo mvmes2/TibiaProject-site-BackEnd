@@ -1,88 +1,88 @@
 const { players, players_comment, accounts, guild_membership, guilds } = require('./../models/projectModels');
 module.exports = app => {
-    const deleteCharacter = async (data) => {
-        try {
-            await players.query().delete().where({ id: data.id });
-            return { status: 200, message: 'Character deleted successfuly!' }
-        } catch(err) {
-            console.log(err)
-            return { status: 500, message: 'Internal error at trying delete, re-open webSite and try again, or contact Admin!' }
-        }
-}
-const updateHidenCharacterInDB = async (data) => {
+  const deleteCharacter = async (data) => {
     try {
-       const ishiden = await players.query().select('hidden').where({ id: data.id }).first();
-
-       await players.query().update({ hidden: ishiden.hidden === 0 ? 1 : 0 }).where({ id: data.id });
-        return { status: 200, message: 'Character hidden updated successfuly!' }
-    } catch(err) {
-        console.log(err)
-        return { status: 500, message: 'Internal error at trying delete, re-open webSite and try again, or contact Admin!' }
+      await players.query().delete().where({ id: data.id });
+      return { status: 200, message: 'Character deleted successfuly!' }
+    } catch (err) {
+      console.log(err)
+      return { status: 500, message: 'Internal error at trying delete, re-open webSite and try again, or contact Admin!' }
     }
-}
+  }
+  const updateHidenCharacterInDB = async (data) => {
+    try {
+      const ishiden = await players.query().select('hidden').where({ id: data.id }).first();
 
-const updateCharacterCommentInDB = async (data) => {
+      await players.query().update({ hidden: ishiden.hidden === 0 ? 1 : 0 }).where({ id: data.id });
+      return { status: 200, message: 'Character hidden updated successfuly!' }
+    } catch (err) {
+      console.log(err)
+      return { status: 500, message: 'Internal error at trying delete, re-open webSite and try again, or contact Admin!' }
+    }
+  }
+
+  const updateCharacterCommentInDB = async (data) => {
 
     try {
-       const comment = await players_comment.query().select('comment').where({ player_id: data.id }).first();
-       comment === undefined ? await players_comment.query().insert({ comment: data.comment, player_id: data.id}).where({ player_id: data.id }) : (
-        await players_comment.query().update({ comment: data.comment}).where({ player_id: data.id })
-       )
-        return { status: 200, message: 'Character comment updated successfuly!' }
-    } catch(err) {
-        console.log(err)
-        return { status: 500, message: 'Internal error at trying delete, re-open webSite and try again, or contact Admin!' }
+      const comment = await players_comment.query().select('comment').where({ player_id: data.id }).first();
+      comment === undefined ? await players_comment.query().insert({ comment: data.comment, player_id: data.id }).where({ player_id: data.id }) : (
+        await players_comment.query().update({ comment: data.comment }).where({ player_id: data.id })
+      )
+      return { status: 200, message: 'Character comment updated successfuly!' }
+    } catch (err) {
+      console.log(err)
+      return { status: 500, message: 'Internal error at trying delete, re-open webSite and try again, or contact Admin!' }
     }
-}
+  }
 
-const checkNameAndEmail = async (data) => {
-    
+  const checkNameAndEmail = async (data) => {
+
     if (!data || data === undefined || data === null) {
-        return resp.status(500).send({
-          message:
-            "Internal error, please close the website and try again later, or open ticket!",
-        });
-      }
-        const checkIfExistEmailFirst = await accounts.query().select('email').where({ email: data.email });
-        const checkIfExistNameFirst = await accounts.query().select('email').whereRaw('LOWER(name) = ?', data.name.toLowerCase());
-    
-        if (checkIfExistNameFirst.length > 0) {
-          return { status: 403, message: 'Account name already in use!' }
-        }
-    
-        if (checkIfExistEmailFirst.length > 0) {
-          return { status: 403, message: 'Email already in use!' }
-        }
-        return { status: 200, message: 'ok' }
-}
+      return resp.status(500).send({
+        message:
+          "Internal error, please close the website and try again later, or open ticket!",
+      });
+    }
+    const checkIfExistEmailFirst = await accounts.query().select('email').where({ email: data.email });
+    const checkIfExistNameFirst = await accounts.query().select('email').whereRaw('LOWER(name) = ?', data.name.toLowerCase());
 
-const checkIfExixtsNameOrEmailOrBothAndReturnAccount = async (name, email) => {
+    if (checkIfExistNameFirst.length > 0) {
+      return { status: 403, message: 'Account name already in use!' }
+    }
+
+    if (checkIfExistEmailFirst.length > 0) {
+      return { status: 403, message: 'Email already in use!' }
+    }
+    return { status: 200, message: 'ok' }
+  }
+
+  const checkIfExixtsNameOrEmailOrBothAndReturnAccount = async (name, email) => {
     let account = null;
     try {
-        if (name !== null) {
-            const checkIfExistNameFirst = await accounts.query().select('email', 'name' ).whereRaw('LOWER(name) = ?', name.toLowerCase());
-            if (checkIfExistNameFirst.length < 1) {
-              return { status: 400, message: 'Wrong or non-existent account name!' }
-            }
-            account = checkIfExistNameFirst;
-           }
-           
-           if (email !== null) {
-             const checkIfExistEmailFirst = await accounts.query().select('email', 'name', 'id', 'password2').where({ email });
-             if (checkIfExistEmailFirst.length < 1) {
-               return { status: 400, message: 'Wrong or non-existent user email!' }
-             }
-             account = checkIfExistEmailFirst;
-           }
-           return { status: 200, message: account };
+      if (name !== null) {
+        const checkIfExistNameFirst = await accounts.query().select('email', 'name').whereRaw('LOWER(name) = ?', name.toLowerCase());
+        if (checkIfExistNameFirst.length < 1) {
+          return { status: 400, message: 'Wrong or non-existent account name!' }
+        }
+        account = checkIfExistNameFirst;
+      }
+
+      if (email !== null) {
+        const checkIfExistEmailFirst = await accounts.query().select('email', 'name', 'id', 'password2').where({ email });
+        if (checkIfExistEmailFirst.length < 1) {
+          return { status: 400, message: 'Wrong or non-existent user email!' }
+        }
+        account = checkIfExistEmailFirst;
+      }
+      return { status: 200, message: account };
     } catch (err) {
-        console.log(err);
-        return { status: 500, message: 'Internal error, open a ticket, or re-try later' }
+      console.log(err);
+      return { status: 500, message: 'Internal error, open a ticket, or re-try later' }
     }
   }
   const getAccountInfoRepository = async (data) => {
     try {
-      const acc = await accounts.query().select(data?.selectinfo ? data.selectinfo : 'change_pass_token').where({id: data.id});
+      const acc = await accounts.query().select(data?.selectinfo ? data.selectinfo : 'change_pass_token').where({ id: data.id });
       if (acc.length < 1) {
         return { status: 400, message: '!Account Not Found.' }
       }
@@ -111,7 +111,7 @@ const checkIfExixtsNameOrEmailOrBothAndReturnAccount = async (name, email) => {
         return false;
       }
       return acc;
-    } catch(err) {
+    } catch (err) {
       console.log(err);
       return { status: 500, message: 'Internal error at trying to get account!' }
     }
@@ -151,16 +151,64 @@ const checkIfExixtsNameOrEmailOrBothAndReturnAccount = async (name, email) => {
     }
   }
 
-    return {
-        updateHidenCharacterInDB,
-        deleteCharacter,
-        updateCharacterCommentInDB,
-        checkNameAndEmail,
-        checkIfExixtsNameOrEmailOrBothAndReturnAccount,
-        getAccountInfoRepository,
-        validateJsonTokenRepository,
-        internalOnlyCheckAccountDoNotSendResponseToFront,
-        getCharacterListFromAccount,
-        getInfoFromAccount
+  const getPlayerQuantityRepository = async () => {
+    try {
+      /* devolve numero de players que tenha account_id diferentes, lastip diferentes, e que sejam no minimo level 8.
+
+      segue a query com sintaxe padrão de Mysql para se ter uma base da conversão abaixo para sintaxe do knex:
+
+      SELECT count(id_acc) FROM (
+        SELECT count(teste.last_ip_agrupado), teste.id_acc FROM (
+        SELECT count(id) as 'quantidade',lastip as 'last_ip_agrupado',account_id as 'id_acc' FROM tibiaproject.players WHERE level >= 8
+        AND group_id = 1 GROUP BY players.lastip, players.account_id) as teste
+        WHERE 1
+         GROUP BY teste.id_acc
+         ) as finalTable
+
+      */
+      const getPlayersWithouAdminAccounts = await players.query()
+        .select(players.raw('count(finalTable.id_acc) as finalResult'))
+        .from(function () {
+          this.select(players.raw('count(teste.last_ip_agrupado)'), 'teste.id_acc')
+            .from(function () {
+              this.select(
+                players.raw('count(id) as quantidade'),
+                'lastip as last_ip_agrupado',
+                'account_id as id_acc'
+              )
+                .from('tibiaproject.players')
+                .where('level', '>=', 8)
+                .andWhere('group_id', 1)
+                .groupBy('players.lastip', 'players.account_id')
+                .as('teste');
+            })
+            .whereNotNull('teste.last_ip_agrupado') // Adicionamos esta condição para evitar contagens nulas
+            .groupBy('teste.id_acc')
+            .as('finalTable');
+        });
+
+      const result = getPlayersWithouAdminAccounts[0].finalResult
+
+      console.log('..........: ', result);
+
+      return { status: 200, message: result }
+    } catch (err) {
+      console.log(err)
+      return { status: 500, message: 'Internal error, re-open webSite and try again, or contact Admin!' }
     }
+  }
+
+  return {
+    updateHidenCharacterInDB,
+    deleteCharacter,
+    updateCharacterCommentInDB,
+    checkNameAndEmail,
+    checkIfExixtsNameOrEmailOrBothAndReturnAccount,
+    getAccountInfoRepository,
+    validateJsonTokenRepository,
+    internalOnlyCheckAccountDoNotSendResponseToFront,
+    getCharacterListFromAccount,
+    getInfoFromAccount,
+    getPlayerQuantityRepository
+  }
 }

@@ -10,9 +10,6 @@ const prismicH = require('@prismicio/helpers');
 const compression = require('compression');
 const fs = require('fs');
 
-
-
-
 const server = http.createServer(app);
 
 const userSockets = {};
@@ -46,10 +43,9 @@ app.use((req, res, next) => {
 app.use(express.json());
 app.use(morgan('dev'));
 
-
-
 const corsOptions = {
   origin: '*', // Substitua por sua URL de origem
+  methods: 'GET,HEAD,PUT,POST,DELETE',
   optionsSuccessStatus: 200, // Para navegadores legados (IE11, várias versões do Android)
 };
 

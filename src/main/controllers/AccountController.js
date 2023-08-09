@@ -3,7 +3,7 @@ module.exports = app => {
 		updateHidenCharacterService, updateCharacterCommentService, recoveryAccountGenericService,
 		updateAccountPasswordService } = app.src.main.services.AccountService;
 	const { updateAcc, getlAllPlayersToHighscoreRepository, getCharacterTitlesRepo, updateCharacterTitleInUseRepo } = app.src.main.repository.UserRepository;
-	const { getAccountInfoRepository, getCharacterListFromAccount, getInfoFromAccount } = app.src.main.repository.AccountRepository;
+	const { getAccountInfoRepository, getCharacterListFromAccount, getInfoFromAccount, getPlayerQuantityRepository } = app.src.main.repository.AccountRepository;
 
 	const validateAccountRequest = async (req, res) => {
 		const data = req.body;
@@ -82,13 +82,13 @@ module.exports = app => {
 	const getCharacterTitlesRequest = async (req, res) => {
 		const data = req.body;
 		const resp = await getCharacterTitlesRepo(data);
-		return res.status(resp.status).send({ message: resp.message }); 
+		return res.status(resp.status).send({ message: resp.message });
 	}
 
 	const updateCharacterTitleInUseRequest = async (req, res) => {
 		const data = req.body;
 		const resp = await updateCharacterTitleInUseRepo(data);
-		return res.status(resp.status).send({ message: resp.message }); 
+		return res.status(resp.status).send({ message: resp.message });
 	}
 
 	const getCharacterListFromAccountRequest = async (req, res) => {
@@ -103,7 +103,10 @@ module.exports = app => {
 		return res.status(resp.status).send({ message: resp.message });
 	}
 
-	
+	const getPlayerQuantity = async (req, res) => {
+		const resp = await getPlayerQuantityRepository();
+		return res.status(resp.status).send({ message: resp.message });
+	}
 
 	return {
 		createCharacterRequest,
@@ -121,6 +124,7 @@ module.exports = app => {
 		updateCharacterTitleInUseRequest,
 		getCharacterTitlesRequest,
 		getCharacterListFromAccountRequest,
-		getInfoFromAccountRequest
+		getInfoFromAccountRequest,
+		getPlayerQuantity
 	}
 }
