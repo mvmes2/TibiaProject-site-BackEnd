@@ -4,7 +4,7 @@ module.exports = app => {
   const { validateLoginHash, createNewCharacterDB, checkCharacterOwnerAtDB, updateAcc } = app.src.main.repository.UserRepository;
   const { deleteCharacter, updateHidenCharacterInDB, updateCharacterCommentInDB, 
     checkIfExixtsNameOrEmailOrBothAndReturnAccount, validateJsonTokenRepository, 
-    internalOnlyCheckAccountDoNotSendResponseToFront } = app.src.main.repository.AccountRepository;
+    internalOnlyCheckAccountDoNotSendResponseToFront, getPlayerQuantityRepository } = app.src.main.repository.AccountRepository;
 
   const checkValidLoginHash = async (data) => {
     const resp = await validateLoginHash(data);
@@ -149,6 +149,6 @@ module.exports = app => {
     updateCharacterCommentService,
     recoveryAccountGenericService,
     validateJsonTokenService,
-    updateAccountPasswordService
+    updateAccountPasswordService,
   }
 }
