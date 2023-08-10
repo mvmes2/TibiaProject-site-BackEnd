@@ -1,4 +1,6 @@
 module.exports = app => {
+	const moment = require('moment');
+
 	const { GetWorldsListService, getAllWorldsCharactersService } = app.src.main.services.WorldsService;
 	const { getWorldWideTopFivePlayersRepository, getAllPlayersFromWorld } = app.src.main.repository.WorldsRepository;
 	const GetWorldListRequest = async (req, res) => {
@@ -11,15 +13,23 @@ module.exports = app => {
 		res.status(resp.status).send({ message: resp.message });
 	}
 
+	let getWorldWideTopFivePlayersRequestLastUpdate = 0;
+	let worldWideTopFivePlayers = 0;
+
 	const getWorldWideTopFivePlayersRequest = async (req, res) => {
-		const resp = await getWorldWideTopFivePlayersRepository()
-		res.status(resp.status).send({ message: resp.message });
+		if (moment().diff(getWorldWideTopFivePlayersRequestLastUpdate, 'minutes') < 5) {
+			console.log('cache getWorldWideTopFivePlayers feito com sucesso!');
+			return res.status(worldWideTopFivePlayers.status).send({ message: worldWideTopFivePlayers.message });
+		}
+		getWorldWideTopFivePlayersRequestLastUpdate = moment();
+		worldWideTopFivePlayers = await getWorldWideTopFivePlayersRepository()
+		return res.status(worldWideTopFivePlayers.status).send({ message: worldWideTopFivePlayers.message });
 	}
 
 	const getAllPlayersFromWorldRequest = async (req, res) => {
 		const data = req.body;
 		const resp = await getAllPlayersFromWorld(data)
-		res.status(resp.status).send({ message: resp.message });
+		return res.status(resp.status).send({ message: resp.message });
 	}
 
 	return {
