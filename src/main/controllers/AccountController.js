@@ -75,7 +75,7 @@ module.exports = app => {
 	const getlAllPlayersToHighscoreController = async (req, res) => {
 		const data = req.body.queryparam;
 		console.log('o que temos aqu??? i', data)
-		if (data == 'experience' && moment().diff(getlAllPlayersToHighscoreLastUpdate, 'seconds') < 40) {
+		if (data == 'experience' && moment().diff(getlAllPlayersToHighscoreLastUpdate, 'seconds') < 15) {
 			console.log('cache getlAllPlayersToHighscore feito com sucesso!');
 			return res.status(AllPlayersToHighscore.status).send({ message: AllPlayersToHighscore.message });
 		}
