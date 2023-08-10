@@ -4,6 +4,7 @@
 client.zip
 ./client.zip
 /src/main/resources/tickets-images/compressed/*
+/src/main/resources/tickets-images/*
 /downloads/*
 /client/*
 client/*

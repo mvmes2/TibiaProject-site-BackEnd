@@ -1,6 +1,3 @@
-let lastUpdatePlayerQuantity = 0;
-let playersQuantity = 0;
-
 module.exports = app => {
 
 	const moment = require('moment');
@@ -13,8 +10,8 @@ module.exports = app => {
 
 	const validateAccountRequest = async (req, res) => {
 		const data = req.body;
-		const resp = await checkValidLoginHash(data)
-		res.status(resp.status).send({ message: resp.message });
+		const resp = await checkValidLoginHash(data);
+		return res.status(resp.status).send({ message: resp.message });
 	}
 
 	const createCharacterRequest = async (req, res) => {
@@ -115,6 +112,9 @@ module.exports = app => {
 		const resp = await getInfoFromAccount(data);
 		return res.status(resp.status).send({ message: resp.message });
 	}
+
+	let lastUpdatePlayerQuantity = 0;
+	let playersQuantity = 0;
 
 	const getPlayerQuantity = async (req, res) => {
 		console.log('lastUpdate: ', lastUpdatePlayerQuantity)

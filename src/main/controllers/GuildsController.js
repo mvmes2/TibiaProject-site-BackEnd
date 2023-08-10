@@ -1,11 +1,23 @@
 module.exports = app => {
+	const moment = require('moment');
+
 	const { getGuildList, getGuildInformation, guildAcceptInvitation, characterToRemoveFromGuild,
 		newGuildInvite, guildInviteCancel, guildUpdateMember, guildCreateNewRank,
 		guildChangeRankName, guildDeleteRank, createNewGuild } = app.src.main.repository.GuildsRepository;
 
+		let GetGuildListLastUpdate = 0;
+		let guildList = 0;
+
 	const GetGuildListRequest = async (req, res) => {
-		const resp = await getGuildList()
-		res.status(resp.status).send({ message: resp.message });
+
+		if (moment().diff(GetGuildListLastUpdate, 'minutes') < 5) {
+			console.log('cache GuildList feito com sucesso!');
+			return res.status(guildList.status).send({ message: guildList.message });
+		}
+
+		GetGuildListLastUpdate = moment();
+		guildList = await getGuildList();
+		return res.status(guildList.status).send({ message: guildList.message });
 	}
 
 	const GetGuildInformationsRequest = async (req, res) => {
@@ -70,7 +82,7 @@ module.exports = app => {
 		res.status(resp.status).send({ message: resp.message });
 	}
 
-	
+
 
 	return {
 		GetGuildListRequest,

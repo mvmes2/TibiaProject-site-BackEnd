@@ -3,14 +3,36 @@ module.exports = app => {
 
 	const { GetWorldsListService, getAllWorldsCharactersService } = app.src.main.services.WorldsService;
 	const { getWorldWideTopFivePlayersRepository, getAllPlayersFromWorld } = app.src.main.repository.WorldsRepository;
-	const GetWorldListRequest = async (req, res) => {
-		const resp = await GetWorldsListService()
-		res.status(resp.status).send({ message: resp.message });
+
+	let getWorldListRequestLastUpdate = 0;
+	let WorldList = 0;
+
+	const getWorldListRequest = async (req, res) => {
+
+		if (moment().diff(getWorldListRequestLastUpdate, 'minutes') < 5) {
+			console.log('cache WorldList feito com sucesso!');
+			return res.status(WorldList.status).send({ message: WorldList.message });
+		}
+
+		getWorldListRequestLastUpdate = moment();
+		WorldList = await GetWorldsListService();
+		return res.status(WorldList.status).send({ message: WorldList.message });
 	}
 
+	let getAllWorldsCharactersLastUpdate = 0;
+	let AllWorldsCharacters = 0;
+
 	const getAllWorldsCharactersRequest = async (req, res) => {
-		const resp = await getAllWorldsCharactersService()
-		res.status(resp.status).send({ message: resp.message });
+
+		if (moment().diff(getAllWorldsCharactersLastUpdate, 'minutes') < 5) {
+			console.log('cache AllWorldsCharacters feito com sucesso!');
+			return res.status(AllWorldsCharacters.status).send({ message: AllWorldsCharacters.message });
+		}
+
+		getAllWorldsCharactersLastUpdate = moment();
+		AllWorldsCharacters = await getAllWorldsCharactersService()
+
+		return res.status(AllWorldsCharacters.status).send({ message: AllWorldsCharacters.message });
 	}
 
 	let getWorldWideTopFivePlayersRequestLastUpdate = 0;
@@ -33,7 +55,7 @@ module.exports = app => {
 	}
 
 	return {
-		GetWorldListRequest,
+		getWorldListRequest,
 		getAllWorldsCharactersRequest,
 		getWorldWideTopFivePlayersRequest,
 		getAllPlayersFromWorldRequest
