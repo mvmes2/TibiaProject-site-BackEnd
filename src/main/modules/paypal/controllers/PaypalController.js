@@ -91,8 +91,8 @@ module.exports = app => {
 				try {
 					insertNewPayment(data);
 					setTimeout(async () => {
-					insertCoinsAtAccountToApprovedPayment(data.transaction_id);
-					res.status(201).send({ message: 'ok' })
+						insertCoinsAtAccountToApprovedPayment(data.transaction_id);
+						res.status(201).send({ message: 'ok' })
 					}, 1000);
 				} catch (err) {
 					console.log(err);
@@ -100,13 +100,13 @@ module.exports = app => {
 				}
 			}).catch((err) => {
 				console.log(err);
-			res.status(404).send({ message: 'Error at validating your payment' });
+				res.status(404).send({ message: 'Error at validating your payment' });
 			});
 		} catch (err) {
 			console.log(err);
 			res.status(404).send({ message: 'Error at validating your payment' });
 		}
-		
+
 	};
 
 	return {

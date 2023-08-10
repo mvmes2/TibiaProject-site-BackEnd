@@ -1,16 +1,27 @@
 const prismicH = require("@prismicio/helpers");
 module.exports = (app) => {
+
+  const moment = require('moment');
+
   const { TesteService } = app.src.main.services.ServerTestService;
   const { client } = app.src.main.config.prismicConfig;
+
   const TesteRequest = async (req, res) => {
     const resp = await TesteService();
     res.status(resp.status).send({ data: resp.data });
   };
 
+  let listAllDocumentsNewsTickersLastUpdate = 0;
+  let listAllDocumentsNewsTickers = 0;
+
   const ListNewsTickers = async (req, res) => {
     const { limit = 5 } = req.params;
 
     try {
+      if (moment().diff(listAllDocumentsNewsTickersLastUpdate, 'minutes') < 5) {
+        console.log('cache news-tickers feito com sucesso!');
+        return res.status(202).send({ message: listAllDocumentsNewsTickers });
+      }
       const allDocuments = await client.getAllByType("news-tickers", {
         orderings: {
           field: "document.last_publication_date",
@@ -19,7 +30,8 @@ module.exports = (app) => {
         limit
       })
 
-      const listAllDocuments = allDocuments.reduce((acc, doc) => {
+      listAllDocumentsNewsTickersLastUpdate = moment();
+      listAllDocumentsNewsTickers = allDocuments.reduce((acc, doc) => {
 
         const arr = acc
 
@@ -35,7 +47,7 @@ module.exports = (app) => {
         return arr
       }, [])
 
-      res.status(202).send({ message: listAllDocuments })
+     return res.status(202).send({ message: listAllDocumentsNewsTickers });
     } catch (err) {
       console.log(err)
       res.status(400).send({ message: "Server problem, could not list News" });
@@ -43,10 +55,18 @@ module.exports = (app) => {
     }
   }
 
+  let ListNewsLastUpdate = 0;
+  let newsAllDocuments = 0;
+
   const ListNews = async (req, res) => {
     const { limit = 10 } = req.params;
 
     try {
+      if (moment().diff(ListNewsLastUpdate, 'minutes') < 5) {
+        console.log('cache News feito com sucesso!');
+        return res.status(200).send({ message: newsAllDocuments });
+      }
+
       const allDocuments = await client.getAllByType("news-post", {
         orderings: {
           field: "document.last_publication_date",
@@ -55,7 +75,8 @@ module.exports = (app) => {
         limit,
       });
 
-      const newAllDocuments = allDocuments.reduce((acc, doc) => {
+      ListNewsLastUpdate = moment();
+      newsAllDocuments = allDocuments.reduce((acc, doc) => {
         
         const tituloHeader = prismicH.asHTML(doc.data.titulo_news);
         const allContents = []
@@ -108,9 +129,9 @@ module.exports = (app) => {
         return [...acc, docFormatted];
       }, []);
 
-      res.status(200).send({ message: newAllDocuments });
+     return res.status(200).send({ message: newsAllDocuments });
     } catch (err) {
-      res.status(400).send({ message: "Server problem, could not list News" });
+     return res.status(400).send({ message: "Server problem, could not list News" });
     }
   };
   return {

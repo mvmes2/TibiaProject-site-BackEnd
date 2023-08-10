@@ -1,4 +1,7 @@
 module.exports = app => {
+
+	const moment = require('moment');
+
 	const { checkValidLoginHash, createCharacterSerice, validateCharacterService, deleteCharacterService,
 		updateHidenCharacterService, updateCharacterCommentService, recoveryAccountGenericService,
 		updateAccountPasswordService } = app.src.main.services.AccountService;
@@ -7,8 +10,8 @@ module.exports = app => {
 
 	const validateAccountRequest = async (req, res) => {
 		const data = req.body;
-		const resp = await checkValidLoginHash(data)
-		res.status(resp.status).send({ message: resp.message });
+		const resp = await checkValidLoginHash(data);
+		return res.status(resp.status).send({ message: resp.message });
 	}
 
 	const createCharacterRequest = async (req, res) => {
@@ -66,11 +69,18 @@ module.exports = app => {
 		return res.status(200).send({ message: 'okla', user: req.user });
 	}
 
+	let getlAllPlayersToHighscoreLastUpdate = 0;
+	let AllPlayersToHighscore = 0;
+
 	const getlAllPlayersToHighscoreController = async (req, res) => {
 		const data = req.body.queryparam;
-		console.log(data)
-		const resp = await getlAllPlayersToHighscoreRepository(data);
-		return res.status(resp.status).send({ message: resp.message });
+		if (moment().diff(getlAllPlayersToHighscoreLastUpdate, 'minutes') < 5) {
+			console.log('cache getlAllPlayersToHighscore feito com sucesso!');
+			return res.status(AllPlayersToHighscore.status).send({ message: AllPlayersToHighscore.message });
+		}
+		getlAllPlayersToHighscoreLastUpdate = moment();
+		AllPlayersToHighscore = await getlAllPlayersToHighscoreRepository(data);
+		return res.status(AllPlayersToHighscore.status).send({ message: AllPlayersToHighscore.message });
 	}
 
 	const updateAccountPasswordRequest = async (req, res) => {
@@ -103,9 +113,19 @@ module.exports = app => {
 		return res.status(resp.status).send({ message: resp.message });
 	}
 
+	let lastUpdatePlayerQuantity = 0;
+	let playersQuantity = 0;
+
 	const getPlayerQuantity = async (req, res) => {
-		const resp = await getPlayerQuantityRepository();
-		return res.status(resp.status).send({ message: resp.message });
+		console.log('lastUpdate: ', lastUpdatePlayerQuantity)
+		if (moment().diff(lastUpdatePlayerQuantity, 'minutes') < 5) {
+			console.log('cache feito com sucesso!');
+			return res.status(playersQuantity.status).send({ message: playersQuantity.message });
+		}
+		lastUpdatePlayerQuantity = moment();
+		playersQuantity = await getPlayerQuantityRepository();
+		console.log('request enviada para o banco!');
+		return res.status(playersQuantity.status).send({ message: playersQuantity.message });
 	}
 
 	return {
