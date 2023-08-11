@@ -1,5 +1,7 @@
+const moment = require('moment');
 const { players, guilds, guild_invites, guild_membership, guild_ranks,
   guild_wars, guildwar_kills, accounts } = require('../models/projectModels');
+
 
 const getGuildList = async () => {
   try {
@@ -11,12 +13,24 @@ const getGuildList = async () => {
   }
 }
 
+let guildInformationData = null;
+let guildInformationLastUpdated = 0;
+let guildInformationSeted = 0;
+
 const getGuildInformation = async (data) => {
+  
+  console.log('O que veio dentro de data de guilds query? ', data.guild_id)
+  console.log('O que veio dentro de guildInformationData? ', guildInformationData?.guild_id)
+  if (guildInformationData?.guild_id == data.guild_id && moment().diff(guildInformationLastUpdated, 'minutes') < 5) {
+    console.log('Cache GuildInformation aplicado com sucesso!')
+    return { status: 200, message: guildInformationSeted };
+  } 
+    
   try {
     const guildInfo = await guilds.query()
       .join('worlds', 'guilds.world_id', '=', 'worlds.id')
       .select('guilds.*', 'worlds.serverName as worldName').where('guilds.id', data.guild_id).first();
-console.log(' o que veio aqui em guildInfo? ', guildInfo)
+      console.log(' o que veio aqui em guildInfo? ', guildInfo)
     const guildOnwerName = await players.query().select('name').where({ id: guildInfo.ownerid }).first()
 
     const memberList = await guild_membership.query()
@@ -37,7 +51,9 @@ console.log(' o que veio aqui em guildInfo? ', guildInfo)
       .where({ guild_id: data.guild_id })
       .orderBy('guild_ranks.level', 'DESC');
 
-    const newGuildInfos = {
+    guildInformationData = data;
+    guildInformationLastUpdated = moment();
+    guildInformationSeted = {
       ...guildInfo,
       ownerName: guildOnwerName.name,
       memberList,
@@ -45,7 +61,7 @@ console.log(' o que veio aqui em guildInfo? ', guildInfo)
       guildInvites
     }
 
-    return { status: 200, message: newGuildInfos };
+    return { status: 200, message: guildInformationSeted };
   } catch (err) {
     console.log('internal error while trying to retrieve guildMembersList at: getGuildMembersList, ', err);
     return { status: 500, message: 'Internal error, close the website, and try again, or call Administration!' }
@@ -72,6 +88,7 @@ const guildAcceptInvitation = async (data) => {
 const characterToRemoveFromGuild = async (data) => {
   try {
     await guild_membership.query().delete().where({ player_id: data.player_id });
+    guildInformationData = null;
     return { status: 200, message: 'Character Removed from guild' };
   } catch (err) {
     console.log('internal error while trying to remove character from Guild at: characterToRemoveFromGuild, ', err);
