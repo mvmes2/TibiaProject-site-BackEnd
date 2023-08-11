@@ -69,19 +69,11 @@ module.exports = app => {
 		return res.status(200).send({ message: 'okla', user: req.user });
 	}
 
-	let getlAllPlayersToHighscoreLastUpdate = 0;
-	let AllPlayersToHighscore = 0;
 
 	const getlAllPlayersToHighscoreController = async (req, res) => {
 		const data = req.body.queryparam;
-		console.log('o que temos aqu??? i', data)
-		if (data == 'experience' && moment().diff(getlAllPlayersToHighscoreLastUpdate, 'seconds') < 15) {
-			console.log('cache getlAllPlayersToHighscore feito com sucesso!');
-			return res.status(AllPlayersToHighscore.status).send({ message: AllPlayersToHighscore.message });
-		}
-		getlAllPlayersToHighscoreLastUpdate = moment();
-		AllPlayersToHighscore = await getlAllPlayersToHighscoreRepository(data);
-		return res.status(AllPlayersToHighscore.status).send({ message: AllPlayersToHighscore.message });
+		const resp = await getlAllPlayersToHighscoreRepository(data);
+		return res.status(resp.status).send({ message: resp.message });
 	}
 
 	const updateAccountPasswordRequest = async (req, res) => {
