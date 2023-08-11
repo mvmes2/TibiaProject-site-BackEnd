@@ -13,6 +13,7 @@ const getProductsList = async () => {
   }
 }
 
+//cache
 let lastPaymentIDUpdated = 0;
 let lastPaymentID = 0;
 
