@@ -1,7 +1,7 @@
 const { worlds, players, products, accounts, payments } = require('../../../models/projectModels');
 const { userSockets, io } = require('../../../../../server');
 const { projectMailer } = require('../../../utils/utilities');
-
+const moment = require('moment');
 
 const getProductsList = async () => {
   try {
@@ -13,11 +13,20 @@ const getProductsList = async () => {
   }
 }
 
+let lastPaymentIDUpdated = 0;
+let lastPaymentID = 0;
+
 const GetPaymentListLastIDRepository = async () => {
+
+  if (lastPaymentIDUpdated != 0 && moment().diff(lastPaymentIDUpdated, 'minutes') < 5) {
+    console.log('Cache lastPaymentID aplicado com sucesso!')
+    return { status: 200, message: lastPaymentID === undefined  ? {id: 0} : lastPaymentID };
+  } 
   try {
-    const paymentListLastId = await payments.query().select('id').orderBy('id', 'desc').first();
-    console.log('cheguei aqui? ', paymentListLastId)
-    return { status: 200, message: paymentListLastId === undefined ? {id: 0} : paymentListLastId };
+    lastPaymentID = await payments.query().select('id').orderBy('id', 'desc').first();
+    lastPaymentIDUpdated = moment();
+
+    return { status: 200, message: lastPaymentID === undefined ? {id: 0} : lastPaymentID };
   } catch (err) {
     console.log(err);
     return { status: 500, message: 'Internal error, close the website, and try again, or call Administration!' }
@@ -29,6 +38,7 @@ const insertNewPayment = async (data) => {
   data.transaction_id = data.transaction_id.toString();
   try {
     await payments.query().insert(data);
+    lastPaymentIDUpdated = 0;
   } catch (err) {
     console.log(err);
     return { status: 500, message: 'Internal error!' }
