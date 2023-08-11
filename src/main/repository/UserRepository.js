@@ -3,6 +3,7 @@ const { accounts, players, players_online, player_deaths, player_items,
 const { convertPremiumTimeToDaysLeft, updateLastDayTimeStampEpochFromGivenDays } = require('../utils/utilities');
 
 module.exports = app => {
+  const moment = require('moment');
 
   const updateAcc = async (data) => {
     const findAccountFirst = await accounts.query().select('id').where({ id: data.id });
@@ -220,8 +221,8 @@ module.exports = app => {
         const comment = await players_comment.query().select('comment').where({ player_id: found.id }).first();
         const accountCharList = await players.query().select('name', 'hidden').where({ account_id: found.account_id });
         const guild = await guild_membership.query().select('player_id', 'guild_id', 'rank_id').where({ player_id: found.id }).first();
-        const memberRank = guild ? ( await guild_ranks.query().select('name').where({ id: guild.rank_id }).first() ) : '';
-        const GuildName = guild ? ( await guilds.query().select('name', 'id').where({ id: guild.guild_id }).first() ) : '';
+        const memberRank = guild ? (await guild_ranks.query().select('name').where({ id: guild.rank_id }).first()) : '';
+        const GuildName = guild ? (await guilds.query().select('name', 'id').where({ id: guild.guild_id }).first()) : '';
         console.log('wetf guild_id???', GuildName)
         const characterOwnershipFalse = {
           ...found,
@@ -248,8 +249,8 @@ module.exports = app => {
         const comment = await players_comment.query().select('comment').where({ player_id: checkCharacterOwner.id }).first();
         const accountCharList = await players.query().select('name', 'hidden').where({ account_id: checkCharacterOwner.account_id });
         const guild = await guild_membership.query().select('player_id', 'guild_id', 'rank_id').where({ player_id: checkCharacterOwner.id }).first();
-        const memberRank = guild ? ( await guild_ranks.query().select('name').where({ id: guild.rank_id }).first() ) : '';
-        const GuildName = guild ? ( await guilds.query().select('name', 'id').where({ id: guild.guild_id }).first() ) : '';
+        const memberRank = guild ? (await guild_ranks.query().select('name').where({ id: guild.rank_id }).first()) : '';
+        const GuildName = guild ? (await guilds.query().select('name', 'id').where({ id: guild.guild_id }).first()) : '';
         console.log('wetf guild_id???', GuildName)
         const characterOwnershipTrue = {
           ...checkCharacterOwner,
@@ -270,7 +271,74 @@ module.exports = app => {
     }
   };
 
+  // Sistema de cash para highScores
+  let experienceLastUpdated = 0;
+  let experiencePlayers = 0;
+
+  let skillFistLastUpdated = 0;
+  let skillFistPlayers = 0;
+
+  let skillAxeLastUpdated = 0;
+  let skillAxePlayers = 0;
+
+  let skillSwordLastUpdated = 0;
+  let skillSwordPlayers = 0;
+
+  let skillClubLastUpdated = 0;
+  let skillClubPlayers = 0;
+
+  let skillDistLastUpdated = 0;
+  let skillDistPlayers = 0;
+
+  let skillMlvlLastUpdated = 0;
+  let skillMlvlPlayers = 0;
+
+  let skillShieldingLastUpdated = 0;
+  let skillShieldingPlayers = 0;
+
+  let skillFishingLastUpdated = 0;
+  let skillFishingPlayers = 0;
+
   const getlAllPlayersToHighscoreRepository = async (data) => {
+    console.log('.................: ', data)
+    // Sistema de cash para highScores
+    if (data == 'experience' && moment().diff(experienceLastUpdated, 'minutes') < 5) {
+      console.log('Cache experienceSkill aplicado com sucesso!')
+      return { status: 200, message: JSON.stringify(experiencePlayers) }
+    }
+    else if (data == 'skill_fist' && moment().diff(skillFistLastUpdated, 'minutes') < 5) {
+      console.log('Cache skill_fist aplicado com sucesso!')
+      return { status: 200, message: JSON.stringify(skillFistPlayers) }
+    }
+    else if (data == 'skill_axe' && moment().diff(skillAxeLastUpdated, 'minutes') < 5) {
+      console.log('Cache skill_axe aplicado com sucesso!')
+      return { status: 200, message: JSON.stringify(skillAxePlayers) }
+    }
+    else if (data == 'skill_sword' && moment().diff(skillSwordLastUpdated, 'minutes') < 5) {
+      console.log('Cache skill_sword aplicado com sucesso!')
+      return { status: 200, message: JSON.stringify(skillSwordPlayers) }
+    }
+    else if (data == 'skill_club' && moment().diff(skillClubLastUpdated, 'minutes') < 5) {
+      console.log('Cache skill_club aplicado com sucesso!')
+      return { status: 200, message: JSON.stringify(skillClubPlayers) }
+    }
+    else if (data == 'skill_dist' && moment().diff(skillDistLastUpdated, 'minutes') < 5) {
+      console.log('Cache skill_dist aplicado com sucesso!')
+      return { status: 200, message: JSON.stringify(skillDistPlayers) }
+    }
+    else if (data == 'maglevel' && moment().diff(skillMlvlLastUpdated, 'minutes') < 5) {
+      console.log('Cache maglevel aplicado com sucesso!')
+      return { status: 200, message: JSON.stringify(skillMlvlPlayers) }
+    }
+    else if (data == 'skill_shielding' && moment().diff(skillShieldingLastUpdated, 'minutes') < 5) {
+      console.log('Cache skill_shielding aplicado com sucesso!')
+      return { status: 200, message: JSON.stringify(skillShieldingPlayers) }
+    }
+    else if (data == 'skill_fishing' && moment().diff(skillFishingLastUpdated, 'minutes') < 5) {
+      console.log('Cache skill_fishing aplicado com sucesso!')
+      return { status: 200, message: JSON.stringify(skillFishingPlayers) }
+    }
+
     try {
       const highScores = await players.query()
         .join('worlds', 'players.world_id', '=', 'worlds.id')
@@ -280,15 +348,64 @@ module.exports = app => {
           'players.hidden', 'accounts.country', 'players.skill_fist', 'players.skill_club', 'players.skill_sword',
           'players.skill_axe', 'players.skill_dist', 'players.skill_shielding',
           'players.skill_fishing', 'players.experience', 'players.maglevel')
-        .where('players.group_id', '<', 5)
+        .where('players.group_id', '<', 6)
         .where({ 'players.deletedAt': 0 })
         .orderBy(data, 'desc')
         .limit(100);
 
-      return { status: 200, message: JSON.stringify(highScores) }
+      switch (data) {
+        case 'experience':
+          experienceLastUpdated = moment();
+          experiencePlayers = highScores;
+          return { status: 200, message: JSON.stringify(experiencePlayers) }
+
+        case 'skill_fist':
+          skillFistLastUpdated = moment();
+          skillFistPlayers = highScores;
+          return { status: 200, message: JSON.stringify(skillFistPlayers) }
+
+        case 'skill_axe':
+          skillAxeLastUpdated = moment();
+          skillAxePlayers = highScores;
+          return { status: 200, message: JSON.stringify(skillAxePlayers) }
+
+        case 'skill_sword':
+          skillSwordLastUpdated = moment();
+          skillSwordPlayers = highScores;
+          return { status: 200, message: JSON.stringify(skillSwordPlayers) }
+
+        case 'skill_club':
+          skillClubLastUpdated = moment();
+          skillClubPlayers = highScores;
+          return { status: 200, message: JSON.stringify(skillClubPlayers) }
+
+        case 'skill_dist':
+          skillDistLastUpdated = moment();
+          skillDistPlayers = highScores;
+          return { status: 200, message: JSON.stringify(skillDistPlayers) }
+        case 'maglevel':
+          skillMlvlLastUpdated = moment();
+          skillMlvlPlayers = highScores;
+          return { status: 200, message: JSON.stringify(skillMlvlPlayers) }
+
+        case 'skill_shielding':
+          skillShieldingLastUpdated = moment();
+          skillShieldingPlayers = highScores;
+          return { status: 200, message: JSON.stringify(skillShieldingPlayers) }
+
+        case 'skill_fishing':
+          skillFishingLastUpdated = moment();
+          skillFishingPlayers = highScores;
+          return { status: 200, message: JSON.stringify(skillFishingPlayers) }
+
+        default:
+          console.log('Error while trying to retrieve highScores')
+          return { status: 500, message: JSON.stringify('Internal error') }
+      }
+
     } catch (err) {
       console.log(err)
-      return { status: 500, message: 'Internal errror' }
+      return { status: 500, message: 'Internal error while trying to retrieve highScores' }
     }
   }
 
