@@ -42,31 +42,63 @@ module.exports = app => {
     }
   }
 
+  let checkIfAccExistsData = 0;
+  let checkIfAccExistsLastUpdated = 0;
+  let checkAcc = 0;
+
   const checkIfAccExists = async (data) => {
-    try {
-      const exists = await accounts.query().select('email', 'id', 'password', 'name', 'loginHash', 'country', 'coins').where({ email: data });
-      if (!exists || exists === undefined || exists?.length < 1) {
+    console.log('....................................................!!!!!!!!!!!!!!!: ', data)
+    console.log('....................................................!!!!!!!!!!!!!!!: ', checkIfAccExistsData, data)
+    console.log('vai entrar no chache?')
+    if (checkIfAccExistsData.toString() === data.toString() && moment().diff(checkIfAccExistsLastUpdated, 'minutes') < 5) {
+      console.log('Entrou no chache?')
+      console.log('Cache checkAcc aplicado com sucesso!')
+      if (!checkAcc || checkAcc === undefined || checkAcc?.length < 1) {
         return { bool: false };
       } else {
-        return { acc: exists, bool: true };
+        return { acc: checkAcc, bool: true };
+      }
+    }
+    try {
+      checkAcc = await accounts.query().select('email', 'id', 'password', 'name', 'loginHash', 'country', 'coins').where({ email: data });
+      if (!checkAcc || checkAcc === undefined || checkAcc?.length < 1) {
+        checkIfAccExistsLastUpdated = moment();
+        checkIfAccExistsData = data;
+        return { bool: false };
+      } else {
+        checkIfAccExistsLastUpdated = moment();
+        checkIfAccExistsData = data;
+        return { acc: checkAcc, bool: true };
       }
     } catch (err) {
       console.log('erro ao tentar validar account em checkIfExists userRepository...', err)
     }
   }
 
+  let validateLoginData = 0;
+  let validateLoginLastUpdated = 0;
+  let validateLoginAccInfo = 0;
+
   const validateLoginHash = async (data) => {
-    console.log(data)
+    // cache
+    console.log('Vai entrar no chache?........................................', data, validateLoginData)
+    if (validateLoginData.id === data.id && moment().diff(validateLoginLastUpdated, 'minutes') < 5) {
+      console.log('Cache validateLoginAccMannagement aplicado com sucesso!')
+     
+      return { status: 200, message: validateLoginAccInfo };
+    }
+
     try {
+      console.log('NÃO ENTROU NO CASH!')
       if (!data?.loginHash || !data.id) { return { status: 403, message: 'You need to Login!' } }
 
-      const validHash = await accounts.query().select('loginHash').where({ id: data.id }).first();
+     const validateLoginInfo = await accounts.query().select('loginHash').where({ id: data.id }).first();
 
-      if (!validHash || validHash === undefined) { return { status: 403, message: 'error at login hash' } }
+      if (!validateLoginInfo || validateLoginInfo === undefined) { return { status: 403, message: 'error at login hash' } }
 
-      if (validHash.loginHash.trim() !== data?.loginHash.trim()) {
+      if (validateLoginInfo.loginHash.trim() !== data?.loginHash.trim()) {
         return {
-          status: 403, message: `close this page, re-open the website, and try again! or call admin!`
+          status: 403, message: `Error at Login hash, close this page, re-open the website, and try again! or call admin!`
         }
       };
 
@@ -137,12 +169,14 @@ module.exports = app => {
       const accUpdatedPremiumTime = await accounts.query().select('id', 'name', 'email', 'country', 'lastday', 'coins',
         'isBanned', 'banReason', 'premdays', 'createdAt', 'day_end_premmy', 'web_lastlogin', 'web_flags', 'type')
         .where({ id: Number(data.id) }).first();
-      const accInfo = {
+
+        validateLoginAccInfo = {
         ...accUpdatedPremiumTime,
         editedCharList,
       }
-
-      return { status: 200, message: accInfo };
+      validateLoginLastUpdated = moment();
+      validateLoginData = data;
+      return { status: 200, message: validateLoginAccInfo };
     } catch (err) {
       console.log(err);
       return { status: 500, message: 'Internal error' };

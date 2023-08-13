@@ -5,12 +5,12 @@ module.exports = app => {
 		newGuildInvite, guildInviteCancel, guildUpdateMember, guildCreateNewRank,
 		guildChangeRankName, guildDeleteRank, createNewGuild } = app.src.main.repository.GuildsRepository;
 
-		let GetGuildListLastUpdate = 0;
-		let guildList = 0;
+	let GetGuildListLastUpdate = 0;
+	let guildList = 0;
 
 	const GetGuildListRequest = async (req, res) => {
 
-		if (moment().diff(GetGuildListLastUpdate, 'minutes') < 5) {
+		if (GetGuildListLastUpdate != 0 && moment().diff(GetGuildListLastUpdate, 'minutes') < 5) {
 			console.log('cache GuildList feito com sucesso!');
 			return res.status(guildList.status).send({ message: guildList.message });
 		}
@@ -78,11 +78,10 @@ module.exports = app => {
 
 	const createNewGuildRequest = async (req, res) => {
 		const data = req.body;
-		const resp = await createNewGuild(data)
+		const resp = await createNewGuild(data);
+		GetGuildListLastUpdate = 0;
 		res.status(resp.status).send({ message: resp.message });
 	}
-
-
 
 	return {
 		GetGuildListRequest,

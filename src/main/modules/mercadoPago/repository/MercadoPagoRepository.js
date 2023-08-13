@@ -1,7 +1,7 @@
 const { worlds, players, products, accounts, payments } = require('../../../models/projectModels');
 const { userSockets, io } = require('../../../../../server');
 const { projectMailer } = require('../../../utils/utilities');
-
+const moment = require('moment');
 
 const getProductsList = async () => {
   try {
@@ -13,11 +13,21 @@ const getProductsList = async () => {
   }
 }
 
+//cache
+let lastPaymentIDUpdated = 0;
+let lastPaymentID = 0;
+
 const GetPaymentListLastIDRepository = async () => {
+
+  if (lastPaymentIDUpdated != 0 && moment().diff(lastPaymentIDUpdated, 'minutes') < 5) {
+    console.log('Cache lastPaymentID aplicado com sucesso!')
+    return { status: 200, message: lastPaymentID === undefined ? { id: 0 } : lastPaymentID };
+  }
   try {
-    const paymentListLastId = await payments.query().select('id').orderBy('id', 'desc').first();
-    console.log('cheguei aqui? ', paymentListLastId)
-    return { status: 200, message: paymentListLastId === undefined ? {id: 0} : paymentListLastId };
+    lastPaymentID = await payments.query().select('id').orderBy('id', 'desc').first();
+    lastPaymentIDUpdated = moment();
+
+    return { status: 200, message: lastPaymentID === undefined ? { id: 0 } : lastPaymentID };
   } catch (err) {
     console.log(err);
     return { status: 500, message: 'Internal error, close the website, and try again, or call Administration!' }
@@ -29,6 +39,7 @@ const insertNewPayment = async (data) => {
   data.transaction_id = data.transaction_id.toString();
   try {
     await payments.query().insert(data);
+    lastPaymentIDUpdated = 0;
   } catch (err) {
     console.log(err);
     return { status: 500, message: 'Internal error!' }
@@ -61,13 +72,13 @@ const insertCoinsAtAccountToApprovedPayment = async (paymentID) => {
       .whereNotNull('approved_date')
       .whereNull('coins_paid_date');
 
-      console.log('como estou recebendo o id?', paymentID)
-      console.log('qual conta vai vir? vai dar certo? ', getAccountToInsertCoins)
+    console.log('como estou recebendo o id?', paymentID)
+    console.log('qual conta vai vir? ', getAccountToInsertCoins)
 
     if (getAccountToInsertCoins?.length < 1) {
-      try{
+      try {
         throw new Error('Payment ID do not exists or payment id have already been paid, check your email!')
-      }catch(err){
+      } catch (err) {
         console.log(err)
         return { status: 404, message: 'Payment ID do not exists or payment id have already been paid, check your email!' }
       }
@@ -81,8 +92,8 @@ const insertCoinsAtAccountToApprovedPayment = async (paymentID) => {
       try {
         projectMailer.coinsPurchase(accToPay.account_email, accToPay.account_name, accToPay.coins_quantity);
         console.log('email de pagamento enviado!');
-      } catch(err) {
-        console.log('email error at mercadoPagoRepository: ', err)
+      } catch (err) {
+        console.log('email error at mercadoPagoRepository, insertCoinsAtAccountToApprovedPayment at Email send', err)
       }
 
       console.log('consolando se tem algo no userSocket ', userSockets ? userSockets : '');
@@ -99,11 +110,10 @@ const insertCoinsAtAccountToApprovedPayment = async (paymentID) => {
       return { status: 200, message: 'paied' }
     }
   } catch (err) {
-    console.log(err);
+    console.log('Internal error! insertCoinsAtAccountToApprovedPayment at mercadoPagoRepository', err);
     return { status: 500, message: 'Internal error!' }
   }
 }
-
 
 module.exports = {
   getProductsList,

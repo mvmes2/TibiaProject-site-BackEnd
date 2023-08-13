@@ -1,34 +1,35 @@
 const { checkPassword, hashGenerator, sendEmailTo, generateToken } = require('../utils/utilities');
 module.exports = app => {
-    const { checkIfAccExists, updateAcc } = app.src.main.repository.UserRepository;
+	const { checkIfAccExists, updateAcc } = app.src.main.repository.UserRepository;
 
-    const LoginAccService = async (data) => {
-        const exists = await checkIfAccExists(data.email);
-        if (!exists.bool) {
-            return { status: 404, message: 'Wrong Email and Password, or Account does not exists!' }
-        }
+	const LoginAccService = async (data) => {
+		
+		const exists = await checkIfAccExists(data.email);
+		if (!exists.bool) {
+			return { status: 404, message: 'Wrong Email and Password, or Account does not exists!' }
+		}
 
-        const acc = exists.acc[0];
-        
-        const isPasswordValid = checkPassword(data.password, acc.password);
+		const acc = exists.acc[0];
 
-        if (!isPasswordValid) { return { status: 400, message: 'Wrong passwrod, if you forgot your password please use account recovery!' } };
+		const isPasswordValid = checkPassword(data.password, acc.password);
 
-       const hash = hashGenerator(8);
-       acc.loginHash = hash;
-       const {password, ...accwithoutPassword} = acc;
-       const newLoginToken = generateToken(1440, accwithoutPassword)
+		if (!isPasswordValid) { return { status: 400, message: 'Wrong passwrod, if you forgot your password please use account recovery!' } };
 
-        const updateInfo = {
-            loginHash: hash,
-            web_lastlogin: Math.floor(Date.now() / 1000),
-            login_token: newLoginToken
-        }
+		const hash = hashGenerator(8);
+		acc.loginHash = hash;
+		const { password, ...accwithoutPassword } = acc;
+		const newLoginToken = generateToken(1440, accwithoutPassword)
 
-        await updateAcc({ update: updateInfo, id: acc.id });
-    return { status: 200, message: { id: acc.id, loginHash: hash, name: acc.name, login_token: newLoginToken, email: acc.email, country:acc.country, coins: acc.coins }};
-}
-    return {
-        LoginAccService,
-    }
+		const updateInfo = {
+			loginHash: hash,
+			web_lastlogin: Math.floor(Date.now() / 1000),
+			login_token: newLoginToken
+		}
+
+		await updateAcc({ update: updateInfo, id: acc.id });
+		return { status: 200, message: { id: acc.id, loginHash: hash, name: acc.name, login_token: newLoginToken, email: acc.email, country: acc.country, coins: acc.coins } };
+	}
+	return {
+		LoginAccService,
+	}
 }
