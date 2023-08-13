@@ -95,16 +95,22 @@ module.exports = (app) => {
 
   let listAllNewsLastUpdated = 0;
   let listAllNewsInfo = 0;
+  let listAllNewsPage = 0;
 
   const ListAllNews = async (req, res) => {
-
-    if (moment().diff(listAllNewsLastUpdated, 'minutes') < 5) {
-      console.log('CACHE ListAllNews feito com sucesso!');
+    const { page } = req.params;
+    
+    console.log('O que ta vindo???.................: ', listAllNewsPage, page);
+    console.log('VAI ENTRAR NO CACHE????');
+    if (listAllNewsPage == page && moment().diff(listAllNewsLastUpdated, 'minutes') < 5) {
+      console.log('ENTROU NO CACHE!!!');
+      console.log('CACHE ListAllNewsArchives feito com sucesso!');
       return res.status(200).send({ message: listAllNewsInfo });
     };
 
     try {
-      const { page } = req.params;
+      console.log('NÃO ENTROU NO CACHE!!!');
+      
       const allNews = await client.get({
         orderings: {
           field: "document.last_publication_date",
@@ -151,6 +157,7 @@ module.exports = (app) => {
         data: formatterNews,
       };
       listAllNewsLastUpdated = moment();
+      listAllNewsPage = page;
       return res.status(200).send({ message: listAllNewsInfo });
     } catch (err) {
       console.log(err);

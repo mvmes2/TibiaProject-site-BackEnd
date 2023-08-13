@@ -61,9 +61,6 @@ module.exports = app => {
     app.route('/User-guild-createGuild').post(authMiddleware, app.src.main.controllers.GuildsController.createNewGuildRequest);
     app.route('/User-players-quantity').get(app.src.main.controllers.AccountController.getPlayerQuantity);
     
-    
-    
-    
 
     /////////////////////////////////////////////////// Admin Routes //////////////////////////////////////////////////////////
 
@@ -77,8 +74,7 @@ module.exports = app => {
     app.route('/Admin-get-client-version').get(AdminAuthMiddleware, app.src.main.controllers.ClientVersionController.GetClientVersionRequest);
     app.route('/Admin-update-client-version').post(AdminAuthMiddleware, app.src.main.controllers.ClientVersionController.UpdateClientVersionRequest);
     
-    
-    
+
     
     //////Error MiddleWare/////
     app.use((err, req, res, next) => {
