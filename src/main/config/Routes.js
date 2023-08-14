@@ -37,7 +37,6 @@ module.exports = app => {
     app.route('/getHighScores-players').post(app.src.main.controllers.AccountController.getlAllPlayersToHighscoreController);
     app.route('/getTicketList').post(authMiddleware, app.src.main.controllers.TicketsController.GetTicketListRequest);
     app.route('/createNewTicket').post(authMiddleware, upload, compressImagesMiddleware, app.src.main.controllers.TicketsController.CreateNewTicket);
-    app.route('/getTicketListLastId').get(authMiddleware, app.src.main.controllers.TicketsController.GetTicketListLastIdRequest);
     app.route('/getTicket').post(authMiddleware, app.src.main.controllers.TicketsController.GetTicketRequest);
     app.route('/User-ticket-update').post(authMiddleware, app.src.main.controllers.TicketsController.UserTicketUpdateRequest);
     app.route('/User-ticket-insert-new-response').post(authMiddleware, upload, compressImagesMiddleware, app.src.main.controllers.TicketsController.UserTicketInsertNewResponseRequest);
