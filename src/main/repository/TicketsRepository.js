@@ -10,7 +10,7 @@ let getTickeListLastUpdated = 0;
 const getTicketListFromUser = async (data) => {
 	console.log('VAI ENTRAR NO CACHE DE GETTICKETS??? ', data.id, getTicketListData.id);
 //cache
-	if (getTicketListData.id === data.id && moment().diff(getTickeListLastUpdated, 'minutes') < 5) {
+	if (getTickeListLastUpdated !== 0 && getTicketListData.id === data.id && moment().diff(getTickeListLastUpdated, 'minutes') < 5) {
 		console.log('ENTROU NO CACHE DE GETTICKETLIST!!');
 		console.log('CACHE em getTicketList feito com sucesso!');
 		return { status: 200, message: getTickeListInfo };
@@ -54,7 +54,7 @@ const CreateNewTicketInDB = async (data, files) => {
 			})
 			console.log('kd imagens?  ', ticketImage)
 		}
-
+		getTickeListLastUpdated = 0;
 		return { status: 200, message: 'ok' };
 	} catch (err) {
 		console.log(err);
@@ -62,8 +62,20 @@ const CreateNewTicketInDB = async (data, files) => {
 	}
 }
 
+let ticketLastUpdated = 0;
+let ticketInfo = 0;
+let ticketData = 0;
+
 const getTicket = async (data) => {
+	console.log(' o que ta vindo no data de getTicket? ', data);
+	//cache
+	if (data.id === ticketData.id && moment().diff(ticketLastUpdated, 'minutes') < 2) {
+		console.log('CACHE em getTicket feito com sucesso!');
+		return { status: 200, message: ticketInfo };
+	}
 	try {
+		ticketData = data;
+
 		const ticket = await tickets.query().select('*').where({ id: data.id }).first();
 		const ticketImages = await tickets_images.query().select('*').where({ ticket_id: data.id });
 		const ticketReponses = await tickets_response.query().select('*').where({ ticket_id: data.id });
@@ -71,20 +83,20 @@ const getTicket = async (data) => {
 		const responseImagesArr = await Promise.all(
 			ticketReponses.map(async (response) => {
 				const images = await tickets_response_images.query().select('*').where({ response_id: Number(response.id) });
-				console.log('tem images? ', images);
 				return images;
 			})
 		);
 
 		const responseImages = responseImagesArr.flat();
 
-		const newTicketToRender = {
+		ticketInfo = {
 			...ticket,
 			ticketImages,
 			ticketReponses,
 			responseImages
 		}
-		return { status: 200, message: newTicketToRender };
+		ticketLastUpdated = moment();
+		return { status: 200, message: ticketInfo };
 	} catch (err) {
 		console.log(err);
 		return { status: 500, message: 'Internal error' }
