@@ -219,15 +219,41 @@ module.exports = app => {
     }
   }
 
+  let checkPlayerNameInfo = 0;
+  let PlayerInfoLastUpdated = 0;
+  let PlayerData = 0;
+  let PlayerInfo = 0;
+
   const checkCharacterOwnerAtDB = async (data) => {
     data.name = data.name.replaceAll('-', ' ');
     console.log(data.name)
     console.log('qual a dataaa???????????????????????? ', data.name)
-    const checkOnlyPlayerNameFirst = await players.query().select('name', 'account_id').where({ name: data.name });
+//cache
+  console.log('VAI ENTRAR NO CACHE DE GetPlayerInfo??', PlayerData.name, data.name);
+    if (PlayerData.name === data.name && moment().diff(PlayerInfoLastUpdated, 'minutes') < 5) {
+      console.log('ENTROU NO CACHE!!')
+      console.log('CACHE em GetPlayerInfo feito com sucesso!!');
+      if (checkPlayerNameInfo.length < 1) { return { status: 404, message: 'Character does not exists!' } }
 
-    if (checkOnlyPlayerNameFirst.length < 1) { return { status: 404, message: 'Character does not exists!' } }
+      if (PlayerInfo && PlayerInfo?.owner == false) {
+        return { status: 200, message: PlayerInfo, owner: false } 
+      }
+      return { status: 200, message: PlayerInfo, owner: true }
+    }
+
+    checkPlayerNameInfo = await players.query().select('name', 'account_id').where({ name: data.name });
+
+    if (checkPlayerNameInfo.length < 1) {
+      PlayerInfoLastUpdated = moment();
+      return { status: 404, message: 'Character does not exists!' } 
+    }
+
     let checkCharacterOwner = null;
+
     try {
+      console.log('NÃO ENTROU NO CASH!!')
+      PlayerData = data;
+
       checkCharacterOwner = await players.query()
         .join('worlds', 'players.world_id', '=', 'worlds.id')
         .join('vocations', 'players.vocation', 'vocations.vocation_id')
@@ -241,7 +267,7 @@ module.exports = app => {
     }
     if (checkCharacterOwner === undefined || checkCharacterOwner === null) {
       try {
-        console.log('qual o nome dessa mierda? ', data.name.toLowerCase())
+        
         const found = await players.query()
           .join('worlds', 'players.world_id', '=', 'worlds.id')
           .join('vocations', 'players.vocation', 'vocations.vocation_id')
@@ -258,7 +284,7 @@ module.exports = app => {
         const memberRank = guild ? (await guild_ranks.query().select('name').where({ id: guild.rank_id }).first()) : '';
         const GuildName = guild ? (await guilds.query().select('name', 'id').where({ id: guild.guild_id }).first()) : '';
         console.log('wetf guild_id???', GuildName)
-        const characterOwnershipFalse = {
+        PlayerInfo = {
           ...found,
           deathList,
           owner: false,
@@ -269,7 +295,8 @@ module.exports = app => {
           guild_rank: memberRank.name,
           guild_id: GuildName.id
         }
-        return { status: 200, message: characterOwnershipFalse, owner: false }
+        PlayerInfoLastUpdated = moment();
+        return { status: 200, message: PlayerInfo, owner: false }
       } catch (err) {
         console.log(err);
         return { status: 500, message: 'erro interno, contate a administração ou abra um ticket!a' }
@@ -285,8 +312,8 @@ module.exports = app => {
         const guild = await guild_membership.query().select('player_id', 'guild_id', 'rank_id').where({ player_id: checkCharacterOwner.id }).first();
         const memberRank = guild ? (await guild_ranks.query().select('name').where({ id: guild.rank_id }).first()) : '';
         const GuildName = guild ? (await guilds.query().select('name', 'id').where({ id: guild.guild_id }).first()) : '';
-        console.log('wetf guild_id???', GuildName)
-        const characterOwnershipTrue = {
+        
+        PlayerInfo = {
           ...checkCharacterOwner,
           deathList,
           owner: true,
@@ -297,7 +324,8 @@ module.exports = app => {
           guild_rank: memberRank.name,
           guild_id: GuildName.id
         }
-        return { status: 200, message: characterOwnershipTrue }
+        PlayerInfoLastUpdated = moment();
+        return { status: 200, message: PlayerInfo, owner: true }
       } catch (err) {
         console.log(err);
         return { status: 500, message: 'erro interno, contate a administração ou abra um ticket!' }
@@ -443,15 +471,38 @@ module.exports = app => {
     }
   }
 
+  let getTitleLastUpdated = 0;
+  let getTitleSLastUpdated = 0;
+  let getTitlesInfo = 0;
+  let getTitleInfo = 0;
+  let getTitleData = 0;
+
   const getCharacterTitlesRepo = async (data) => {
-    console.log('player title player id.....: ', data)
+    console.log('VAI ENTRAR NO CACHE GETTITLE???? ', data.id, getTitleData.id)
     try {
+      //cache
+      if (getTitleData?.id === data?.id && data?.trigger === 'getTitle' && moment().diff(getTitleLastUpdated, 'minutes') < 5) {
+        console.log('ENTROU NO CASH!!!');
+        console.log('CACHE EM GETTITLE FEITO COM SUCESSO!!!');
+          return { status: 200, message: getTitleInfo }
+      }
+      if (getTitleData?.id === data?.id && moment().diff(getTitleSLastUpdated, 'minutes') < 5) {
+        console.log('ENTROU NO CASH!!!');
+        console.log('CACHE EM GETTITLES FEITO COM SUCESSO!!!');
+          return { status: 200, message: getTitlesInfo }
+      }
+
+      console.log('NÃO ENTROU NO CASH!!!');
+      getTitleData = data;
+
       if (data.trigger === 'getTitle') {
-        const title = await players_titles.query().select('*').where({ player_id: data.id }).where({ in_use: 1 }).first();
-        return { status: 200, message: title }
+        getTitleInfo = await players_titles.query().select('*').where({ player_id: data.id }).where({ in_use: 1 }).first();
+        getTitleLastUpdated = moment();
+        return { status: 200, message: getTitleInfo }
       } else {
-        const titles = await players_titles.query().select('*').where({ player_id: data.id });
-        return { status: 200, message: titles }
+        getTitlesInfo = await players_titles.query().select('*').where({ player_id: data.id });
+        getTitleSLastUpdated = moment();
+        return { status: 200, message: getTitlesInfo }
       }
     } catch (err) {
       console.log('Error trying get titles at: getCharacterTitlesRepo, ', err)

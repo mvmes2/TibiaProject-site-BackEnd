@@ -1,21 +1,28 @@
 const { tickets, tickets_response, tickets_images, tickets_response_images } = require('../models/projectModels');
+const moment = require('moment');
 const fs = require('fs');
 const path = require('path');
 
-const getTicketListFromUser = async (data) => {
-	try {
-		const ticketList = await tickets.query().select('*').where({ account_id: data.id });
-		return { status: 200, message: ticketList };
-	} catch (err) {
-		console.log(err);
-		return { status: 500, message: 'Internal error' }
-	}
-}
+let getTicketListData = 0;
+let getTickeListInfo = 0;
+let getTickeListLastUpdated = 0;
 
-const getLastIdFromTicketList = async (data) => {
+const getTicketListFromUser = async (data) => {
+	console.log('VAI ENTRAR NO CACHE DE GETTICKETS??? ', data.id, getTicketListData.id);
+//cache
+	if (getTicketListData.id === data.id && moment().diff(getTickeListLastUpdated, 'minutes') < 5) {
+		console.log('ENTROU NO CACHE DE GETTICKETLIST!!');
+		console.log('CACHE em getTicketList feito com sucesso!');
+		return { status: 200, message: getTickeListInfo };
+	}
+
 	try {
-		const ticketListLastId = await tickets.query().select('id').orderBy('id', 'desc').first();
-		return { status: 200, message: ticketListLastId };
+		getTicketListData = data;
+
+		console.log('NÃO ENTROU NO CACHE DE GETTICKETLIST!!');
+		getTickeListInfo = await tickets.query().select('*').where({ account_id: data.id });
+		getTickeListLastUpdated = moment();
+		return { status: 200, message: getTickeListInfo };
 	} catch (err) {
 		console.log(err);
 		return { status: 500, message: 'Internal error' }
@@ -184,7 +191,6 @@ const AdminOnDeleteTicketRepository = async (data) => {
 module.exports = {
 	getTicketListFromUser,
 	CreateNewTicketInDB,
-	getLastIdFromTicketList,
 	getTicket,
 	updateTicketsRepository,
 	insertNewTicketResponseRepository,
