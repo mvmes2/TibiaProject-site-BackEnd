@@ -9,7 +9,7 @@ let getTickeListLastUpdated = 0;
 
 const getTicketListFromUser = async (data) => {
 	console.log('VAI ENTRAR NO CACHE DE GETTICKETS??? ', data.id, getTicketListData.id);
-//cache
+	//cache
 	if (getTickeListLastUpdated !== 0 && getTicketListData.id === data.id && moment().diff(getTickeListLastUpdated, 'minutes') < 2) {
 		console.log('ENTROU NO CACHE DE GETTICKETLIST!!');
 		console.log('CACHE em getTicketList feito com sucesso!');
