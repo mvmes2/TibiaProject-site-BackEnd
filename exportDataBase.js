@@ -3,9 +3,9 @@ const path = require('path');
 
 // Configuração da conexão com o banco de dados
 const dbConfig = {
-  host: 'localhost',
-  user: 'root',
-  password: 'root',
+  host: 'projectserver.vps-kinghost.net',
+  user: 'ProjectAdmin',
+  password: '@TibiaProjectDB@482015*',
   database: 'tibiaproject'
 };
 
