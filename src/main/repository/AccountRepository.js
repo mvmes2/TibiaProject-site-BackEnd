@@ -1,8 +1,10 @@
 const { players, players_comment, accounts, guild_membership, guilds } = require('./../models/projectModels');
+const { setCreateCharacterController } = require('../utils/utilities');
 module.exports = app => {
   const deleteCharacter = async (data) => {
     try {
       await players.query().delete().where({ id: data.id });
+      setCreateCharacterController(0)
       return { status: 200, message: 'Character deleted successfuly!' }
     } catch (err) {
       console.log(err)
