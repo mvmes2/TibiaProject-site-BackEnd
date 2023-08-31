@@ -5,18 +5,20 @@ module.exports = app => {
 	const { getWorldWideTopFivePlayersRepository, getAllPlayersFromWorld } = app.src.main.repository.WorldsRepository;
 
 	let getWorldListRequestLastUpdate = 0;
-	let WorldList = 0;
+	let WorldList = null;
+
+	
 
 	const getWorldListRequest = async (req, res) => {
-
+		console.log('WTF???????????????????????????????????????????? ', WorldList)
 		if (moment().diff(getWorldListRequestLastUpdate, 'minutes') < 5) {
 			console.log('cache WorldList feito com sucesso!');
-			return res.status(WorldList.status).send({ message: WorldList.message });
+			return res.status(WorldList?.status ? WorldList?.status : 200).send({ message: WorldList?.message });
 		}
 
 		getWorldListRequestLastUpdate = moment();
 		WorldList = await GetWorldsListService();
-		return res.status(WorldList.status).send({ message: WorldList.message });
+		return res.status(WorldList?.status ? WorldList?.status : 200).send({ message: WorldList?.message });
 	}
 
 	let getAllWorldsCharactersLastUpdate = 0;

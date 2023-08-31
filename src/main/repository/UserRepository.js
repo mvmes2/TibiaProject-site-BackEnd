@@ -1,6 +1,6 @@
 const { accounts, players, players_online, player_deaths, player_items,
   players_comment, players_titles, guild_membership, guilds, guild_ranks } = require('../models/projectModels');
-const { convertPremiumTimeToDaysLeft, updateLastDayTimeStampEpochFromGivenDays } = require('../utils/utilities');
+const { convertPremiumTimeToDaysLeft, updateLastDayTimeStampEpochFromGivenDays, setCreateCharacterController, getCreateCharacterController } = require('../utils/utilities');
 
 module.exports = app => {
   const moment = require('moment');
@@ -78,11 +78,11 @@ module.exports = app => {
   let validateLoginData = 0;
   let validateLoginLastUpdated = 0;
   let validateLoginAccInfo = 0;
-
+ 
   const validateLoginHash = async (data) => {
     // cache
     console.log('Vai entrar no chache?........................................', data, validateLoginData)
-    if (validateLoginData.id === data.id && moment().diff(validateLoginLastUpdated, 'minutes') < 5) {
+    if (validateLoginData.id === data.id && getCreateCharacterController() !== 0 && moment().diff(validateLoginLastUpdated, 'minutes') < 5) {
       console.log('Cache validateLoginAccMannagement aplicado com sucesso!')
      
       return { status: 200, message: validateLoginAccInfo };
@@ -176,6 +176,7 @@ module.exports = app => {
       }
       validateLoginLastUpdated = moment();
       validateLoginData = data;
+      setCreateCharacterController(1);
       return { status: 200, message: validateLoginAccInfo };
     } catch (err) {
       console.log(err);
@@ -209,6 +210,7 @@ module.exports = app => {
         newComersIinitialItens.map(async (each) => {
           await player_items.query().insert(each);
         })
+        setCreateCharacterController(0);
         return { status: 201, message: 'Created successfuly' }
       } else {
         return { status: 400, message: 'Name already in use!' };
@@ -522,8 +524,6 @@ module.exports = app => {
     }
   }
 
-
-
   return {
     checkIfAccExists,
     InsertNewAccount,
@@ -535,4 +535,5 @@ module.exports = app => {
     getCharacterTitlesRepo,
     updateCharacterTitleInUseRepo
   }
+  
 }

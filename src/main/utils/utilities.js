@@ -235,6 +235,15 @@ const convertDate = (dateTimeStamp, param) => {
   return convertedDate;
 };
 
+let createCharacterController = 0;
+
+const setCreateCharacterController = (number) => {
+  createCharacterController = Number(number);
+}
+const getCreateCharacterController = () => {
+  return Number(createCharacterController);
+}
+
 module.exports = {
     checkPassword,
     hashGenerator,
@@ -249,5 +258,7 @@ module.exports = {
     paypalApi,
     generateTokenAdmin,
     AdmintokenValidation,
-    convertDate
+    convertDate,
+    setCreateCharacterController,
+    getCreateCharacterController
 }

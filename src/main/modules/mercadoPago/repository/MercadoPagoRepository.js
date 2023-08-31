@@ -67,10 +67,14 @@ const deleteCancelledPayment = async (data) => {
 const insertCoinsAtAccountToApprovedPayment = async (paymentID) => {
   console.log('consolando paymentID pra inserção de coins: ', paymentID);
   try {
-    const getAccountToInsertCoins = await payments.query().select('account_id', 'coins_quantity', 'account_email', 'account_name')
+    const getAccountToInsertCoins = await payments.query().select('account_id', 'coins_quantity', 'account_email', 'account_name', 'product_name')
       .where({ transaction_id: !paymentID.id ? paymentID.toString() : paymentID.id.toString() })
       .whereNotNull('approved_date')
       .whereNull('coins_paid_date');
+
+    const accToPay = getAccountToInsertCoins[0];
+    const userId = accToPay?.account_id;
+    const userSocketId = userSockets ? userSockets[userId] : '';
 
     console.log('como estou recebendo o id?', paymentID)
     console.log('qual conta vai vir? ', getAccountToInsertCoins)
@@ -82,13 +86,79 @@ const insertCoinsAtAccountToApprovedPayment = async (paymentID) => {
         console.log(err)
         return { status: 404, message: 'Payment ID do not exists or payment id have already been paid, check your email!' }
       }
-    } else {
-      const accToPay = getAccountToInsertCoins[0];
+    }
+
+    /////////////////////////////////////////////////// Founder's Pack.
+
+    else if (accToPay.product_name.includes("Founder's")) {
+
+      try {
+        const getPreviousPackNumberAmmountToSumm = await accounts.query().select('silver_pack', 'gold_pack', 'diamond_pack').where({ id: accToPay.account_id }).first();
+
+        const packPayFunction = async (packType) => {
+
+          const packToPayAmount = (Number(getPreviousPackNumberAmmountToSumm[packType]) + 1);
+
+          const updateAccountInfo = {
+            [packType]: packToPayAmount
+          }
+
+          await accounts.query().update(updateAccountInfo).where({ id: accToPay.account_id });
+          await payments.query().update({ coins_paid_date: Date.now() / 1000 }).where({ transaction_id: !paymentID.id ? paymentID.toString() : paymentID.id.toString() });
+
+          try {
+            projectMailer.coinsPurchase(accToPay.account_email, accToPay.account_name, accToPay.coins_quantity);
+            console.log('email de pagamento enviado!');
+          } catch (err) {
+            console.log('email error at mercadoPagoRepository, insertCoinsAtAccountToApprovedPayment at Email send: ', err)
+          }
+
+          if (userSocketId) {
+            console.log('Emitindo evento de pagamento aprovado para:', userSocketId ? userSockets : '');
+            io.to(userSocketId).emit("payment_approved", {
+              status: "approved",
+              foundersPack: packType
+            });
+          }
+          return { status: 200, message: 'paied' }
+        }
+
+        switch (accToPay.product_name) {
+          case "Silver Founder's Pack":
+            packPayFunction('silver_pack');
+            break
+          case "Gold Founder's Pack":
+            packPayFunction('gold_pack');
+            break
+          case "Diamond Founder's Pack":
+            packPayFunction('diamond_pack');
+            break
+            
+          default:
+            console.log('Provavelmente pack de teste: ', accToPay.product_name);
+            packPayFunction('silver_pack');
+            // console.log('Ocorreu algum erro ao receber o product name e efetuar o pagamento em: insertCoinsAtAccountToApprovedPayment');
+            break
+        }
+
+      } catch (err) {
+        console.log('error at: insertCoinsAtAccountToApprovedPayment: ', err);
+        return { status: 500, message: 'Internal error!' }
+      }
+    }
+
+    else {
+
       const getPreviousAmmountToSumm = await accounts.query().select('coins').where({ id: accToPay.account_id }).first();
+
       console.log('como ta vindo os coins antes? ', getPreviousAmmountToSumm)
       console.log('quanto vai dar a brincadeira atual? ', (Number(getPreviousAmmountToSumm.coins) + Number(accToPay.coins_quantity)));
+
       await accounts.query().update({ coins: (Number(getPreviousAmmountToSumm.coins) + Number(accToPay.coins_quantity)) }).where({ id: accToPay.account_id });
       await payments.query().update({ coins_paid_date: Date.now() / 1000 }).where({ transaction_id: !paymentID.id ? paymentID.toString() : paymentID.id.toString() });
+
+
+
       try {
         projectMailer.coinsPurchase(accToPay.account_email, accToPay.account_name, accToPay.coins_quantity);
         console.log('email de pagamento enviado!');
@@ -98,8 +168,7 @@ const insertCoinsAtAccountToApprovedPayment = async (paymentID) => {
 
       console.log('consolando se tem algo no userSocket ', userSockets ? userSockets : '');
       console.log('logando o id da conta do usuário ao receber o pagamento: ', accToPay?.account_id);
-      const userId = accToPay?.account_id;
-      const userSocketId = userSockets ? userSockets[userId] : '';
+
 
       if (userSocketId) {
         console.log('Emitindo evento de pagamento aprovado para:', userSocketId ? userSockets : '');

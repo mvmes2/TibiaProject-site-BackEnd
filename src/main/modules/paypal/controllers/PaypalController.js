@@ -1,116 +1,106 @@
 require('dotenv').config();
 const { generateToken } = require('../../../utils/utilities');
 const { paypalApi, paypalApiGetToken } = require('../../../utils/utilities');
+const { api } = require('../api');
+
+//Controlador do paypal será usado para o checkoutPRO do mercado pago tendo em vista que nao iremos mais utilizar do paypal por enquanto
+// para nao ter que refazer o fluxo de pagamento, iremos aproveitar o modulo paypal inteiro!
 
 module.exports = app => {
 	const { insertNewPayment,
 		insertCoinsAtAccountToApprovedPayment } = app.src.main.modules.mercadoPago.repository.MercadoPagoRepository;
 
 
-	const PaypalCreatePaymnentController = async (req, res) => {
-		const data = req.body;
-		console.log('dataaa: ', data)
-		const dataToTokenIfSuccess = {
-			account_id: data.account_id,
-			account_name: data.name,
-			account_email: data.email,
-			transaction_type: 'paypal',
-			payment_currency: data.currency,
-			payment_company: 'Paypal',
-			product_name: data.product_name,
-			unity_value: data.value,
-			total_value: data.value,
-			coins_quantity: data.coins_quantity,
-			fee_percentage: 7.0,
-			status: 'approved',
-			created_date: Math.floor(Date.now() / 1000),
-			approved_date: Math.floor(Date.now() / 1000)
-		}
-		const token = generateToken(10, dataToTokenIfSuccess);
+	const PagseguroCreatePaymnentController = async (req, res) => {
 
-		const order = {
-			intent: 'CAPTURE',
-			purchase_units: [
-				{
-					amount: {
-						currency_code: "BRL",
-						value: `${data.value}`
-					},
-					description: data.product_name,
+		const headers = {
+			'Accept': 'application/json',
+			'Content-type': 'application/json',
+			'Authorization': `Bearer ${process.env.PAG_SEGURO_ACCESS_TOKEN}`
+		}
+
+		const dataFront = req.body;
+		console.log('dataaa: ', dataFront)
+		// const dataToTokenIfSuccess = {
+		// 	account_id: data.account_id,
+		// 	account_name: data.name,
+		// 	account_email: data.email,
+		// 	transaction_type: 'paypal',
+		// 	payment_currency: data.currency,
+		// 	payment_company: 'Paypal',
+		// 	product_name: data.product_name,
+		// 	unity_value: data.value,
+		// 	total_value: data.value,
+		// 	coins_quantity: data.coins_quantity,
+		// 	fee_percentage: 7.0,
+		// 	status: 'approved',
+		// 	created_date: Math.floor(Date.now() / 1000),
+		// 	approved_date: Math.floor(Date.now() / 1000)
+		// }
+
+		console.log('qual unity price? ', Number(dataFront.value))
+
+		const data = {
+			reference_id: 'teste',
+			customer: {
+				// name: dataFront.name,
+				name: 'garry boina verde',
+				email: 'garry@sandbox.pagseguro.com.br',
+				tax_id: '39115973808',
+				phone: {
+					country: '55',
+					area: '11',
+					number: '959579097'
 				}
-			],
-			application_context: {
-				brand_name: "tibiaproject.com",
-				landing_page: "LOGIN",
-				user_action: "PAY_NOW",
-				return_url: `${process.env.BASE_URL_IP_FRONT}/success/paypal/${token}`,
-				cancel_url: `${process.env.BASE_URL_IP_FRONT}/donation/type/paypal?/`
-			}
+			},
+			items: [{
+				reference_id: dataFront.product_name,
+				name: dataFront.product_name,
+				quantity: 1,
+				unit_amount: (Number(dataFront.value) * 100)
+			}],
+			additional_amount: 0,
+			discount_amount: 0,
+			payment_methods:[
+        {
+            type: "credit_card",
+        },
+    ],
+    payment_methods_configs: [
+        {
+            type: "credit_card",
+            brands: ["mastercard"],
+            config_options: [
+                {
+                    option: "installments_limit",
+                    value: "3"
+                }
+            ]
+        }
+    ],
+			soft_descriptor: 'TibiaProject',
+			redirect_url: `${process.env.BASE_URL_IP_FRONT}`,
+			notification_urls: [
+        // "https://webhook.site/ea47cd57-00e0-4d71-9be1-feda160b9391",
+				`${process.env.BASE_URL_IP_FRONT}/pagseguro-notification-url`
+    ]
 		};
 
-		const params = new URLSearchParams();
-		params.append("grant_type", "client_credentials");
-
-
-		const { data: { access_token } } = await paypalApi.post('/v1/oauth2/token', params, {
-			headers: {
-				"Content-Type": "application/x-www-form-urlencoded",
-			},
-			auth: {
-				username: process.env.PAYPAL_USER_ID,
-				password: process.env.PAYPAL_USER_PASSWORD
-			}
+		api.post(`/checkouts`, data, { headers }).then((resp) => {
+			console.log('resp do create preference mercado pago api pro: ', resp, resp.data.links);
+		}).catch((err) => {
+			console.log('erro na create preference mercado pago api pro: ', JSON.stringify(err), err?.response?.data?.error_messages);
 		});
 
-		const response = await paypalApi.post('/v2/checkout/orders', order, {
-			headers: {
-				Authorization: `Bearer ${access_token}`,
-			}
-		});
-
-		console.log(response.data)
-		const transaction_id = response.data.id;
-		const approveLink = response.data.links.filter((item) => item.rel === 'approve')[0].href
-
-		res.status(201).send({ message: { url: approveLink, transaction_id: transaction_id } });
 	};
 
-	const PaypalCaptureAndCompletePayment = async (req, res) => {
-		try {
-			const data = req.body;
-			console.log(data);
-			const response = await paypalApi.post(`/v2/checkout/orders/${data.transaction_id}/capture`,
-				{},
-				{
-					auth: {
-						username: process.env.PAYPAL_USER_ID,
-						password: process.env.PAYPAL_USER_PASSWORD
-					}
-				}
-			).then(() => {
-				try {
-					insertNewPayment(data);
-					setTimeout(async () => {
-						insertCoinsAtAccountToApprovedPayment(data.transaction_id);
-						res.status(201).send({ message: 'ok' })
-					}, 1000);
-				} catch (err) {
-					console.log(err);
-					res.status(404).send({ message: 'Error at validating your payment' });
-				}
-			}).catch((err) => {
-				console.log(err);
-				res.status(404).send({ message: 'Error at validating your payment' });
-			});
-		} catch (err) {
-			console.log(err);
-			res.status(404).send({ message: 'Error at validating your payment' });
-		}
+	const PagSeguroNotificationReceiverController = async (req, res) => {
+		console.log('NOTIFICAÇÃO CHEGANDOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO..............: ', req);
 
 	};
 
 	return {
-		PaypalCreatePaymnentController,
-		PaypalCaptureAndCompletePayment
+		PagseguroCreatePaymnentController,
+		PagSeguroNotificationReceiverController
 	}
 }

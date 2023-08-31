@@ -3,7 +3,7 @@ exports.up = async function (knex) {
 		{
 			product_name: "Silver Founder's Pack",
 			unity_value: 200,
-			coins_quantity: 350,
+			coins_quantity: 230,
 			payment_type: 'pix'
 		},
 		{
@@ -14,14 +14,14 @@ exports.up = async function (knex) {
 		},
 		{
 			product_name: "Diamond Founder's Pack",
-			unity_value: 550,
-			coins_quantity: 775,
+			unity_value: 499,
+			coins_quantity: 650,
 			payment_type: 'pix'
 		},
 		{
 			product_name: "Silver Founder's Pack",
 			unity_value: 210,
-			coins_quantity: 350,
+			coins_quantity: 230,
 			payment_type: 'creditCard'
 		},
 		{
@@ -32,8 +32,8 @@ exports.up = async function (knex) {
 		},
 		{
 			product_name: "Diamond Founder's Pack",
-			unity_value: 570,
-			coins_quantity: 775,
+			unity_value: 517,
+			coins_quantity: 650,
 			payment_type: 'creditCard'
 		}
 	]);
