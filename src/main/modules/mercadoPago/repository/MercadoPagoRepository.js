@@ -1,6 +1,7 @@
+require('dotenv').config();
 const { worlds, players, products, accounts, payments } = require('../../../models/projectModels');
 const { userSockets, io } = require('../../../../../server');
-const { projectMailer } = require('../../../utils/utilities');
+const { projectMailer, getlastPaymentIDUpdated, setlastPaymentIDUpdated, setCreateCharacterController } = require('../../../utils/utilities');
 const moment = require('moment');
 
 const getProductsList = async () => {
@@ -14,20 +15,19 @@ const getProductsList = async () => {
 }
 
 //cache
-let lastPaymentIDUpdated = 0;
 let lastPaymentID = 0;
 
 const GetPaymentListLastIDRepository = async () => {
 
-  if (lastPaymentIDUpdated != 0 && moment().diff(lastPaymentIDUpdated, 'minutes') < 5) {
+  if (getlastPaymentIDUpdated() !== 0 && moment().diff(getlastPaymentIDUpdated(), 'minutes') < 5) {
     console.log('Cache lastPaymentID aplicado com sucesso!')
-    return { status: 200, message: lastPaymentID === undefined ? { id: 0 } : lastPaymentID };
+    return { status: 200, message: lastPaymentID === undefined ? 1 : (Number(lastPaymentID.id) + 1)  };
   }
   try {
     lastPaymentID = await payments.query().select('id').orderBy('id', 'desc').first();
-    lastPaymentIDUpdated = moment();
+    setlastPaymentIDUpdated(moment());
 
-    return { status: 200, message: lastPaymentID === undefined ? { id: 0 } : lastPaymentID };
+    return { status: 200, message: lastPaymentID === undefined ? 1 : (Number(lastPaymentID.id) + 1)  };
   } catch (err) {
     console.log(err);
     return { status: 500, message: 'Internal error, close the website, and try again, or call Administration!' }
@@ -37,9 +37,15 @@ const GetPaymentListLastIDRepository = async () => {
 const insertNewPayment = async (data) => {
   console.log(data);
   data.transaction_id = data.transaction_id.toString();
+  const checkIfPaymentAlreadyExists = await payments.query().select('transaction_id').where({ transaction_id: data.transaction_id });
+  if (checkIfPaymentAlreadyExists.length > 0 ) {
+    console.log('Pagamento ja existe!');
+    return { status: 409, message: 'Pagamento já existe!' }
+  }
   try {
     await payments.query().insert(data);
-    lastPaymentIDUpdated = 0;
+    setlastPaymentIDUpdated(0);
+    return { status: 201, message: 'Pagamento criado com sucesso!' }
   } catch (err) {
     console.log(err);
     return { status: 500, message: 'Internal error!' }
@@ -64,7 +70,8 @@ const deleteCancelledPayment = async (data) => {
   }
 }
 
-const insertCoinsAtAccountToApprovedPayment = async (paymentID) => {
+const insertCoinsAtAccountToApprovedPayment = async (paymentID, pagseguroEmail) => {
+  console.log(' consolando se estamos recebendo email do pagSeguro!! ', pagseguroEmail);
   console.log('consolando paymentID pra inserção de coins: ', paymentID);
   try {
     const getAccountToInsertCoins = await payments.query().select('account_id', 'coins_quantity', 'account_email', 'account_name', 'product_name')
@@ -74,6 +81,7 @@ const insertCoinsAtAccountToApprovedPayment = async (paymentID) => {
 
     const accToPay = getAccountToInsertCoins[0];
     const userId = accToPay?.account_id;
+    console.log('o que temos dentro do socket??? ', userSockets);
     const userSocketId = userSockets ? userSockets[userId] : '';
 
     console.log('como estou recebendo o id?', paymentID)
@@ -84,7 +92,7 @@ const insertCoinsAtAccountToApprovedPayment = async (paymentID) => {
         throw new Error('Payment ID do not exists or payment id have already been paid, check your email!')
       } catch (err) {
         console.log(err)
-        return { status: 404, message: 'Payment ID do not exists or payment id have already been paid, check your email!' }
+        return { status: 409, message: 'Payment ID do not exists or payment id have already been paid, check your email!' }
       }
     }
 
@@ -107,8 +115,14 @@ const insertCoinsAtAccountToApprovedPayment = async (paymentID) => {
           await payments.query().update({ coins_paid_date: Date.now() / 1000 }).where({ transaction_id: !paymentID.id ? paymentID.toString() : paymentID.id.toString() });
 
           try {
-            projectMailer.coinsPurchase(accToPay.account_email, accToPay.account_name, accToPay.coins_quantity);
+            const link = `${process.env.BASE_URL_IP_FRONT}/founder_guide`;
+
+            projectMailer.FounderPackPurchase(accToPay.product_name, accToPay.account_name, accToPay.account_email, link);
             console.log('email de pagamento enviado!');
+            if (pagseguroEmail && accToPay.account_email !== pagseguroEmail) {
+              projectMailer.FounderPackPurchase(accToPay.product_name, accToPay.account_name, pagseguroEmail, link);
+              console.log('email PagSeguro de pagamento enviado!');
+            }
           } catch (err) {
             console.log('email error at mercadoPagoRepository, insertCoinsAtAccountToApprovedPayment at Email send: ', err)
           }
@@ -135,9 +149,8 @@ const insertCoinsAtAccountToApprovedPayment = async (paymentID) => {
             break
             
           default:
-            console.log('Provavelmente pack de teste: ', accToPay.product_name);
-            packPayFunction('silver_pack');
-            // console.log('Ocorreu algum erro ao receber o product name e efetuar o pagamento em: insertCoinsAtAccountToApprovedPayment');
+            console.log('Provavelmente pack de teste: ', accToPay.product_name, 'Este Founder pack nao existe!');
+            console.log('Ocorreu algum erro ao receber o product name e efetuar o pagamento em: insertCoinsAtAccountToApprovedPayment');
             break
         }
 
@@ -161,7 +174,12 @@ const insertCoinsAtAccountToApprovedPayment = async (paymentID) => {
 
       try {
         projectMailer.coinsPurchase(accToPay.account_email, accToPay.account_name, accToPay.coins_quantity);
+        setCreateCharacterController(0);
         console.log('email de pagamento enviado!');
+        if (pagseguroEmail && accToPay.account_email !== pagseguroEmail) {
+          projectMailer.coinsPurchase(pagseguroEmail, accToPay.account_name, accToPay.coins_quantity);
+          console.log('email PagSeguro de pagamento enviado!');
+        }
       } catch (err) {
         console.log('email error at mercadoPagoRepository, insertCoinsAtAccountToApprovedPayment at Email send', err)
       }

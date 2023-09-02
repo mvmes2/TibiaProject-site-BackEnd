@@ -2,10 +2,10 @@ const { Server } = require("socket.io");
 
 const io = new Server({
   cors: {
-    origin: "*",
+    origin: ["https://tibiaproject.com", "http://localhost:3000"],
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    credentials: true,
-    preflightContinue: true
+    // credentials: false,
+    // preflightContinue: true
   }
 });
 

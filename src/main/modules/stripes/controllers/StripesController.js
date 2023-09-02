@@ -13,11 +13,12 @@ module.exports = app => {
     try {
       const data = req.body;
 
+      console.log(' O que ta vindo de data no stripes? ', data);
+
     const dataToTokenIfSuccess = {
       account_id: data.account_id,
       account_name: data.name,
       account_email: data.email,
-      transaction_id: Number(data.order_id) + 1,
       transaction_type: 'creditCard',
       payment_currency: data.currency,
       payment_company: 'Stripes',
@@ -30,11 +31,18 @@ module.exports = app => {
       created_date: Math.floor(Date.now() / 1000),
       approved_date: Math.floor(Date.now() / 1000)
     }
-    const token = generateToken(10, dataToTokenIfSuccess);
-
+    
     const product = await stripe.products.create({name: data.product_name});
+    const newObjToPay = {
+      ...dataToTokenIfSuccess,
+      transaction_id: product.id
+    }
+    
+    const token = generateToken(10, newObjToPay);
 
-    console.log(data)
+
+    console.log(' o que ta vindo do product criado? ', product)
+    console.log(' como ficou o order id? ? ', newObjToPay.transaction_id)
 
     console.log('valor convertido: ', ((Math.ceil((Number(data.unity_value) * Number(data.exchangeRate)))) * 100))
 
