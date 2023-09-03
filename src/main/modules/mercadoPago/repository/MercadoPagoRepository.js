@@ -149,13 +149,30 @@ const insertCoinsAtAccountToApprovedPayment = async (paymentID, pagseguroEmail) 
             break
 
           default:
-            console.log('Provavelmente pack de teste: ', accToPay.product_name, 'Este Founder pack nao existe!');
-            console.log('Ocorreu algum erro ao receber o product name e efetuar o pagamento em: insertCoinsAtAccountToApprovedPayment');
+            const text = `Account name: ${accToPay?.account_name}, AccountID: ${accToPay?.account_id}, Provavelmente pack de teste, ${accToPay.product_name}, Este Founder pack nao existe no banco produção!!`
+            console.log(text);
+            const responseText = `${new Date().toISOString()} - ${text}\n\n`;
+            fs.appendFile('error-InsertFoundersPack-Log.txt', responseText, (err) => {
+              if (err) {
+                console.error('Erro ao escrever no arquivo:', err);
+              } else {
+                console.log('Entrada adicionada com sucesso ao error-InsertFoundersPack-Log.txt.');
+              }
+            });
             break
         }
 
       } catch (err) {
-        console.log('error at: insertCoinsAtAccountToApprovedPayment: ', err);
+        const text = `Account name: ${accToPay?.account_name}, AccountID: ${accToPay?.account_id}, erro ao tentar inserir coin, ${err}`
+        console.log(text);
+        const responseText = `${new Date().toISOString()} - ${text}\n\n`;
+        fs.appendFile('error-InsertPurchasedCoin-Log.txt', responseText, (err) => {
+          if (err) {
+            console.error('Erro ao escrever no arquivo:', err);
+          } else {
+            console.log('Entrada adicionada com sucesso ao error-InsertPurchasedCoin-Log.txt.');
+          }
+        });
         return { status: 500, message: 'Internal error!' }
       }
     }
@@ -197,7 +214,16 @@ const insertCoinsAtAccountToApprovedPayment = async (paymentID, pagseguroEmail) 
       return { status: 200, message: 'paied' }
     }
   } catch (err) {
-    console.log('Internal error! insertCoinsAtAccountToApprovedPayment at mercadoPagoRepository', err);
+    const text = `Account name: ${accToPay?.account_name}, AccountID: ${accToPay?.account_id}, Internal error! insertCoinsAtAccountToApprovedPayment function at mercadoPagoRepository, ${err}`
+    console.log(text);
+    const responseText = `${new Date().toISOString()} - ${text}\n\n`;
+    fs.appendFile('error-InsertCoinsAtAccountToApprovedPayment-Function-Log.txt', responseText, (err) => {
+      if (err) {
+        console.error('Erro ao escrever no arquivo:', err);
+      } else {
+        console.log('Entrada adicionada com sucesso ao error-InsertCoinsAtAccountToApprovedPayment-Function-Log.txt.');
+      }
+    });
     return { status: 500, message: 'Internal error!' }
   }
 }

@@ -158,30 +158,28 @@ module.exports = app => {
 
         }).catch((err) => {
           const responseText = util.inspect(err, { depth: null });
-          fs.writeFile('errorApiCall-notificationPixPayments-Log.txt', responseText, (err) => {
+          fs.writeFile('error-ApiCall-notificationPixPayments-Log.txt', responseText, (err) => {
             if (err) {
               console.error('Erro ao escrever arquivo:', err);
             } else {
-              console.log('Arquivo errorApiCall-notificationPixPayments-Log.txt foi criado com sucesso.');
+              console.log('Arquivo error-ApiCall-notificationPixPayments-Log.txt.txt foi criado com sucesso.');
             }
           })
-          console.log('errorApiCall-notificationPixPayments-Log');
+          console.log('error-ApiCall-notificationPixPayments-Log.txt');
         })
       }
 
       return { status: 200, message: 'ok' };
     } catch (err) {
       const responseText = `${new Date().toISOString()} - ${util.inspect(err, { depth: null })}\n\n`;
-
-      fs.appendFile('errorTryCatch-notificationPixPayments-Log.txt', responseText, (err) => {
+      fs.appendFile('error-notificationPixPayments-Log.txt', responseText, (err) => {
         if (err) {
           console.error('Erro ao escrever no arquivo:', err);
         } else {
-          console.log('Entrada adicionada com sucesso ao errorTryCatchLog.txt.');
+          console.log('Entrada adicionada com sucesso ao error-notificationPixPayments-Log.');
         }
       });
-
-      console.log('errorTryCatch-notificationPixPayments-Log');
+      console.log('error-notificationPixPayments-Log');
       return { status: 500, message: 'Internal error' }
     }
   }
