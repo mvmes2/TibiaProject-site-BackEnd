@@ -9,6 +9,7 @@ const morgan = require('morgan');
 const prismicH = require('@prismicio/helpers');
 const compression = require('compression');
 const fs = require('fs');
+const bodyParser = require('body-parser');
 
 const server = http.createServer(app);
 
@@ -17,6 +18,35 @@ const userSockets = {};
 io.attach(server);
 
 app.use(compression());
+
+const corsOptions = {
+  origin: '*', // Substitua por sua URL de origem
+  methods: 'GET,HEAD,PUT,POST,DELETE',
+  optionsSuccessStatus: 200, // Para navegadores legados (IE11, várias versões do Android)
+};
+
+app.use(cors(corsOptions));
+
+io.on("connection", (socket) => {
+  console.log("Usuário conectado:", socket.id);
+
+  socket.on("user_connected", ({ userId }) => {
+      console.log("Usuário conectado com ID:", userId, "e socket ID:", socket.id);
+      userSockets[userId] = socket.id;
+    console.log("Objeto userSockets atualizado:", userSockets);
+  });
+
+  socket.on("disconnect", () => {
+    console.log("Usuário desconectado:", socket.id);
+
+    // remova a associação do id do usuario do socket
+    const userId = Object.keys(userSockets).find((key) => userSockets[key] === socket.id);
+    if (userId) {
+      delete userSockets[userId];
+      console.log(userSockets)
+    }
+  });
+});
 
 app.use((req, res, next) => {
   req.url = req.url.replace('/api', '');
@@ -43,13 +73,7 @@ app.use((req, res, next) => {
 app.use(express.json());
 app.use(morgan('dev'));
 
-const corsOptions = {
-  origin: '*', // Substitua por sua URL de origem
-  methods: 'GET,HEAD,PUT,POST,DELETE',
-  optionsSuccessStatus: 200, // Para navegadores legados (IE11, várias versões do Android)
-};
 
-app.use(cors(corsOptions));
 
 app.use(express.static(__dirname + '/client'));
 app.use(express.static(__dirname + '/downloads'));
@@ -67,26 +91,11 @@ app.get('/downloads', (req, res) => {
   readStream.pipe(res);
 });
 
-io.on("connection", (socket) => {
-    console.log("Usuário conectado:", socket.id);
+io.on("connect_error", (error) => {
+  console.log("Connection Error:", error);
+});
 
-    socket.on("user_connected", ({ userId }) => {
-        console.log("Usuário conectado com ID:", userId, "e socket ID:", socket.id);
-        userSockets[userId] = socket.id;
-      console.log("Objeto userSockets atualizado:", userSockets);
-    });
 
-    socket.on("disconnect", () => {
-      console.log("Usuário desconectado:", socket.id);
-
-      // remova a associação do id do usuario do socket
-      const userId = Object.keys(userSockets).find((key) => userSockets[key] === socket.id);
-      if (userId) {
-        delete userSockets[userId];
-        console.log(userSockets)
-      }
-    });
-  });
 
 module.exports = {
   io,
@@ -112,7 +121,7 @@ consign()
   .then("./src/main/config/Routes.js")
   .into(app);
 
-const PORT = 3333;
+const PORT = 8880;
 server.listen(PORT, () => {
     console.log(`BackEnd Rodando na porta: ${PORT}!!`);
 });

@@ -133,6 +133,23 @@ const projectMailer = {
         },
       });
   },
+  FounderPackPurchase: function sendEmailTo(founder_pack, account_name, account_email, link) {
+    mailer.sendMail({
+        from: "tibiaprojectbr@gmail.com",       
+        to: account_email,
+        subject: 'Founder pack purchase',
+        template: "main/resources/emailTemplates/foundersPackPurchase",
+        context: {
+          founder_pack,
+          account_name,
+          account_email,
+          link,
+          youtube_logo,
+          instagram_logo,
+          discord_logo,
+        },
+      });
+  },
 }
 
 const generateToken = (duration, userData) =>{
@@ -236,12 +253,20 @@ const convertDate = (dateTimeStamp, param) => {
 };
 
 let createCharacterController = 0;
+let lastPaymentIDUpdated = 0;
 
 const setCreateCharacterController = (number) => {
   createCharacterController = Number(number);
 }
 const getCreateCharacterController = () => {
   return Number(createCharacterController);
+}
+
+const setlastPaymentIDUpdated = (number) => {
+  lastPaymentIDUpdated = Number(number);
+}
+const getlastPaymentIDUpdated = () => {
+  return Number(lastPaymentIDUpdated);
 }
 
 module.exports = {
@@ -260,5 +285,7 @@ module.exports = {
     AdmintokenValidation,
     convertDate,
     setCreateCharacterController,
-    getCreateCharacterController
+    getCreateCharacterController,
+    setlastPaymentIDUpdated,
+    getlastPaymentIDUpdated
 }

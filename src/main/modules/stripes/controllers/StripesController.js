@@ -13,52 +13,60 @@ module.exports = app => {
     try {
       const data = req.body;
 
-    const dataToTokenIfSuccess = {
-      account_id: data.account_id,
-      account_name: data.name,
-      account_email: data.email,
-      transaction_id: Number(data.order_id),
-      transaction_type: 'creditCard',
-      payment_currency: data.currency,
-      payment_company: 'Stripes',
-      product_name: data.product_name,
-      unity_value: data.unity_value,
-      total_value: (Number(data.unity_value) * Number(data.exchangeRate)),
-      coins_quantity: data.coins_quantity,
-      fee_percentage: data.currency === 'BRL' ? 5 : 6.5,
-      status: 'approved',
-      created_date: Math.floor(Date.now() / 1000),
-      approved_date: Math.floor(Date.now() / 1000)
-    }
-    const token = generateToken(10, dataToTokenIfSuccess);
+      console.log(' O que ta vindo de data no stripes? ', data);
 
-    const product = await stripe.products.create({name: data.product_name});
+      const dataToTokenIfSuccess = {
+        account_id: data.account_id,
+        account_name: data.name,
+        account_email: data.email,
+        transaction_type: 'creditCard',
+        payment_currency: data.currency,
+        payment_company: 'Stripes',
+        product_name: data.product_name,
+        unity_value: data.unity_value,
+        total_value: (Number(data.unity_value) * Number(data.exchangeRate)),
+        coins_quantity: data.coins_quantity,
+        fee_percentage: data.currency === 'BRL' ? 5 : 6.5,
+        status: 'approved',
+        created_date: Math.floor(Date.now() / 1000),
+        approved_date: Math.floor(Date.now() / 1000)
+      }
 
-    console.log(data)
+      const product = await stripe.products.create({ name: data.product_name });
+      const newObjToPay = {
+        ...dataToTokenIfSuccess,
+        transaction_id: product.id
+      }
 
-    console.log('valor convertido: ', ((Math.ceil((Number(data.unity_value) * Number(data.exchangeRate)))) * 100))
+      const token = generateToken(10, newObjToPay);
 
-    const price = await stripe.prices.create({
-      product: product.id,
-      unit_amount: (Math.ceil(((Number(data.unity_value) * Number(data.exchangeRate)) * 100))),
-      currency: data.currency.toLowerCase(),
-    });
-    console.log(price);
-    const session = await stripe.checkout.sessions.create({
-      line_items: [
-        {
-          // Provide the exact Price ID (for example, pr_1234) of the product you want to sell
-          price: price.id,
-          quantity: 1,
-        },
-      ],
-      mode: 'payment',
-      success_url: `${process.env.BASE_URL_IP_FRONT}/success/stripes/${token}`,
-      cancel_url: `${process.env.BASE_URL_IP_FRONT}/donation/type/credit-card?/${data.account_id}`,
-    });
-    
-    res.status(200).json({ url: session.url });
-    } catch(err) {
+
+      console.log(' o que ta vindo do product criado? ', product)
+      console.log(' como ficou o order id? ? ', newObjToPay.transaction_id)
+
+      console.log('valor convertido: ', ((Math.ceil((Number(data.unity_value) * Number(data.exchangeRate)))) * 100))
+
+      const price = await stripe.prices.create({
+        product: product.id,
+        unit_amount: (Math.ceil(((Number(data.unity_value) * Number(data.exchangeRate)) * 100))),
+        currency: data.currency.toLowerCase(),
+      });
+      console.log(price);
+      const session = await stripe.checkout.sessions.create({
+        line_items: [
+          {
+            // Provide the exact Price ID (for example, pr_1234) of the product you want to sell
+            price: price.id,
+            quantity: 1,
+          },
+        ],
+        mode: 'payment',
+        success_url: `${process.env.BASE_URL_IP_FRONT}/success/stripes/${token}`,
+        cancel_url: `${process.env.BASE_URL_IP_FRONT}/donation/type/credit-card?/${data.account_id}`,
+      });
+
+      res.status(200).json({ url: session.url });
+    } catch (err) {
       console.log(err)
       res.status(500).send('internal error');
     }
