@@ -106,6 +106,9 @@ consign()
   .then("./src/main/config/prismicConfig.js")
   .then("./src/main/utils")
   .then("./src/main/middlewares")
+  .then("./src/main/repository")
+  .then("./src/main/services")
+  .then("./src/main/controllers")
   .then("./src/main/modules/mercadoPago/repository")
   .then("./src/main/modules/mercadoPago/services")
   .then("./src/main/modules/mercadoPago/")
@@ -115,13 +118,10 @@ consign()
   .then("./src/main/modules/paypal/repository")
   .then("./src/main/modules/paypal/controllers")
   .then("./src/main/modules/paypal/")
-  .then("./src/main/repository")
-  .then("./src/main/services")
-  .then("./src/main/controllers")
   .then("./src/main/config/Routes.js")
   .into(app);
 
-const PORT = 8880;
+const PORT = 3333;
 server.listen(PORT, () => {
     console.log(`BackEnd Rodando na porta: ${PORT}!!`);
 });
