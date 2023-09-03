@@ -17,7 +17,7 @@ module.exports = app => {
       account_id: data.account_id,
       account_name: data.name,
       account_email: data.email,
-      transaction_id: Number(data.order_id) + 1,
+      transaction_id: Number(data.order_id),
       transaction_type: 'creditCard',
       payment_currency: data.currency,
       payment_company: 'Stripes',

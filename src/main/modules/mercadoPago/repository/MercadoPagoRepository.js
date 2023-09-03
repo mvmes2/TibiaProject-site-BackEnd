@@ -19,15 +19,15 @@ let lastPaymentID = 0;
 
 const GetPaymentListLastIDRepository = async () => {
 
-  if (lastPaymentIDUpdated != 0 && moment().diff(lastPaymentIDUpdated, 'minutes') < 5) {
+  if (lastPaymentIDUpdated !== 0 && moment().diff(lastPaymentIDUpdated, 'minutes') < 5) {
     console.log('Cache lastPaymentID aplicado com sucesso!')
-    return { status: 200, message: lastPaymentID === undefined ? { id: 0 } : lastPaymentID };
+    return { status: 200, message: lastPaymentID === undefined ? 1 : (Number(lastPaymentID.id) + 1)  };
   }
   try {
     lastPaymentID = await payments.query().select('id').orderBy('id', 'desc').first();
     lastPaymentIDUpdated = moment();
 
-    return { status: 200, message: lastPaymentID === undefined ? { id: 0 } : lastPaymentID };
+    return { status: 200, message: lastPaymentID === undefined ? 1 : (Number(lastPaymentID.id) + 1)  };
   } catch (err) {
     console.log(err);
     return { status: 500, message: 'Internal error, close the website, and try again, or call Administration!' }

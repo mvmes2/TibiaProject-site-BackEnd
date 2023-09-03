@@ -26,10 +26,10 @@ module.exports = app => {
         email: data.email,
       },
       metadata: {
-        order_id: data.order_id === 0 ? 1 : (Number(data.order_id) + 1),
+        order_id: Number(data.order_id),
         products: [
           {
-            id: data.order_id === 0 ? 1 : (Number(data.order_id) + 1),
+            id: Number(data.order_id),
             title: data.product_name,
             description: 'Virtual coins to be used at www.tibiaProject.com',
             quantity: 1,

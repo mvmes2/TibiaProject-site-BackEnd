@@ -73,7 +73,7 @@ module.exports = app => {
             config_options: [
                 {
                     option: "installments_limit",
-                    value: "3"
+                    value: "5"
                 }
             ]
         }
@@ -81,8 +81,7 @@ module.exports = app => {
 			soft_descriptor: 'TibiaProject',
 			redirect_url: `${process.env.BASE_URL_IP_FRONT}`,
 			notification_urls: [
-        // "https://webhook.site/ea47cd57-00e0-4d71-9be1-feda160b9391",
-				`${process.env.BASE_URL_IP_FRONT}/pagseguro-notification-url`
+				`${process.env.BASE_URL_IP_BACK}/pagseguro-notification-url`
     ]
 		};
 

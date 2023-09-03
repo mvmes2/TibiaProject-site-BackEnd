@@ -20,6 +20,7 @@
   "dependencies": {
     "@prismicio/client": "^6.7.3",
     "@prismicio/helpers": "^2.3.9",
+    "body-parser": "^1.20.2",
     "compress-images": "^2.0.5",
     "compression": "^1.7.4",
     "consign": "^0.1.6",
