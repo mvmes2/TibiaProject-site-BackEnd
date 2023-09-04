@@ -6,8 +6,9 @@ const instagram_logo = 'https://res.cloudinary.com/dqncp7bg6/image/upload/v16782
 const youtube_logo = 'https://res.cloudinary.com/dqncp7bg6/image/upload/c_pad,b_auto:predominant,fl_preserve_transparency/v1678229812/youtube_buxwrq.jpg';
 const discord_logo = 'https://res.cloudinary.com/dqncp7bg6/image/upload/v1678229803/discord_rh9nrm.png';
 const axios = require('axios');
-
-
+const fs = require('fs').promises;
+const path = require('path');
+const moment = require('moment-timezone');
 
 const encryptPassword = (password) => {
   const sha1 = new jsSHA("SHA-1", "TEXT");
@@ -17,193 +18,195 @@ const encryptPassword = (password) => {
 
 const checkPassword = (givenPassword, encryptedPassword) => {
   let passwordHash = null;
-    try {
-       passwordHash = encryptPassword(givenPassword);
-    } catch(err){
-     console.log(err);
-    }
-    return passwordHash === encryptedPassword;
+  try {
+    passwordHash = encryptPassword(givenPassword);
+  } catch (err) {
+    console.log(err);
+  }
+  return passwordHash === encryptedPassword;
 }
 
 const hashGenerator = (size) => {
-    const first = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J']
-    const second = []
-    first.map((item) => second.push(item.toLowerCase()))
-    const third = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
-    const fifth = [first, second, third]
-    const string = []
-    do {
-      const random = Math.floor(Math.random() * 10)
-      const random2 = Math.floor(Math.random() * 3)
-      if (string.length >= size) break
-      if (string.length <= size) {
-        string.push(fifth[random2][random])
-      }
-    } while (string.length <= size)
-    return string.join('')
-  }
-
-  const validateRegexSecurity = (inputToTest) => {
-    const regex = /^(?!.*(INPUT|NULL|UTF8|AND|OR|SELECT|INSERT|UPDATE|DELETE|FROM|WHERE|DROP|CREATE|ALTER|RENAME|TRUNCATE|DATABASE|TABLE|INDEX|GRANT|REVOKE|UNION|EXEC|SCRIPT|JAVASCRIPT|ALERT|PROMPT|CONFIRM|DOCUMENT|LOCATION|WINDOW|XMLHTTPREQUEST|EVAL|FUNCTION|PROTOTYPE|CONSTRUCTOR|CLASS|IMPORT|EXPORT|DEFAULT|SUPER|THIS|CATCH|FINALLY|TRY|DEBUGGER|ARGUMENTS|input|null|utf8|and|or|select|insert|update|delete|from|where|drop|create|alter|rename|truncate|database|table|index|grant|revoke|union|exec|script|javascript|alert|prompt|confirm|document|location|window|xmlhttprequest|eval|function|prototype|constructor|class|import|export|default|super|this|catch|finally|try|debugger|arguments))([a-zA-Z]+([ '-][a-zA-Z]+){0,2})$/ ;
-
-    if (regex.test(inputToTest)) {
-      return true
-    } else {
-      return false
+  const first = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J']
+  const second = []
+  first.map((item) => second.push(item.toLowerCase()))
+  const third = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+  const fifth = [first, second, third]
+  const string = []
+  do {
+    const random = Math.floor(Math.random() * 10)
+    const random2 = Math.floor(Math.random() * 3)
+    if (string.length >= size) break
+    if (string.length <= size) {
+      string.push(fifth[random2][random])
     }
+  } while (string.length <= size)
+  return string.join('')
+}
+
+const validateRegexSecurity = (inputToTest) => {
+  const regex = /^(?!.*(INPUT|NULL|UTF8|AND|OR|SELECT|INSERT|UPDATE|DELETE|FROM|WHERE|DROP|CREATE|ALTER|RENAME|TRUNCATE|DATABASE|TABLE|INDEX|GRANT|REVOKE|UNION|EXEC|SCRIPT|JAVASCRIPT|ALERT|PROMPT|CONFIRM|DOCUMENT|LOCATION|WINDOW|XMLHTTPREQUEST|EVAL|FUNCTION|PROTOTYPE|CONSTRUCTOR|CLASS|IMPORT|EXPORT|DEFAULT|SUPER|THIS|CATCH|FINALLY|TRY|DEBUGGER|ARGUMENTS|input|null|utf8|and|or|select|insert|update|delete|from|where|drop|create|alter|rename|truncate|database|table|index|grant|revoke|union|exec|script|javascript|alert|prompt|confirm|document|location|window|xmlhttprequest|eval|function|prototype|constructor|class|import|export|default|super|this|catch|finally|try|debugger|arguments))([a-zA-Z]+([ '-][a-zA-Z]+){0,2})$/;
+
+  if (regex.test(inputToTest)) {
+    return true
+  } else {
+    return false
   }
+}
 
-  const formatDateToTimeStampEpoch = (date) => {
-    //formato de date 'MM/DD/YYY'
-    const agora = new Date();
-    const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    const horarioFormatado = agora.toLocaleTimeString('pt-BR', { timeZone });
-    const horarioAtual = horarioFormatado.slice(0, 8);
+const formatDateToTimeStampEpoch = (date) => {
+  //formato de date 'MM/DD/YYY'
+  const agora = new Date();
+  const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const horarioFormatado = agora.toLocaleTimeString('pt-BR', { timeZone });
+  const horarioAtual = horarioFormatado.slice(0, 8);
 
-    const dataTimestamp = Math.floor(new Date(`${date} ${horarioAtual}`).getTime() / 1000);
-    return dataTimestamp;
+  const dataTimestamp = Math.floor(new Date(`${date} ${horarioAtual}`).getTime() / 1000);
+  return dataTimestamp;
 }
 
 const projectMailer = {
   welcomeAndValidate: function sendEmailTo(email, subject, account_email, account_name, account_pass, activation_link) {
     mailer.sendMail({
-        from: "tibiaprojectbr@gmail.com",        
-        to: email,
-        subject,
-        template: "main/resources/emailTemplates/welcomeAndActivationAccount",
-        context: {
-          account_email,
-          account_name,
-          account_pass,
-          youtube_logo,
-          instagram_logo,
-          discord_logo,
-          activation_link
-        },
-      });
+      from: "tibiaprojectbr@gmail.com",
+      to: email,
+      subject,
+      template: "main/resources/emailTemplates/welcomeAndActivationAccount",
+      context: {
+        account_email,
+        account_name,
+        account_pass,
+        youtube_logo,
+        instagram_logo,
+        discord_logo,
+        activation_link
+      },
+    });
   },
   changePassword: function sendEmailTo(account_email, account_name, account_pass, changePassword_link) {
     mailer.sendMail({
-        from: "tibiaprojectbr@gmail.com",        
-        to: account_email,
-        subject: 'Change password request',
-        template: "main/resources/emailTemplates/passwordRecovery",
-        context: {
-          account_email,
-          account_name,
-          account_pass,
-          youtube_logo,
-          instagram_logo,
-          discord_logo,
-          changePassword_link
-        },
-      });
+      from: "tibiaprojectbr@gmail.com",
+      to: account_email,
+      subject: 'Change password request',
+      template: "main/resources/emailTemplates/passwordRecovery",
+      context: {
+        account_email,
+        account_name,
+        account_pass,
+        youtube_logo,
+        instagram_logo,
+        discord_logo,
+        changePassword_link
+      },
+    });
   },
   coinsPurchase: function sendEmailTo(account_email, account_name, coins) {
     mailer.sendMail({
-        from: "tibiaprojectbr@gmail.com",        
-        to: account_email,
-        subject: 'Coins Purchase',
-        template: "main/resources/emailTemplates/coinsPurchaseEmail",
-        context: {
-          account_email,
-          account_name,
-          coins,
-          youtube_logo,
-          instagram_logo,
-          discord_logo,
-        },
-      });
+      from: "tibiaprojectbr@gmail.com",
+      to: account_email,
+      subject: 'Coins Purchase',
+      template: "main/resources/emailTemplates/coinsPurchaseEmail",
+      context: {
+        account_email,
+        account_name,
+        coins,
+        youtube_logo,
+        instagram_logo,
+        discord_logo,
+      },
+    });
   },
   TicketResponse: function sendEmailTo(account_email, ticket_id, ticket_type, response_date, link) {
     mailer.sendMail({
-        from: "tibiaprojectbr@gmail.com",       
-        to: account_email,
-        subject: 'Ticket response',
-        template: "main/resources/emailTemplates/TicketRepliedEmail",
-        context: {
-          account_email,
-          ticket_id,
-          ticket_type,
-          response_date,
-          link,
-          youtube_logo,
-          instagram_logo,
-          discord_logo,
-        },
-      });
+      from: "tibiaprojectbr@gmail.com",
+      to: account_email,
+      subject: 'Ticket response',
+      template: "main/resources/emailTemplates/TicketRepliedEmail",
+      context: {
+        account_email,
+        ticket_id,
+        ticket_type,
+        response_date,
+        link,
+        youtube_logo,
+        instagram_logo,
+        discord_logo,
+      },
+    });
   },
   FounderPackPurchase: function sendEmailTo(founder_pack, account_name, account_email, link) {
     mailer.sendMail({
-        from: "tibiaprojectbr@gmail.com",       
-        to: account_email,
-        subject: 'Founder pack purchase',
-        template: "main/resources/emailTemplates/foundersPackPurchase",
-        context: {
-          founder_pack,
-          account_name,
-          account_email,
-          link,
-          youtube_logo,
-          instagram_logo,
-          discord_logo,
-        },
-      });
+      from: "tibiaprojectbr@gmail.com",
+      to: account_email,
+      subject: 'Founder pack purchase',
+      template: "main/resources/emailTemplates/foundersPackPurchase",
+      context: {
+        founder_pack,
+        account_name,
+        account_email,
+        link,
+        youtube_logo,
+        instagram_logo,
+        discord_logo,
+      },
+    });
   },
 }
 
-const generateToken = (duration, userData) =>{
+const generateToken = (duration, userData) => {
   const JWTCONFIG = {
     expiresIn: `${duration}m`,
     algorithm: 'HS256'
   }
 
-  const generatedUserToken = jwt.sign({ 
-    data: userData},
+  const generatedUserToken = jwt.sign({
+    data: userData
+  },
     process.env.TOKEN_GENERATE_SECRET,
     JWTCONFIG
-    );
+  );
 
-    return generatedUserToken;
+  return generatedUserToken;
 }
 
-const generateTokenAdmin = (duration, userData) =>{
+const generateTokenAdmin = (duration, userData) => {
   const JWTCONFIG = {
     expiresIn: `${duration}m`,
     algorithm: 'HS256'
   }
 
-  const generatedAdminToken = jwt.sign({ 
-    data: userData},
+  const generatedAdminToken = jwt.sign({
+    data: userData
+  },
     process.env.TOKEN_GENERATE_SECRET_ADMIN,
     JWTCONFIG
-    );
+  );
 
-    return generatedAdminToken;
+  return generatedAdminToken;
 }
 
 
 
 const tokenValidation = (token) => {
   console.log('recebendo token', token)
- try {
-  const decoded = jwt.verify(token, process.env.TOKEN_GENERATE_SECRET);
-  return decoded;
- } catch(err) {
-  console.log(err);
-  return false;
- }
+  try {
+    const decoded = jwt.verify(token, process.env.TOKEN_GENERATE_SECRET);
+    return decoded;
+  } catch (err) {
+    console.log(err);
+    return false;
+  }
 }
 
 const AdmintokenValidation = (token) => {
   console.log('recebendo token', token)
- try {
-  const decoded = jwt.verify(token, process.env.TOKEN_GENERATE_SECRET_ADMIN);
-  return decoded;
- } catch(err) {
-  console.log(err);
-  return false;
- }
+  try {
+    const decoded = jwt.verify(token, process.env.TOKEN_GENERATE_SECRET_ADMIN);
+    return decoded;
+  } catch (err) {
+    console.log(err);
+    return false;
+  }
 }
 
 const convertPremiumTimeToDaysLeft = (lastDay) => {
@@ -228,27 +231,17 @@ const updateLastDayTimeStampEpochFromGivenDays = (days, lastDay) => {
   return newTimeStampEpoch;
 };
 
-const paypalApi = axios.create({
-  baseURL: process.env.PAYPAL_API_BASE_URL,
-});
-
 const convertDate = (dateTimeStamp, param) => {
   const dateToConvert = new Date(dateTimeStamp * 1000);
   const convertedDate = !param
-    ? `${
-        dateToConvert.getDate().toString().length < 2 ? 0 : ""
-      }${dateToConvert.getDate()}/${
-        dateToConvert.getMonth().toString().length < 2 ? 0 : ""
-      }${dateToConvert.getMonth() + 1}/${dateToConvert.getFullYear()} - ${
-        dateToConvert.getHours().toString().length < 2 ? 0 : ""
-      }${dateToConvert.getHours()}:${
-        dateToConvert.getMinutes().toString().length < 2 ? 0 : ""
-      }${dateToConvert.getMinutes()}`
-    : `${
-        dateToConvert.getDate().toString().length < 2 ? 0 : ""
-      }${dateToConvert.getDate()}/${
-        dateToConvert.getMonth().toString().length < 2 ? 0 : ""
-      }${dateToConvert.getMonth() + 1}/${dateToConvert.getFullYear()}`;
+    ? `${dateToConvert.getDate().toString().length < 2 ? 0 : ""
+    }${dateToConvert.getDate()}/${dateToConvert.getMonth().toString().length < 2 ? 0 : ""
+    }${dateToConvert.getMonth() + 1}/${dateToConvert.getFullYear()} - ${dateToConvert.getHours().toString().length < 2 ? 0 : ""
+    }${dateToConvert.getHours()}:${dateToConvert.getMinutes().toString().length < 2 ? 0 : ""
+    }${dateToConvert.getMinutes()}`
+    : `${dateToConvert.getDate().toString().length < 2 ? 0 : ""
+    }${dateToConvert.getDate()}/${dateToConvert.getMonth().toString().length < 2 ? 0 : ""
+    }${dateToConvert.getMonth() + 1}/${dateToConvert.getFullYear()}`;
   return convertedDate;
 };
 
@@ -269,23 +262,62 @@ const getlastPaymentIDUpdated = () => {
   return Number(lastPaymentIDUpdated);
 }
 
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+/**
+ * @function
+ * @param {string} txtName - The name of the txt file to be created.
+ * @param {string} warningText - The warning text.
+ * @param {string} errText - The error text if exception or error throw and error message not passed by warningText.
+ */
+const ErrorLogCreateFileHandler = async (txtName, warningText, errText) => {
+  
+  const text = warningText;
+  console.log(text);
+  const localDateTime = moment().tz("America/Sao_Paulo").format();
+  const responseText = `${localDateTime} - ${text}, ${errText}\n\n`;
+
+  const logDirectory = path.join(__dirname, '..', 'apiErrorsLogs');
+
+  try {
+    await fs.mkdir(logDirectory, { recursive: true });
+  } catch (error) {
+    if (error.code !== 'EEXIST') {  // Ignore the error if the directory already exists
+      console.error('Erro ao criar o diretório:', error);
+      return;
+    }
+  }
+
+  const logFilePath = path.join(logDirectory, txtName);
+
+  try {
+    await fs.appendFile(logFilePath, responseText);
+    console.log(`Entrada adicionada com sucesso ao ${logFilePath}`);
+  } catch (error) {
+    console.error('Erro ao escrever no arquivo:', error);
+  }
+};
+
 module.exports = {
-    checkPassword,
-    hashGenerator,
-    validateRegexSecurity,
-    encryptPassword,
-    formatDateToTimeStampEpoch,
-    projectMailer,
-    generateToken,
-    tokenValidation,
-    convertPremiumTimeToDaysLeft,
-    updateLastDayTimeStampEpochFromGivenDays,
-    paypalApi,
-    generateTokenAdmin,
-    AdmintokenValidation,
-    convertDate,
-    setCreateCharacterController,
-    getCreateCharacterController,
-    setlastPaymentIDUpdated,
-    getlastPaymentIDUpdated
+  checkPassword,
+  hashGenerator,
+  validateRegexSecurity,
+  encryptPassword,
+  formatDateToTimeStampEpoch,
+  projectMailer,
+  generateToken,
+  tokenValidation,
+  convertPremiumTimeToDaysLeft,
+  updateLastDayTimeStampEpochFromGivenDays,
+  generateTokenAdmin,
+  AdmintokenValidation,
+  convertDate,
+  setCreateCharacterController,
+  getCreateCharacterController,
+  setlastPaymentIDUpdated,
+  getlastPaymentIDUpdated,
+  sleep,
+  ErrorLogCreateFileHandler
 }

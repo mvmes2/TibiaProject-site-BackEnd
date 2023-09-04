@@ -1,0 +1,10 @@
+2023-09-04T11:31:55-03:00 - erro na create preference PagSeguro checkout: , AxiosError: Request failed with status code 401
+
+2023-09-04T11:34:00-03:00 - erro na create preference PagSeguro checkout: , AxiosError: Request failed with status code 401
+
+2023-09-04T11:37:15-03:00 - erro na create preference PagSeguro checkout: , AxiosError: Request failed with status code 500
+
+2023-09-04T11:38:48-03:00 - erro na create preference PagSeguro checkout: , AxiosError: Request failed with status code 500
+
+2023-09-04T11:45:30-03:00 - erro na create preference PagSeguro checkout: , AxiosError: Request failed with status code 500
+

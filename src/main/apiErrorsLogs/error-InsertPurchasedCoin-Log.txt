@@ -1,0 +1,2 @@
+2023-09-03T18:19:24-03:00 - Account name: garry, AccountID: 53, erro ao tentar inserir coin, ReferenceError: Cannot access 'text' before initialization, 
+
