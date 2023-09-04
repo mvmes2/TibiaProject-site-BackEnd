@@ -27,6 +27,11 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 
+// app.use(express.urlencoded({ extended: true }));
+app.use(bodyParser.json());
+
+app.use(bodyParser.urlencoded({ extended: true }));
+
 io.on("connection", (socket) => {
   console.log("Usuário conectado:", socket.id);
 

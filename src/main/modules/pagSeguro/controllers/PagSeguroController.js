@@ -41,7 +41,6 @@ module.exports = app => {
 				payment_methods_configs: [
 					{
 						type: "credit_card",
-						brands: ["mastercard"],
 						config_options: [
 							{
 								option: "installments_limit",
@@ -60,7 +59,7 @@ module.exports = app => {
 			const redirect = [];
 
 			await api.post(`/checkouts`, data, { headers }).then(async (resp) => {
-				console.log('logando response pagSeguro para homo!!!  ', util.inspect(resp.data, { depth: 2, colors: true }))
+				console.log('logando response pagSeguro para homo!!!  ', util.inspect(resp.data, { depth: 2, colors: true }));
 
 				const userData = dataFront;
 				const newUserDataToPay = {
@@ -79,15 +78,12 @@ module.exports = app => {
 						return redirect.push(item);
 					}
 				});
+				return res.status(200).send({ data: redirect[0]?.href });
 			}).catch(async (err) => {
 				const text = 'erro na create preference PagSeguro checkout: '
 				await ErrorLogCreateFileHandler(Enums.PAGSEGUROCONTROLLER_PagseguroCreatePaymnentController_ERROR_FILE_NAME, text, err);
-				console.log('erro na create preference PagSeguro checkout: ', err);
-				console.log('logando response error  ', util.inspect(err, { depth: 2, colors: true }))
-			});
-
-			return res.status(200).send({ data: redirect[0]?.href });
-
+				console.log('logando response pagSeguro para homo!!!  ', util.inspect(err, { depth: 2, colors: true }));
+			});	
 		} catch (err) {
 			console.log('Error ao tentar criar checkout, ', err);
 			return res.status(500).send({ message: 'Internal error!' });
@@ -103,7 +99,7 @@ module.exports = app => {
 			console.log('o que tem dentro de host? ', req.headers['x-product-origin'])
 			console.log('o que tem dentro de authenticity? ', req.headers['x-authenticity-token'])
 
-			if (req.headers['x-product-origin'] !== 'CHECKOUT' || !req.headers['x-product-id'].includes('CHEC_') || !req.headers['user-agent'].includes('Go-http-client/') || !req.headers['x-authenticity-token']) {
+			if (req.headers['x-product-origin'] !== 'CHECKOUT' || !req.headers['x-product-id'].includes('CHEC_') || !req.headers['user-agent'].includes('Go-http-client/')) {
 				console.log('não autorizado a entrar nesta rota de notification do pagSeguro!! algo de errado com a veracidade da requisição! function PagSeguroNotificationReceiverController')
 				return res.status(403).send({ message: 'Erro ao checar a validade da requisição!' });
 			}
