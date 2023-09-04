@@ -83,7 +83,8 @@ module.exports = app => {
 				const text = 'erro na create preference PagSeguro checkout: '
 				await ErrorLogCreateFileHandler(Enums.PAGSEGUROCONTROLLER_PagseguroCreatePaymnentController_ERROR_FILE_NAME, text, err);
 				console.log('erro na create preference PagSeguro checkout: ', err);
-				console.log('logando response error  ', util.inspect(err, { depth: 2, colors: true }))
+				console.log('logando response error  ', util.inspect(err, { depth: 2, colors: true }));
+				return res.status(500).send({ message: 'Internal error!' });
 			});
 
 			return res.status(200).send({ data: redirect[0]?.href });

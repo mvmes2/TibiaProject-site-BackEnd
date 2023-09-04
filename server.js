@@ -27,6 +27,8 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 
+app.use(express.urlencoded({ extended: true }));
+
 io.on("connection", (socket) => {
   console.log("Usuário conectado:", socket.id);
 
@@ -121,7 +123,7 @@ consign()
   .then("./src/main/config/Routes.js")
   .into(app);
 
-const PORT = 3333;
+const PORT = 8880;
 server.listen(PORT, () => {
     console.log(`BackEnd Rodando na porta: ${PORT}!!`);
 });

@@ -8,3 +8,5 @@
 
 2023-09-04T11:45:30-03:00 - erro na create preference PagSeguro checkout: , AxiosError: Request failed with status code 500
 
+2023-09-04T11:56:05-03:00 - erro na create preference PagSeguro checkout: , AxiosError: Request failed with status code 500
+
