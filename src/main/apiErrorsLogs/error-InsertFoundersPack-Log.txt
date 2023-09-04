@@ -1,0 +1,4 @@
+2023-09-03T18:33:53-03:00 - Account name: garry, AccountID: 53, Provavelmente pack de teste, Silver Founder's Pack TEST 2, Este Founder pack nao existe no banco produção!!, 
+
+2023-09-03T18:53:07-03:00 - Account name: garry, AccountID: 53, Provavelmente pack de teste, Silver Founder's Pack TEST 3, Este Founder pack nao existe no banco produção!!, 
+

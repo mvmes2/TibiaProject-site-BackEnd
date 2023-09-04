@@ -1,8 +1,9 @@
 require('dotenv').config();
 const { worlds, players, products, accounts, payments } = require('../../../models/projectModels');
 const { userSockets, io } = require('../../../../../server');
-const { projectMailer, getlastPaymentIDUpdated, setlastPaymentIDUpdated, setCreateCharacterController } = require('../../../utils/utilities');
+const { projectMailer, getlastPaymentIDUpdated, setlastPaymentIDUpdated, setCreateCharacterController, ErrorLogCreateFileHandler } = require('../../../utils/utilities');
 const moment = require('moment');
+const Enums = require('../../../config/Enums');
 
 const getProductsList = async () => {
   try {
@@ -35,6 +36,7 @@ const GetPaymentListLastIDRepository = async () => {
 }
 
 const insertNewPayment = async (data) => {
+  console.log('ESTAMOS INSERINDO PAGAMENTO!!!!!!!!!!!!!!');
   console.log(data);
   data.transaction_id = data.transaction_id.toString();
   const checkIfPaymentAlreadyExists = await payments.query().select('transaction_id').where({ transaction_id: data.transaction_id });
@@ -48,6 +50,7 @@ const insertNewPayment = async (data) => {
     return { status: 201, message: 'Pagamento criado com sucesso!' }
   } catch (err) {
     console.log(err);
+    await ErrorLogCreateFileHandler(Enums.MERCADOPAGOREPOSITORY_insertNewPayment_ERROR_FILE_NAME, '', err);
     return { status: 500, message: 'Internal error!' }
   }
 }
@@ -57,6 +60,7 @@ const updatePayment = async (data) => {
     await payments.query().update(data.update).where({ transaction_id: data.transaction_id.toString() });
   } catch (err) {
     console.log(err);
+   await ErrorLogCreateFileHandler(Enums.MERCADOPAGOREPOSITORY_updatePayment_ERROR_FILE_NAME, '', err);
     return { status: 500, message: 'Internal error!' }
   }
 }
@@ -91,7 +95,8 @@ const insertCoinsAtAccountToApprovedPayment = async (paymentID, pagseguroEmail) 
       try {
         throw new Error('Payment ID do not exists or payment id have already been paid, check your email!')
       } catch (err) {
-        console.log(err)
+        const text = 'Error while retrieving account to insert coins, (transaction_id does do not exist at database)';
+       await ErrorLogCreateFileHandler(Enums.MERCADOPAGOREPOSITORY_insertCoinsAtAccountToApprovedPayment_InsertCoinsAtAccountToApprovedPayment_ERROR_FILE_NAME, text, err);
         return { status: 409, message: 'Payment ID do not exists or payment id have already been paid, check your email!' }
       }
     }
@@ -149,36 +154,25 @@ const insertCoinsAtAccountToApprovedPayment = async (paymentID, pagseguroEmail) 
             break
 
           default:
+            if (process.env?.LOCAL_TEST_DEVELOPMENT_ENV){
+              packPayFunction('silver_pack');
+              const text = `Account name: ${accToPay?.account_name}, AccountID: ${accToPay?.account_id}, Provavelmente pack de teste, ${accToPay.product_name}, Este Founder pack nao existe no banco produção!!`
+              await ErrorLogCreateFileHandler(Enums.MERCADOPAGOREPOSITORY_insertCoinsAtAccountToApprovedPayment_InsertFoundersPack_ERROR_FILE_NAME, text, '');
+              break
+            }
             const text = `Account name: ${accToPay?.account_name}, AccountID: ${accToPay?.account_id}, Provavelmente pack de teste, ${accToPay.product_name}, Este Founder pack nao existe no banco produção!!`
-            console.log(text);
-            const responseText = `${new Date().toISOString()} - ${text}\n\n`;
-            fs.appendFile('error-InsertFoundersPack-Log.txt', responseText, (err) => {
-              if (err) {
-                console.error('Erro ao escrever no arquivo:', err);
-              } else {
-                console.log('Entrada adicionada com sucesso ao error-InsertFoundersPack-Log.txt.');
-              }
-            });
+           await ErrorLogCreateFileHandler(Enums.MERCADOPAGOREPOSITORY_insertCoinsAtAccountToApprovedPayment_InsertFoundersPack_ERROR_FILE_NAME, text, '');
             break
         }
 
       } catch (err) {
         const text = `Account name: ${accToPay?.account_name}, AccountID: ${accToPay?.account_id}, erro ao tentar inserir coin, ${err}`
-        console.log(text);
-        const responseText = `${new Date().toISOString()} - ${text}\n\n`;
-        fs.appendFile('error-InsertPurchasedCoin-Log.txt', responseText, (err) => {
-          if (err) {
-            console.error('Erro ao escrever no arquivo:', err);
-          } else {
-            console.log('Entrada adicionada com sucesso ao error-InsertPurchasedCoin-Log.txt.');
-          }
-        });
+        await ErrorLogCreateFileHandler(Enums.MERCADOPAGOREPOSITORY_insertCoinsAtAccountToApprovedPayment_InsertPurchasedCoin_ERROR_FILE_NAME, text, '');
         return { status: 500, message: 'Internal error!' }
       }
     }
 
     else {
-
       const getPreviousAmmountToSumm = await accounts.query().select('coins').where({ id: accToPay.account_id }).first();
 
       console.log('como ta vindo os coins antes? ', getPreviousAmmountToSumm)
@@ -186,8 +180,6 @@ const insertCoinsAtAccountToApprovedPayment = async (paymentID, pagseguroEmail) 
 
       await accounts.query().update({ coins: (Number(getPreviousAmmountToSumm.coins) + Number(accToPay.coins_quantity)) }).where({ id: accToPay.account_id });
       await payments.query().update({ coins_paid_date: Date.now() / 1000 }).where({ transaction_id: !paymentID.id ? paymentID.toString() : paymentID.id.toString() });
-
-
 
       try {
         projectMailer.coinsPurchase(accToPay.account_email, accToPay.account_name, accToPay.coins_quantity);
@@ -204,7 +196,6 @@ const insertCoinsAtAccountToApprovedPayment = async (paymentID, pagseguroEmail) 
       console.log('consolando se tem algo no userSocket ', userSockets ? userSockets : '');
       console.log('logando o id da conta do usuário ao receber o pagamento: ', accToPay?.account_id);
 
-
       if (userSocketId) {
         console.log('Emitindo evento de pagamento aprovado para:', userSocketId ? userSockets : '');
         io.to(userSocketId).emit("payment_approved", {
@@ -215,15 +206,7 @@ const insertCoinsAtAccountToApprovedPayment = async (paymentID, pagseguroEmail) 
     }
   } catch (err) {
     const text = `Account name: ${accToPay?.account_name}, AccountID: ${accToPay?.account_id}, Internal error! insertCoinsAtAccountToApprovedPayment function at mercadoPagoRepository, ${err}`
-    console.log(text);
-    const responseText = `${new Date().toISOString()} - ${text}\n\n`;
-    fs.appendFile('error-InsertCoinsAtAccountToApprovedPayment-Function-Log.txt', responseText, (err) => {
-      if (err) {
-        console.error('Erro ao escrever no arquivo:', err);
-      } else {
-        console.log('Entrada adicionada com sucesso ao error-InsertCoinsAtAccountToApprovedPayment-Function-Log.txt.');
-      }
-    });
+   await ErrorLogCreateFileHandler(Enums.MERCADOPAGOREPOSITORY_insertCoinsAtAccountToApprovedPayment_InsertCoinsAtAccountToApprovedPayment_ERROR_FILE_NAME, text, '');
     return { status: 500, message: 'Internal error!' }
   }
 }

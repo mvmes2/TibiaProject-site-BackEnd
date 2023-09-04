@@ -1,11 +1,12 @@
 require('dotenv').config();
 const fs = require('fs');
 const util = require('util');
-
 const { api } = require('./api');
+const { sleep } = require('../../../utils/utilities');
+const Payer = require('../../../controllers/PayerController');
+
 module.exports = app => {
   const { insertNewPayment, updatePayment, deleteCancelledPayment, insertCoinsAtAccountToApprovedPayment } = app.src.main.modules.mercadoPago.repository.MercadoPagoRepository;
-  const { AddPayerToList, GetPayerAtList, RemovePayerFromList } = app.src.main.controllers.PayerController;
 
   const headers = {
     Authorization: `Bearer ${process.env.MERCADO_PAGO_ACCESS_TOKEN}`
@@ -38,7 +39,7 @@ module.exports = app => {
         }
       };
 
-      await api.post('/payments', body, { headers }).then((resp) => {
+      await api.post('/payments', body, { headers }).then(async (resp) => {
 
         // const responseText1 = util.inspect(resp, { depth: null });
         // const responseText2 = util.inspect(resp.data, { depth: null });
@@ -64,8 +65,10 @@ module.exports = app => {
           id: resp.data.id,
           payerData: data
         }
-        AddPayerToList(insertNewPayerInfo);
 
+        console.log('vai ser inserido na lista de payer?');
+        await Payer.AddPayerToList(insertNewPayerInfo);
+        console.log('Foi inserido na lista de payer?');
         return respuest = { status: 201, message: { qr_code: resp.data.point_of_interaction.transaction_data.qr_code_base64, cpy_paste: resp.data.point_of_interaction.transaction_data.qr_code } }
       }).catch((err) => {
         console.log(err);
@@ -93,14 +96,14 @@ module.exports = app => {
 
       if (data?.action === 'payment.created') {
 
-        const getPayer = GetPayerAtList(paymentId);
-        console.log('qual o payer? ', getPayer)
+        const getPayer = await Payer.GetPayerAtList(paymentId);
+        console.log('qual o payer? ', getPayer);
         const GLOBAL_USER_DATA_TO_PAYMENT = getPayer?.payerData;
         console.log('qual o payer final depois do payer data? ', GLOBAL_USER_DATA_TO_PAYMENT);
 
         console.log('paymentCreated: ', paymentId);
 
-        if (Number(paymentId) !== Number(getPayer?.payerID)) {
+        if (Number(paymentId) !== Number(getPayer?.transactionID)) {
           console.log('payer diferente do armazenado ou payer já foi pago e removido da lista!');
           return { status: 200, message: 'payer diferente do armazenado ou payer já foi pago e removido da lista!' };
         }
@@ -108,7 +111,7 @@ module.exports = app => {
           account_id: GLOBAL_USER_DATA_TO_PAYMENT.account_id,
           account_name: GLOBAL_USER_DATA_TO_PAYMENT.name,
           account_email: GLOBAL_USER_DATA_TO_PAYMENT.email,
-          transaction_id: Number(getPayer.payerID),
+          transaction_id: Number(getPayer.transactionID),
           transaction_type: 'pix',
           payment_currency: 'BRL',
           payment_company: 'Mercado Pago',
@@ -120,19 +123,24 @@ module.exports = app => {
           status: 'pending_payment',
           created_date: Math.floor(Date.now() / 1000),
         }
-        insertNewPayment(newPaymentInsert);
+
+        console.log('deu algum erro ao montar o objeto de payment para inserir no banco? ', newPaymentInsert);
+        sleep(1000);
+
+        await insertNewPayment(newPaymentInsert);
+
         return { status: 200, message: 'ok' }
       }
       if (data?.action === 'payment.updated' && paymentId) {
         console.log('qual id sendo updatado?? ', paymentId)
-        await api.get(`/payments/${paymentId}`, { headers }).then((resp) => {
+        await api.get(`/payments/${paymentId}`, { headers }).then( async (resp) => {
           console.log('to recebendo o que de status? ', resp.data.status)
 
           if (resp.data.status === 'cancelled') {
             console.log('payment cancelled: ', resp?.data?.id);
             const cancelledID = resp?.data?.id;
             deleteCancelledPayment({ transaction_id: cancelledID });
-            RemovePayerFromList(cancelledID);
+            await Payer.RemovePayerFromList(cancelledID);
           }
 
           if (resp.data.status === 'approved') {
@@ -149,7 +157,7 @@ module.exports = app => {
 
             setTimeout(async () => {
               await insertCoinsAtAccountToApprovedPayment(approvedID);
-              RemovePayerFromList(approvedID);
+              await Payer.RemovePayerFromList(approvedID);
 
             }, 1000);
           }

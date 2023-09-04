@@ -115,9 +115,9 @@ consign()
   .then("./src/main/modules/stripes/repository")
   .then("./src/main/modules/stripes/services")
   .then("./src/main/modules/stripes/")
-  .then("./src/main/modules/paypal/repository")
-  .then("./src/main/modules/paypal/controllers")
-  .then("./src/main/modules/paypal/")
+  .then("./src/main/modules/pagSeguro/repository")
+  .then("./src/main/modules/pagSeguro/controllers")
+  .then("./src/main/modules/pagSeguro/")
   .then("./src/main/config/Routes.js")
   .into(app);
 
