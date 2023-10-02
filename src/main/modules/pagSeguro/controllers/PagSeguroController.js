@@ -59,7 +59,7 @@ module.exports = app => {
 			const redirect = [];
 
 			await api.post(`/checkouts`, data, { headers }).then(async (resp) => {
-				console.log('logando response pagSeguro para homo!!!  ', util.inspect(resp.data, { depth: 2, colors: true }));
+				console.log('logando response pagSeguro para homologação!!!  ', util.inspect(resp, { depth: 3, colors: true }));
 
 				const userData = dataFront;
 				const newUserDataToPay = {
@@ -82,18 +82,8 @@ module.exports = app => {
 			}).catch(async (err) => {
 				const text = 'erro na create preference PagSeguro checkout: '
 				await ErrorLogCreateFileHandler(Enums.PAGSEGUROCONTROLLER_PagseguroCreatePaymnentController_ERROR_FILE_NAME, text, err);
-<<<<<<< HEAD
-				console.log('erro na create preference PagSeguro checkout: ', err);
-				console.log('logando response error  ', util.inspect(err, { depth: 2, colors: true }));
-				return res.status(500).send({ message: 'Internal error!' });
+				console.log('Error', err);
 			});
-
-			return res.status(200).send({ data: redirect[0]?.href });
-
-=======
-				console.log('logando response pagSeguro para homo!!!  ', util.inspect(err, { depth: 2, colors: true }));
-			});	
->>>>>>> c499572692a9a9a918f971ec1d9a755989bf991e
 		} catch (err) {
 			console.log('Error ao tentar criar checkout, ', err);
 			return res.status(500).send({ message: 'Internal error!' });
