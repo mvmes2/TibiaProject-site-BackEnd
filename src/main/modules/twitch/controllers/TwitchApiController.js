@@ -27,6 +27,7 @@ let twitchData = null;
 		const queryParams = {
 			game_id: gameID,
 			language: 'pt',
+			type: 'live',
 			first: 100,
 		};
 
@@ -81,73 +82,32 @@ let twitchData = null;
 		// const livesStremandoTibiaProject = liveStreams.filter((item) => item.title.toLowerCase().includes('#tibiaproject'));
 		const livesStremandoTibiaProject = liveStreams.filter((item) => item.user_name == 'EliasTibianoDoido');
 
-		const checkStreamToUpdate = await getAllStreamersList();
-
 		livesStremandoTibiaProject.map(async (item) => {
 
 				item.thumbnail_url = item.thumbnail_url.replace('{width}', 170),
 				item.thumbnail_url = item.thumbnail_url.replace('{height}', 120)
 
-			const insertLiveToOficialStreamersLiveCheck = async (streamerid, streamer) => {
-
 				const oficialStreamersList = await getAllOficialStreamersList();
 
 				const checkIfAlreadyExistLiveCheck = await getAllOficialStreamersLiveCheckList();
 
-				if (oficialStreamersList.some((streamerSome) => streamerSome.twitch_user_id == streamer.user_id) && !checkIfAlreadyExistLiveCheck.find((find) => find.live_id== streamer.id)) {
+				if (oficialStreamersList.some((streamerSome) => streamerSome.twitch_user_id == item.user_id) && !checkIfAlreadyExistLiveCheck.find((find) => find.live_id== item.id)) {
 					const newOficialStreamerToCheck = {
-						streamer_id: Number(streamerid),
-						streamer_twitch_id: streamer.user_id,
-						streamer_name: streamer.user_name,
-						live_id: streamer.id,
-						live_title: streamer.title,
-						live_started_at: streamer.started_at
+						streamer_twitch_id: item.user_id,
+						streamer_name: item.user_name,
+						live_id: item.id,
+						live_title: item.title,
+						live_started_at: item.started_at
 					};
 					await inserStreamerAtLiveCheckTime(newOficialStreamerToCheck);
-				}
-			}
+				}		
 
-			if (checkStreamToUpdate.some((itemSome) => item.id == itemSome.stream_id)) {
-
-				const getLive = await getStreamerLive({id: item.user_id});
-
-				const getStreamerIDATDB = getLive[0].id;
-
-				const streamerUpdate = {
-					id: item.id,
-					update: {
-						stream_title: item.stream_title,
-						viewer_count: item.viewer_count,
-					}
-				}
-				await insertLiveToOficialStreamersLiveCheck(getStreamerIDATDB, item);
-
-				return await updateLiveStream(streamerUpdate);
-
-			} else if (!checkStreamToUpdate.some((itemSome) => item.id == itemSome.id)) {
-				
-				const insert = {
-					stream_id: item.id,
-					user_name: item.user_name,
-					user_login: item.user_login,
-					user_id: item.user_id,
-					game_name: item.game_name,
-					stream_title: item.title,
-					language: item.language,
-					language: item.language,
-					thumbnail_url: item.thumbnail_url,
-					stream_started_at: item.started_at,
-					viewer_count: item.viewer_count,
-				}
-				const streamerIDAtDB = await insertNewStreamer(insert);
-				await insertLiveToOficialStreamersLiveCheck(streamerIDAtDB, item);				
-			}
 		});
 		
-		const livesStremandoTibiaProjectFromDB = await getAllStreamersList();
 		twithLastUpdated = moment();
-		twitchData = livesStremandoTibiaProjectFromDB;
-		return res.status(200).send(livesStremandoTibiaProjectFromDB);
+		twitchData = livesStremandoTibiaProject;
+
+		return res.status(200).send(livesStremandoTibiaProject);
 	}
 
 	// const getTwitchUserID = async (req, res) => {
