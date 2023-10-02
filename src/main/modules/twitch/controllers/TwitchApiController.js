@@ -118,6 +118,7 @@ let twitchData = null;
 					update: {
 						stream_title: item.stream_title,
 						viewer_count: item.viewer_count,
+						thumbnail_url: item.thumbnail_url
 					}
 				}
 				await insertLiveToOficialStreamersLiveCheck(getStreamerIDATDB, item);
