@@ -1,4 +1,4 @@
-const { players, players_comment, accounts, guild_membership, guilds } = require('./../models/projectModels');
+const { players, players_comment, accounts, guild_membership, guilds } = require('../models/MasterModels');
 const { setCreateCharacterController } = require('../utils/utilities');
 module.exports = app => {
   const deleteCharacter = async (data) => {

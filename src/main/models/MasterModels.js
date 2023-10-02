@@ -1,5 +1,5 @@
 const { Model } = require('objection');
-const connection = require('../config/db');
+const connection = require('../config/dbMasterConf');
 
 Model.knex(connection);
 
@@ -12,9 +12,8 @@ class accounts extends Model {
 }
 
 class players extends Model {
-    static tableName = 'players'
+    static tableName = 'players';
 }
-
 class player_deaths extends Model {
     static tableName = 'player_deaths'
 }

@@ -1,5 +1,5 @@
 require('dotenv').config();
-const { worlds, players, products, accounts, payments } = require('../../../models/projectModels');
+const { worlds, players, products, accounts, payments } = require('../../../models/MasterModels');
 const { userSockets, io } = require('../../../../../server');
 const { projectMailer, getlastPaymentIDUpdated, setlastPaymentIDUpdated, setCreateCharacterController, ErrorLogCreateFileHandler } = require('../../../utils/utilities');
 const moment = require('moment');
