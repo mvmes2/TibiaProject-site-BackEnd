@@ -3,7 +3,11 @@ const { twitchApiaUTH, twitchApi } = require('../api/twitchApi');
 module.exports = app => {
 	const moment = require('moment');
 	const { twitchAuthController } = app.src.main.modules.twitch.controllers.AuthController;
-	const { insertNewStreamer, getAllStreamersList, updateStreamer } = app.src.main.modules.twitch.repository.twitchRepository;
+	const { insertNewStreamer, getAllStreamersList, updateLiveStream, inserStreamerAtLiveCheckTime, 
+		getAllOficialStreamersList, getAllOficialStreamersLiveCheckList, getStreamerLive } = app.src.main.modules.twitch.repository.twitchRepository;
+
+let twithLastUpdated = 0;
+let twitchData = null;
 
 	const getGameID = async (headers) => {
 		try {
@@ -13,7 +17,6 @@ module.exports = app => {
 			return gameID.id;
 		} catch (err) {
 			console.log(err);
-			res.status(500).send({ message: 'Internal error!' });
 		}
 	}
 
@@ -24,6 +27,7 @@ module.exports = app => {
 		const queryParams = {
 			game_id: gameID,
 			language: 'pt',
+			type: 'live',
 			first: 100,
 		};
 
@@ -44,9 +48,11 @@ module.exports = app => {
 				}
 
 				cursor = response?.data?.pagination?.cursor;
+				
 				streamsList.push(...response?.data?.data);
 			}
 			streamsList.sort((a, b) => b.viewer_count - a.viewer_count);
+			console.log('stremando Tibia agora: ', streamsList.length);
 			return streamsList;
 		} catch (err) {
 			console.error(err.data);
@@ -55,6 +61,13 @@ module.exports = app => {
 
 
 	const twitch = async (req, res) => {
+
+		if (moment().diff(twithLastUpdated, 'minutes') < 2) {
+			console.log('temos data?', twitchData);
+			console.log('cache Twitch feito com sucesso!');
+			return res.status(200).send(twitchData);
+		}
+
 		const getToken = await twitchAuthController();
 
 		const headers = {
@@ -65,45 +78,56 @@ module.exports = app => {
 		const gameID = await getGameID(headers);
 
 		const liveStreams = await getLiveStreams(headers, gameID);
-		
-		// const livesStremandoTibiaProject = liveStreams.filter((item) => item.title.toLowerCase().includes('#tibiaproject'));
-		const livesStremandoTibiaProject = liveStreams.filter((item) => item.user_name == 'GuerreiroTetra');
-		const checkStreamToUpdate = await getAllStreamersList();
+
+		const livesStremandoTibiaProject = liveStreams.filter((item) => item.title.toLowerCase().includes('#tibiaproject'));
+		// const livesStremandoTibiaProject = liveStreams.filter((item) => item.user_name == 'EliasTibianoDoido');
+
 		livesStremandoTibiaProject.map(async (item) => {
-			console.log('some? ', checkStreamToUpdate)
-			if (checkStreamToUpdate.some((itemSome) => item.id == itemSome.stream_id)) {
-				const streamerUpdate = {
-					id: item.id,
-					update: {
-						stream_title: item.stream_title,
-						viewer_count: item.viewer_count,
-					}
-				}
 
-				return await updateStreamer(streamerUpdate);
-			} else if(!checkStreamToUpdate.some((itemSome) => item.id == itemSome.id)) {
-				const insert = {
-					stream_id: item.id,
-					user_name: item.user_name,
-					user_login: item.user_login,
-					user_id: item.user_id,
-					game_name: item.game_name,
-					stream_title: item.title,
-					language: item.language,
-					language: item.language,
-					thumbnail_url: item.thumbnail_url,
-					stream_started_at: item.started_at,
-					viewer_count: item.viewer_count,
-				}
+				item.thumbnail_url = item.thumbnail_url.replace('{width}', 170),
+				item.thumbnail_url = item.thumbnail_url.replace('{height}', 120)
 
-				await insertNewStreamer(insert);
-			}
-		})
-		console.log(livesStremandoTibiaProject)
-		return res.status(200).send(headers);
+				const oficialStreamersList = await getAllOficialStreamersList();
+
+				const checkIfAlreadyExistLiveCheck = await getAllOficialStreamersLiveCheckList();
+
+				if (oficialStreamersList.some((streamerSome) => streamerSome.twitch_user_id == item.user_id) && !checkIfAlreadyExistLiveCheck.find((find) => find.live_id== item.id)) {
+					const newOficialStreamerToCheck = {
+						streamer_twitch_id: item.user_id,
+						streamer_name: item.user_name,
+						live_id: item.id,
+						live_title: item.title,
+						live_started_at: item.started_at
+					};
+					await inserStreamerAtLiveCheckTime(newOficialStreamerToCheck);
+				}		
+
+		});
+		
+		twithLastUpdated = moment();
+		twitchData = livesStremandoTibiaProject;
+
+		return res.status(200).send(livesStremandoTibiaProject);
 	}
 
+	// const getTwitchUserID = async (req, res) => {
+	// 	const data = req.body;
+	// 	try {
+	// 		const resp = await twitchApi.get(`/helix/users?login=${data.user_login}`);
+	// 		const userID = resp?.data?.id;
+	// 		if (!userID || userID == undefined || userID == null) {
+	// 			return res.status(400).send({ message: 'Login não existente na twitch, ou erro ao buscar id para este login!' });
+	// 		} else {
+	// 			return res.status(200).send({ user_id: userID });
+	// 		}
+	// 	} catch (err) {
+	// 		console.log(err);
+	// 		return res.status(500).send({ message: `Internal error!, ${err}` });
+	// 	}
+	// }
+
 	return {
-		twitch
+		twitch,
+		// getTwitchUserID
 	}
 }

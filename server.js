@@ -106,6 +106,8 @@ module.exports = {
 consign()
   .then("./src/main/config/prismicConfig.js")
   .then("./src/main/utils")
+  .then("./src/main/modules/twitch/repository")
+  .then("./src/main/modules/twitch")
   .then("./src/main/middlewares")
   .then("./src/main/repository")
   .then("./src/main/services")
@@ -119,8 +121,6 @@ consign()
   .then("./src/main/modules/pagSeguro/repository")
   .then("./src/main/modules/pagSeguro/controllers")
   .then("./src/main/modules/pagSeguro")
-  .then("./src/main/modules/twitch/repository")
-  .then("./src/main/modules/twitch")
   .then("./src/main/config/Routes.js")
   .into(app);
 

@@ -59,7 +59,8 @@ module.exports = app => {
     app.route('/User-get-accountInfo').post(authMiddleware, app.src.main.controllers.AccountController.getInfoFromAccountRequest);
     app.route('/User-guild-createGuild').post(authMiddleware, app.src.main.controllers.GuildsController.createNewGuildRequest);
     app.route('/User-players-quantity').get(app.src.main.controllers.AccountController.getPlayerQuantity);
-    app.route('/twitch/auth').get(app.src.main.modules.twitch.controllers.TwitchApiController.twitch);
+    app.route('/twitch/get-lives').get(app.src.main.modules.twitch.controllers.TwitchApiController.twitch);
+    
     
 
     /////////////////////////////////////////////////// Admin Routes //////////////////////////////////////////////////////////
@@ -73,6 +74,7 @@ module.exports = app => {
     app.route('/Admin-ticket-delete').post(AdminAuthMiddleware, app.src.main.controllers.TicketsController.AdminOnDeleteTicketRequest);
     app.route('/Admin-get-client-version').get(AdminAuthMiddleware, app.src.main.controllers.ClientVersionController.GetClientVersionRequest);
     app.route('/Admin-update-client-version').post(AdminAuthMiddleware, app.src.main.controllers.ClientVersionController.UpdateClientVersionRequest);
+    app.route('/Admin/insert-new-streamer').post(AdminAuthMiddleware, app.src.main.controllers.AdminController.AdminInsertNewStreamer);
     
 
     
