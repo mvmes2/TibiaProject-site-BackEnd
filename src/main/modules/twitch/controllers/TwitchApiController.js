@@ -79,8 +79,8 @@ let twitchData = null;
 
 		const liveStreams = await getLiveStreams(headers, gameID);
 
-		// const livesStremandoTibiaProject = liveStreams.filter((item) => item.title.toLowerCase().includes('#tibiaproject'));
-		const livesStremandoTibiaProject = liveStreams.filter((item) => item.user_name == 'EliasTibianoDoido');
+		const livesStremandoTibiaProject = liveStreams.filter((item) => item.title.toLowerCase().includes('#tibiaproject'));
+		// const livesStremandoTibiaProject = liveStreams.filter((item) => item.user_name == 'EliasTibianoDoido');
 
 		livesStremandoTibiaProject.map(async (item) => {
 
