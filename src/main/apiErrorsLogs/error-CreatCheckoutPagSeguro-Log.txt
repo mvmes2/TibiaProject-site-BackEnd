@@ -48,3 +48,7 @@
 
 2023-09-04T17:02:58-03:00 - erro na create preference PagSeguro checkout: , AxiosError: Request failed with status code 401
 
+2023-09-04T18:07:27-03:00 - erro na create preference PagSeguro checkout: , ReferenceError: err is not defined
+
+2023-09-06T00:10:56-03:00 - erro na create preference PagSeguro checkout: , ReferenceError: RemovePayerFromList is not defined
+

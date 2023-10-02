@@ -60,7 +60,7 @@ const updatePayment = async (data) => {
     await payments.query().update(data.update).where({ transaction_id: data.transaction_id.toString() });
   } catch (err) {
     console.log(err);
-   await ErrorLogCreateFileHandler(Enums.MERCADOPAGOREPOSITORY_updatePayment_ERROR_FILE_NAME, '', err);
+    await ErrorLogCreateFileHandler(Enums.MERCADOPAGOREPOSITORY_updatePayment_ERROR_FILE_NAME, '', err);
     return { status: 500, message: 'Internal error!' }
   }
 }
@@ -96,7 +96,7 @@ const insertCoinsAtAccountToApprovedPayment = async (paymentID, pagseguroEmail) 
         throw new Error('Payment ID do not exists or payment id have already been paid, check your email!')
       } catch (err) {
         const text = 'Error while retrieving account to insert coins, (transaction_id does do not exist at database)';
-       await ErrorLogCreateFileHandler(Enums.MERCADOPAGOREPOSITORY_insertCoinsAtAccountToApprovedPayment_InsertCoinsAtAccountToApprovedPayment_ERROR_FILE_NAME, text, err);
+        await ErrorLogCreateFileHandler(Enums.MERCADOPAGOREPOSITORY_insertCoinsAtAccountToApprovedPayment_InsertCoinsAtAccountToApprovedPayment_ERROR_FILE_NAME, text, err);
         return { status: 409, message: 'Payment ID do not exists or payment id have already been paid, check your email!' }
       }
     }
@@ -121,18 +121,20 @@ const insertCoinsAtAccountToApprovedPayment = async (paymentID, pagseguroEmail) 
 
           try {
             const link = `${process.env.BASE_URL_IP_FRONT}/founder_guide`;
-
+            console.log('vai enviar email??');
             projectMailer.FounderPackPurchase(accToPay.product_name, accToPay.account_name, accToPay.account_email, link);
             console.log('email de pagamento enviado!');
             if (pagseguroEmail && accToPay.account_email !== pagseguroEmail) {
+              console.log('vai enviar email do pagseguro??');
               projectMailer.FounderPackPurchase(accToPay.product_name, accToPay.account_name, pagseguroEmail, link);
               console.log('email PagSeguro de pagamento enviado!');
             }
           } catch (err) {
             console.log('email error at mercadoPagoRepository, insertCoinsAtAccountToApprovedPayment at Email send: ', err)
           }
-
+          console.log('vou continuar e entrar dentro do socket para avisar que foi pago?');
           if (userSocketId) {
+            console.log('entrei no socket para emitir aprovação');
             console.log('Emitindo evento de pagamento aprovado para:', userSocketId ? userSockets : '');
             io.to(userSocketId).emit("payment_approved", {
               status: "approved",
@@ -144,25 +146,25 @@ const insertCoinsAtAccountToApprovedPayment = async (paymentID, pagseguroEmail) 
 
         switch (accToPay.product_name) {
           case "Silver Founder's Pack":
-            packPayFunction('silver_pack');
+            await packPayFunction('silver_pack');
             break
           case "Gold Founder's Pack":
-            packPayFunction('gold_pack');
+            await packPayFunction('gold_pack');
             break
           case "Diamond Founder's Pack":
-            packPayFunction('diamond_pack');
+            await packPayFunction('diamond_pack');
             break
 
           default:
-            if (process.env?.LOCAL_TEST_DEVELOPMENT_ENV){
-              packPayFunction('silver_pack');
+            if (process.env?.LOCAL_TEST_DEVELOPMENT_ENV) {
+              await packPayFunction('silver_pack');
               const text = `Account name: ${accToPay?.account_name}, AccountID: ${accToPay?.account_id}, Provavelmente pack de teste, ${accToPay.product_name}, Este Founder pack nao existe no banco produção!!`
               await ErrorLogCreateFileHandler(Enums.MERCADOPAGOREPOSITORY_insertCoinsAtAccountToApprovedPayment_InsertFoundersPack_ERROR_FILE_NAME, text, '');
               break
             }
             const text = `Account name: ${accToPay?.account_name}, AccountID: ${accToPay?.account_id}, Provavelmente pack de teste, ${accToPay.product_name}, Este Founder pack nao existe no banco produção!!`
-           await ErrorLogCreateFileHandler(Enums.MERCADOPAGOREPOSITORY_insertCoinsAtAccountToApprovedPayment_InsertFoundersPack_ERROR_FILE_NAME, text, '');
-            break
+            await ErrorLogCreateFileHandler(Enums.MERCADOPAGOREPOSITORY_insertCoinsAtAccountToApprovedPayment_InsertFoundersPack_ERROR_FILE_NAME, text, '');
+            return { status: 404, message: 'You cannot receive a Test founders pack, open ticket to admin at ticket page!' }
         }
 
       } catch (err) {
@@ -206,7 +208,7 @@ const insertCoinsAtAccountToApprovedPayment = async (paymentID, pagseguroEmail) 
     }
   } catch (err) {
     const text = `Account name: ${accToPay?.account_name}, AccountID: ${accToPay?.account_id}, Internal error! insertCoinsAtAccountToApprovedPayment function at mercadoPagoRepository, ${err}`
-   await ErrorLogCreateFileHandler(Enums.MERCADOPAGOREPOSITORY_insertCoinsAtAccountToApprovedPayment_InsertCoinsAtAccountToApprovedPayment_ERROR_FILE_NAME, text, '');
+    await ErrorLogCreateFileHandler(Enums.MERCADOPAGOREPOSITORY_insertCoinsAtAccountToApprovedPayment_InsertCoinsAtAccountToApprovedPayment_ERROR_FILE_NAME, text, '');
     return { status: 500, message: 'Internal error!' }
   }
 }
