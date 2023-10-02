@@ -1,5 +1,5 @@
 const { accounts, players, players_online, player_deaths, player_items,
-  players_comment, players_titles, guild_membership, guilds, guild_ranks } = require('../models/projectModels');
+  players_comment, players_titles, guild_membership, guilds, guild_ranks } = require('../models/MasterModels');
 const { convertPremiumTimeToDaysLeft, updateLastDayTimeStampEpochFromGivenDays, setCreateCharacterController, getCreateCharacterController } = require('../utils/utilities');
 
 module.exports = app => {

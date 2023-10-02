@@ -1,0 +1,20 @@
+2023-09-03T21:10:02.958Z - ReferenceError: Console is not defined
+    at ReturnPixNotificationService (C:\Projetos\Projetos\tibiaProjectWebSite\TibiaProject-site-BackEnd\src\main\modules\mercadoPago\services\MercadoPagoServices.js:127:9)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async MercadoPagoPixNotificationController (C:\Projetos\Projetos\tibiaProjectWebSite\TibiaProject-site-BackEnd\src\main\modules\mercadoPago\controllers\MercadoPagoController.js:29:18)
+
+2023-09-03T21:17:17.613Z - ReferenceError: Console is not defined
+    at ReturnPixNotificationService (C:\Projetos\Projetos\tibiaProjectWebSite\TibiaProject-site-BackEnd\src\main\modules\mercadoPago\services\MercadoPagoServices.js:127:9)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async MercadoPagoPixNotificationController (C:\Projetos\Projetos\tibiaProjectWebSite\TibiaProject-site-BackEnd\src\main\modules\mercadoPago\controllers\MercadoPagoController.js:29:18)
+
+2023-09-03T21:17:18.478Z - ReferenceError: Console is not defined
+    at ReturnPixNotificationService (C:\Projetos\Projetos\tibiaProjectWebSite\TibiaProject-site-BackEnd\src\main\modules\mercadoPago\services\MercadoPagoServices.js:127:9)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async MercadoPagoPixNotificationController (C:\Projetos\Projetos\tibiaProjectWebSite\TibiaProject-site-BackEnd\src\main\modules\mercadoPago\controllers\MercadoPagoController.js:29:18)
+
+2023-09-03T21:17:18.870Z - ReferenceError: Console is not defined
+    at ReturnPixNotificationService (C:\Projetos\Projetos\tibiaProjectWebSite\TibiaProject-site-BackEnd\src\main\modules\mercadoPago\services\MercadoPagoServices.js:127:9)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async MercadoPagoPixNotificationController (C:\Projetos\Projetos\tibiaProjectWebSite\TibiaProject-site-BackEnd\src\main\modules\mercadoPago\controllers\MercadoPagoController.js:29:18)
+

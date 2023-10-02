@@ -1,6 +1,6 @@
 const moment = require('moment');
 const { players, guilds, guild_invites, guild_membership, guild_ranks,
-  guild_wars, guildwar_kills, accounts } = require('../models/projectModels');
+  guild_wars, guildwar_kills, accounts } = require('../models/MasterModels');
 
 
 const getGuildList = async () => {

@@ -27,6 +27,11 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 
+app.use(express.urlencoded({ extended: true }));
+// app.use(bodyParser.json());
+
+// app.use(bodyParser.urlencoded({ extended: true }));
+
 io.on("connection", (socket) => {
   console.log("Usuário conectado:", socket.id);
 
@@ -73,8 +78,6 @@ app.use((req, res, next) => {
 app.use(express.json());
 app.use(morgan('dev'));
 
-
-
 app.use(express.static(__dirname + '/client'));
 app.use(express.static(__dirname + '/downloads'));
 
@@ -95,8 +98,6 @@ io.on("connect_error", (error) => {
   console.log("Connection Error:", error);
 });
 
-
-
 module.exports = {
   io,
   userSockets,
@@ -105,19 +106,21 @@ module.exports = {
 consign()
   .then("./src/main/config/prismicConfig.js")
   .then("./src/main/utils")
+  .then("./src/main/modules/twitch/repository")
+  .then("./src/main/modules/twitch")
   .then("./src/main/middlewares")
+  .then("./src/main/repository")
+  .then("./src/main/services")
+  .then("./src/main/controllers")
   .then("./src/main/modules/mercadoPago/repository")
   .then("./src/main/modules/mercadoPago/services")
   .then("./src/main/modules/mercadoPago/")
   .then("./src/main/modules/stripes/repository")
   .then("./src/main/modules/stripes/services")
   .then("./src/main/modules/stripes/")
-  .then("./src/main/modules/paypal/repository")
-  .then("./src/main/modules/paypal/controllers")
-  .then("./src/main/modules/paypal/")
-  .then("./src/main/repository")
-  .then("./src/main/services")
-  .then("./src/main/controllers")
+  .then("./src/main/modules/pagSeguro/repository")
+  .then("./src/main/modules/pagSeguro/controllers")
+  .then("./src/main/modules/pagSeguro")
   .then("./src/main/config/Routes.js")
   .into(app);
 

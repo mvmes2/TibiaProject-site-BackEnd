@@ -32,8 +32,8 @@ module.exports = app => {
     app.route('/stripes-create-payment').post(authMiddleware, app.src.main.modules.stripes.controllers.StripesController.StripesCreateCheckoutController);
     app.route('/stripes-insert-payment').post(authMiddleware, app.src.main.modules.stripes.controllers.StripesController.StripesinsertNewPaymentController);
     app.route('/stripes-insertCoins').post(authMiddleware, app.src.main.modules.stripes.controllers.StripesController.StrpesInsertCoinsToApprovedPayment);
-    app.route('/pagseguro-create-payment').post(authMiddleware, app.src.main.modules.paypal.controllers.PaypalController.PagseguroCreatePaymnentController);
-    app.route('/pagseguro-notification-url').post(app.src.main.modules.paypal.controllers.PaypalController.PagSeguroNotificationReceiverController);
+    app.route('/pagseguro-create-payment').post(authMiddleware, app.src.main.modules.pagSeguro.controllers.PagSeguroController.PagseguroCreatePaymnentController);
+    app.route('/pagseguro-notification-url').post(app.src.main.modules.pagSeguro.controllers.PagSeguroController.PagSeguroNotificationReceiverController);
     app.route('/getHighScores-players').post(app.src.main.controllers.AccountController.getlAllPlayersToHighscoreController);
     app.route('/getTicketList').post(authMiddleware, app.src.main.controllers.TicketsController.GetTicketListRequest);
     app.route('/createNewTicket').post(authMiddleware, upload, compressImagesMiddleware, app.src.main.controllers.TicketsController.CreateNewTicket);
@@ -59,6 +59,8 @@ module.exports = app => {
     app.route('/User-get-accountInfo').post(authMiddleware, app.src.main.controllers.AccountController.getInfoFromAccountRequest);
     app.route('/User-guild-createGuild').post(authMiddleware, app.src.main.controllers.GuildsController.createNewGuildRequest);
     app.route('/User-players-quantity').get(app.src.main.controllers.AccountController.getPlayerQuantity);
+    app.route('/twitch/get-lives').get(app.src.main.modules.twitch.controllers.TwitchApiController.twitch);
+    
     
 
     /////////////////////////////////////////////////// Admin Routes //////////////////////////////////////////////////////////
@@ -72,6 +74,7 @@ module.exports = app => {
     app.route('/Admin-ticket-delete').post(AdminAuthMiddleware, app.src.main.controllers.TicketsController.AdminOnDeleteTicketRequest);
     app.route('/Admin-get-client-version').get(AdminAuthMiddleware, app.src.main.controllers.ClientVersionController.GetClientVersionRequest);
     app.route('/Admin-update-client-version').post(AdminAuthMiddleware, app.src.main.controllers.ClientVersionController.UpdateClientVersionRequest);
+    app.route('/Admin/insert-new-streamer').post(AdminAuthMiddleware, app.src.main.controllers.AdminController.AdminInsertNewStreamer);
     
 
     

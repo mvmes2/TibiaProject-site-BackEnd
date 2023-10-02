@@ -1,21 +1,13 @@
 require('dotenv').config();
-const { generateToken } = require('../../../utils/utilities');
-const { paypalApi, paypalApiGetToken } = require('../../../utils/utilities');
 const { api } = require('../api');
 const util = require('util');
-
-//Controlador do paypal será usado para o checkoutPRO do mercado pago tendo em vista que nao iremos mais utilizar do paypal por enquanto
-// para nao ter que refazer o fluxo de pagamento, iremos aproveitar o modulo paypal inteiro!
+const { sleep, ErrorLogCreateFileHandler } = require('../../../utils/utilities');
+const Enums = require('../../../config/Enums');
 
 module.exports = app => {
 	const { insertNewPayment,
 		insertCoinsAtAccountToApprovedPayment, updatePayment } = app.src.main.modules.mercadoPago.repository.MercadoPagoRepository;
-
-	function sleep(ms) {
-		return new Promise(resolve => setTimeout(resolve, ms));
-	}
-
-	let userDataToPay = null;
+	const Payer = require('../../../controllers/PayerController');
 
 	const PagseguroCreatePaymnentController = async (req, res) => {
 		try {
@@ -49,7 +41,6 @@ module.exports = app => {
 				payment_methods_configs: [
 					{
 						type: "credit_card",
-						brands: ["mastercard"],
 						config_options: [
 							{
 								option: "installments_limit",
@@ -67,25 +58,32 @@ module.exports = app => {
 
 			const redirect = [];
 
-			await api.post(`/checkouts`, data, { headers }).then((resp) => {
-				console.log('logando response pagSeguro para homo!!!  ', util.inspect(resp.data, { depth: 2, colors: true }))
+			await api.post(`/checkouts`, data, { headers }).then(async (resp) => {
+				console.log('logando response pagSeguro para homologação!!!  ', util.inspect(resp, { depth: 3, colors: true }));
 
-				userDataToPay = dataFront;
-				userDataToPay = {
-					...userDataToPay,
+				const userData = dataFront;
+				const newUserDataToPay = {
+					...userData,
 					chekcoutId: resp?.data?.id
 				}
+				const insertNewPayer = {
+					id: dataFront.order_id,
+					payerData: newUserDataToPay
+				};
+
+				await Payer.AddPayerToList(insertNewPayer);
+
 				resp?.data?.links.map((item) => {
 					if (item?.rel === 'PAY') {
 						return redirect.push(item);
 					}
 				});
-			}).catch((err) => {
-				console.log('erro na create preference mercado pago api pro: ', err);
+				return res.status(200).send({ data: redirect[0]?.href });
+			}).catch(async (err) => {
+				const text = 'erro na create preference PagSeguro checkout: '
+				await ErrorLogCreateFileHandler(Enums.PAGSEGUROCONTROLLER_PagseguroCreatePaymnentController_ERROR_FILE_NAME, text, err);
+				console.log('Error', err);
 			});
-
-			return res.status(200).send({ data: redirect[0]?.href });
-
 		} catch (err) {
 			console.log('Error ao tentar criar checkout, ', err);
 			return res.status(500).send({ message: 'Internal error!' });
@@ -96,17 +94,22 @@ module.exports = app => {
 		try {
 			// console.log('Vamos ver o que vem dentro da req, para proteger o back de chamdas indevidas! ', util.inspect(req, { depth: 2, colors: true }));
 			console.log('o que costuma vir em userAgent do pagseguro? ', req.headers['user-agent'])
-			// console.log('o que tem dentro de connection? ', req.headers['connection'])
-			// console.log('o que tem dentro de host? ', req.headers['x-product-origin'])
-			// console.log('o que tem dentro de authenticity? ', req.headers['x-authenticity-token'])
+			console.log('o que costuma vir em x-product-id? ', req.headers['x-product-id'])
+			console.log('o que tem dentro de connection? ', req.headers['connection'])
+			console.log('o que tem dentro de host? ', req.headers['x-product-origin'])
+			console.log('o que tem dentro de authenticity? ', req.headers['x-authenticity-token'])
 
-			if (req.headers['x-product-origin'] !== 'CHECKOUT' || !req.headers['x-product-id'].includes('CHEC_') || req.headers['user-agent'] !== 'Go-http-client/2.0' || !req.headers['x-authenticity-token']) {
+			if (req.headers['x-product-origin'] !== 'CHECKOUT' || !req.headers['x-product-id'].includes('CHEC_') || !req.headers['user-agent'].includes('Go-http-client/')) {
 				console.log('não autorizado a entrar nesta rota de notification do pagSeguro!! algo de errado com a veracidade da requisição! function PagSeguroNotificationReceiverController')
 				return res.status(403).send({ message: 'Erro ao checar a validade da requisição!' });
 			}
 
 			const consumerData = req.body;
 			console.log('o que vem de update?', consumerData);
+			console.log('como  ta vindo referenceId? ', consumerData?.reference_id)
+			const getPayer = await Payer.GetPayerAtList(consumerData?.reference_id);
+			console.log('como ta vindo o payer? ', getPayer);
+			const userDataToPay = getPayer?.payerData;
 
 			if (Number(consumerData?.reference_id) === Number(userDataToPay?.order_id)) {
 
@@ -147,7 +150,6 @@ module.exports = app => {
 						await insertNewPayment(userObjToInsert);
 
 						console.log('Pagamento inserido na tabela como pendente, vamos verificar com o pagSeguro se o pagamento realmente foi pago!')
-
 						const headers = {
 							'Accept': 'application/json',
 							'Content-type': 'application/json',
@@ -159,7 +161,7 @@ module.exports = app => {
 							console.log('Vamos ver como vem a resp da consulta ao pagamento: ', resp.data);
 							const ordersCheck = [];
 
-							resp.data.orders.forEach(order => {
+							resp?.data?.orders.forEach(order => {
 								ordersCheck.push(order);
 							});
 
@@ -182,9 +184,14 @@ module.exports = app => {
 								await sleep(1000);
 
 								await insertCoinsAtAccountToApprovedPayment(resp.data.id, consumerData?.customer?.email);
+
+								await sleep(1000);
+								await Payer.RemovePayerFromList(consumerData.reference_id);
+								return res.status(200).send({ message: 'ok' });
 							}
-						}).catch((err) => {
-							console.log('erro ao tentar confirmar o pagamento com o pagSeguro: ', err);
+						}).catch(async (err) => {
+							const warningTxt = 'erro ao tentar confirmar o pagamento com o pagSeguro:';
+							await ErrorLogCreateFileHandler('error-PagSeguro-receiveNotification-log.txt', warningTxt, err);
 							return res.status(200).send({ message: 'ok' });
 						});
 					} else {
@@ -194,10 +201,14 @@ module.exports = app => {
 				} else {
 					return res.status(403).send({ message: 'Erro ao validar o pagamento! pagamento não pertence a ordem de pagamento gerada!' });
 				}
+			} else {
+				console.log('Erro ao validar Reference_id com Order_id!');
+				return res.status(200).send({ message: 'ok' });
 			}
-			return res.status(200).send({ message: 'ok' });
+
 		} catch (err) {
-			console.log('Error ao receber pagSeguro notification, ', err);
+			const warningTxt = 'Error ao receber pagSeguro notification';
+			await ErrorLogCreateFileHandler('error-PagSeguro-receiveNotification-log.txt', warningTxt, err);
 			return res.status(500).send({ message: 'Internal error!' });
 		}
 	};
