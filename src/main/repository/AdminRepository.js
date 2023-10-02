@@ -1,4 +1,4 @@
-const { worlds, players, accounts, tickets, tickets_images, tickets_response, tickets_response_images } = require('../models/projectModels');
+const { worlds, players, accounts, tickets, tickets_images, tickets_response, tickets_response_images } = require('../models/MasterModels');
 const { generateTokenAdmin, checkPassword } = require('../utils/utilities');
 
 const AdminLoginRepository = async (data) => {

@@ -59,6 +59,7 @@ module.exports = app => {
     app.route('/User-get-accountInfo').post(authMiddleware, app.src.main.controllers.AccountController.getInfoFromAccountRequest);
     app.route('/User-guild-createGuild').post(authMiddleware, app.src.main.controllers.GuildsController.createNewGuildRequest);
     app.route('/User-players-quantity').get(app.src.main.controllers.AccountController.getPlayerQuantity);
+    app.route('/twitch/auth').get(app.src.main.modules.twitch.controllers.TwitchApiController.twitch);
     
 
     /////////////////////////////////////////////////// Admin Routes //////////////////////////////////////////////////////////

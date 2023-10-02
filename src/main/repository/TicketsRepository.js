@@ -1,4 +1,4 @@
-const { tickets, tickets_response, tickets_images, tickets_response_images } = require('../models/projectModels');
+const { tickets, tickets_response, tickets_images, tickets_response_images } = require('../models/MasterModels');
 const moment = require('moment');
 const fs = require('fs');
 const path = require('path');

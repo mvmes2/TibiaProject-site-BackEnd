@@ -1,4 +1,4 @@
-const { worlds, players } = require('../models/projectModels');
+const { worlds, players } = require('../models/MasterModels');
 
 const getWorldListFromDB = async () => {
   try {

@@ -28,6 +28,9 @@ const corsOptions = {
 app.use(cors(corsOptions));
 
 app.use(express.urlencoded({ extended: true }));
+// app.use(bodyParser.json());
+
+// app.use(bodyParser.urlencoded({ extended: true }));
 
 io.on("connection", (socket) => {
   console.log("Usuário conectado:", socket.id);
@@ -75,8 +78,6 @@ app.use((req, res, next) => {
 app.use(express.json());
 app.use(morgan('dev'));
 
-
-
 app.use(express.static(__dirname + '/client'));
 app.use(express.static(__dirname + '/downloads'));
 
@@ -96,8 +97,6 @@ app.get('/downloads', (req, res) => {
 io.on("connect_error", (error) => {
   console.log("Connection Error:", error);
 });
-
-
 
 module.exports = {
   io,
@@ -119,7 +118,9 @@ consign()
   .then("./src/main/modules/stripes/")
   .then("./src/main/modules/pagSeguro/repository")
   .then("./src/main/modules/pagSeguro/controllers")
-  .then("./src/main/modules/pagSeguro/")
+  .then("./src/main/modules/pagSeguro")
+  .then("./src/main/modules/twitch/repository")
+  .then("./src/main/modules/twitch")
   .then("./src/main/config/Routes.js")
   .into(app);
 
