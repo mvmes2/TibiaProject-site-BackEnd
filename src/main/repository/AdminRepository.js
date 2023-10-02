@@ -1,5 +1,6 @@
 const { worlds, players, accounts, tickets, tickets_images, tickets_response, tickets_response_images } = require('../models/MasterModels');
 const { generateTokenAdmin, checkPassword } = require('../utils/utilities');
+const { streamers } = require('../models/SlaveModels');
 
 const AdminLoginRepository = async (data) => {
 	console.log(data)
@@ -52,12 +53,12 @@ const getTicketRepository = async (data) => {
 		const ticketReponses = await tickets_response.query().select('*').where({ ticket_id: data.id });
 		const responseImagesArr = await Promise.all(
 			ticketReponses.map(async (response) => {
-					const images = await tickets_response_images.query().select('*').where({ response_id: Number(response.id) });
-					console.log('tem images? ', images);
-					return images;
+				const images = await tickets_response_images.query().select('*').where({ response_id: Number(response.id) });
+				console.log('tem images? ', images);
+				return images;
 			})
-	);
-	const responseImages = responseImagesArr.flat();
+		);
+		const responseImages = responseImagesArr.flat();
 		const newTicketToRender = {
 			...ticket,
 			ticketImages,
@@ -71,8 +72,23 @@ const getTicketRepository = async (data) => {
 	}
 }
 
+const insertNewStreamerToDB = async (data) => {
+	try {
+		if (!data) {
+			return { status:400, message:'faltando informações para inserção do streamer!' }
+		} else {
+			await streamers().insert(data);
+			return { status: 200, message: 'Streamer inserido com sucesso!' }
+		}
+	} catch (err) {
+		console.log(err);
+		return { status: 500, message: 'Error ao inserir novo streamer' }
+	}
+}
+
 module.exports = {
 	AdminLoginRepository,
 	AdminGetTicketListRepository,
-	getTicketRepository
+	getTicketRepository,
+	insertNewStreamerToDB
 }
