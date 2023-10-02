@@ -67,7 +67,7 @@ module.exports = app => {
 		const liveStreams = await getLiveStreams(headers, gameID);
 		
 		// const livesStremandoTibiaProject = liveStreams.filter((item) => item.title.toLowerCase().includes('#tibiaproject'));
-		const livesStremandoTibiaProject = liveStreams.filter((item) => item.user_name == 'casalhokage');
+		const livesStremandoTibiaProject = liveStreams.filter((item) => item.user_name == 'GuerreiroTetra');
 		const checkStreamToUpdate = await getAllStreamersList();
 		livesStremandoTibiaProject.map(async (item) => {
 			console.log('some? ', checkStreamToUpdate)

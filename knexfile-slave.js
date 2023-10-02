@@ -1,11 +1,12 @@
+require('dotenv');
 module.exports = {
   client: 'mysql2',
   connection: {
-    host: '127.0.0.1',
-    port: 3306,
-    database: 'tibiaprojectslave',
-    user: 'root',
-    password: 'root'
+    host: process.env.DB_HOSTSLAVE,
+    user: process.env.DB_USERSLAVE,
+    database: process.env.DB_NAMESLAVE,
+    password: process.env.DB_PASSSLAVE,
+    port: process.env.DB_PORTSLAVE
   },
   pool: {
     min: 2,
