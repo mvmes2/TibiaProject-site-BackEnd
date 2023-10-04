@@ -60,10 +60,9 @@ module.exports = app => {
     app.route('/User-guild-createGuild').post(authMiddleware, app.src.main.controllers.GuildsController.createNewGuildRequest);
     app.route('/User-players-quantity').get(app.src.main.controllers.AccountController.getPlayerQuantity);
     app.route('/twitch/get-lives').get(app.src.main.modules.twitch.controllers.TwitchApiController.twitch);
+    app.route('/twitch/get-official-streamers').get(app.src.main.modules.twitch.controllers.TwitchApiController.getOfficialStreamersChannelInfo);
     
-    
-
-    /////////////////////////////////////////////////// Admin Routes //////////////////////////////////////////////////////////
+       /////////////////////////////////////////////////// Admin Routes //////////////////////////////////////////////////////////
 
     app.route('/admin-login').post(app.src.main.controllers.AdminController.LoginAdminAccRequest);
     app.route('/validate-token-admin').get(AdminAuthMiddleware, app.src.main.controllers.AdminController.AdminValidateJsonTokenRequest);

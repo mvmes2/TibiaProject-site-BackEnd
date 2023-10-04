@@ -3,11 +3,14 @@ const { twitchApiaUTH, twitchApi } = require('../api/twitchApi');
 module.exports = app => {
 	const moment = require('moment');
 	const { twitchAuthController } = app.src.main.modules.twitch.controllers.AuthController;
-	const { insertNewStreamer, getAllStreamersList, updateLiveStream, inserStreamerAtLiveCheckTime, 
-		getAllOficialStreamersList, getAllOficialStreamersLiveCheckList, getStreamerLive } = app.src.main.modules.twitch.repository.twitchRepository;
+	const { inserStreamerAtLiveCheckTime, getAllOficialStreamersList, getAllOficialStreamersLiveCheckList,
+	} = app.src.main.modules.twitch.repository.twitchRepository;
 
-let twithLastUpdated = 0;
-let twitchData = null;
+	let cacheTwitchLastUpdated = 0;
+	let cacheTwitchData = null;
+
+	let cacheGetOfficialStreamersChannelInfoLastUpdated = 0
+	let cacheGetOfficialStreamersChannelInfoData = null;
 
 	const getGameID = async (headers) => {
 		try {
@@ -48,7 +51,7 @@ let twitchData = null;
 				}
 
 				cursor = response?.data?.pagination?.cursor;
-				
+
 				streamsList.push(...response?.data?.data);
 			}
 			streamsList.sort((a, b) => b.viewer_count - a.viewer_count);
@@ -62,10 +65,9 @@ let twitchData = null;
 
 	const twitch = async (req, res) => {
 
-		if (moment().diff(twithLastUpdated, 'minutes') < 2) {
-			console.log('temos data?', twitchData);
+		if (moment().diff(cacheTwitchLastUpdated, 'minutes') < 2) {
 			console.log('cache Twitch feito com sucesso!');
-			return res.status(200).send(twitchData);
+			return res.status(200).send(cacheTwitchData);
 		}
 
 		const getToken = await twitchAuthController();
@@ -84,30 +86,63 @@ let twitchData = null;
 
 		livesStremandoTibiaProject.map(async (item) => {
 
-				item.thumbnail_url = item.thumbnail_url.replace('{width}', 170),
+			item.thumbnail_url = item.thumbnail_url.replace('{width}', 170),
 				item.thumbnail_url = item.thumbnail_url.replace('{height}', 120)
 
-				const oficialStreamersList = await getAllOficialStreamersList();
+			const oficialStreamersList = await getAllOficialStreamersList();
 
-				const checkIfAlreadyExistLiveCheck = await getAllOficialStreamersLiveCheckList();
+			const checkIfAlreadyExistLiveCheck = await getAllOficialStreamersLiveCheckList();
 
-				if (oficialStreamersList.some((streamerSome) => streamerSome.twitch_user_id == item.user_id) && !checkIfAlreadyExistLiveCheck.find((find) => find.live_id== item.id)) {
-					const newOficialStreamerToCheck = {
-						streamer_twitch_id: item.user_id,
-						streamer_name: item.user_name,
-						live_id: item.id,
-						live_title: item.title,
-						live_started_at: item.started_at
-					};
-					await inserStreamerAtLiveCheckTime(newOficialStreamerToCheck);
-				}		
+			if (oficialStreamersList.some((streamerSome) => streamerSome.twitch_user_id == item.user_id) && !checkIfAlreadyExistLiveCheck.find((find) => find.live_id == item.id)) {
+				const newOficialStreamerToCheck = {
+					streamer_twitch_id: item.user_id,
+					streamer_name: item.user_name,
+					live_id: item.id,
+					live_title: item.title,
+					live_started_at: item.started_at
+				};
+				await inserStreamerAtLiveCheckTime(newOficialStreamerToCheck);
+			}
 
 		});
-		
-		twithLastUpdated = moment();
-		twitchData = livesStremandoTibiaProject;
+
+		cacheTwitchLastUpdated = moment();
+		cacheTwitchData = livesStremandoTibiaProject;
 
 		return res.status(200).send(livesStremandoTibiaProject);
+	}
+
+	const getOfficialStreamersChannelInfo = async (req, res) => {
+		try {
+
+			if (moment().diff(cacheGetOfficialStreamersChannelInfoLastUpdated, 'minutes') < 5) {
+					console.log('cache getOfficialStreamersChannelInfo feito com sucesso!');
+				return res.status(200).send(cacheGetOfficialStreamersChannelInfoData);
+			} 
+
+			const getToken = await twitchAuthController();
+
+			const headers = {
+				Authorization: `Bearer ${getToken}`,
+				'Client-Id': process.env.TWITCH_CLIENT_ID
+			}
+
+			const oficialStreamersList = await getAllOficialStreamersList();
+			const officialList = await Promise.all(oficialStreamersList.map(async (item) => {
+				const streamers = await twitchApi.get(`/helix/users?id=${item.twitch_user_id}`, { headers });
+				const getFallowersCount = await twitchApi.get(`/helix/channels/followers?broadcaster_id=${item.twitch_user_id}`, { headers });
+				streamers.data.data[0].followers = getFallowersCount?.data?.total;
+				return streamers?.data?.data[0];
+			}));
+			
+			cacheGetOfficialStreamersChannelInfoLastUpdated = moment();
+			cacheGetOfficialStreamersChannelInfoData = officialList;
+			
+			return res.status(200).send(officialList);
+		} catch (err) {
+			console.log(err);
+			return res.status(500).send({ message: 'Internal error!' });
+		}
 	}
 
 	// const getTwitchUserID = async (req, res) => {
@@ -128,6 +163,7 @@ let twitchData = null;
 
 	return {
 		twitch,
+		getOfficialStreamersChannelInfo
 		// getTwitchUserID
 	}
 }
