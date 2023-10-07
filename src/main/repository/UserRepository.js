@@ -1,6 +1,7 @@
 const { accounts, players, players_online, player_deaths, player_items,
   players_comment, players_titles, guild_membership, guilds, guild_ranks } = require('../models/MasterModels');
-const { convertPremiumTimeToDaysLeft, updateLastDayTimeStampEpochFromGivenDays, setCreateCharacterController, getCreateCharacterController } = require('../utils/utilities');
+const { convertPremiumTimeToDaysLeft, updateLastDayTimeStampEpochFromGivenDays, setCreateCharacterController,
+   getCreateCharacterController, ErrorLogCreateFileHandler } = require('../utils/utilities');
 
 module.exports = app => {
   const moment = require('moment');
@@ -364,7 +365,7 @@ module.exports = app => {
   let skillFishingPlayers = 0;
 
   const getlAllPlayersToHighscoreRepository = async (data) => {
-    console.log('.................: ', data)
+
     // Sistema de cash para highScores
     if (data == 'experience' && moment().diff(experienceLastUpdated, 'minutes') < 5) {
       console.log('Cache experienceSkill aplicado com sucesso!')
@@ -468,7 +469,9 @@ module.exports = app => {
       }
 
     } catch (err) {
-      console.log(err)
+      console.log(err);
+      const warningTxt = 'Erro gerado ao tentar pegar highscores em userrepository na function getlAllPlayersToHighscoreRepository';
+      ErrorLogCreateFileHandler('error-GetHighScorePlayersFunction.txt', warningTxt, err);
       return { status: 500, message: 'Internal error while trying to retrieve highScores' }
     }
   }
