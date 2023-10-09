@@ -75,7 +75,7 @@ const getTicketRepository = async (data) => {
 const insertNewStreamerToDB = async (data) => {
 	try {
 		if (!data) {
-			return { status:400, message:'faltando informações para inserção do streamer!' }
+			return { status: 400, message: 'faltando informações para inserção do streamer!' }
 		} else {
 			await streamers().insert(data);
 			return { status: 200, message: 'Streamer inserido com sucesso!' }
@@ -86,9 +86,33 @@ const insertNewStreamerToDB = async (data) => {
 	}
 }
 
+const GetAllOfficialStreamersListFromDB = async () => {
+
+	try {
+		const list = await streamers().select('*');
+		return { status: 200, data: list }
+	} catch (err) {
+		console.log(err);
+		return { status: 500, message: 'Internal error!' }
+	}
+}
+
+const AdminUpdateOfficialStreamerDB = async (data) => {
+console.log('como ta vindo a data de update? ', data);
+	try {
+		await streamers().update(data.update).where({ id: Number(data.id) });
+		return { status: 200, message: 'Streamer Updated Successfully' }
+	} catch (err) {
+		console.log(err);
+		return { status: 500, message: 'Internal error!' }
+	}
+}
+
 module.exports = {
 	AdminLoginRepository,
 	AdminGetTicketListRepository,
 	getTicketRepository,
-	insertNewStreamerToDB
+	insertNewStreamerToDB,
+	GetAllOfficialStreamersListFromDB,
+	AdminUpdateOfficialStreamerDB
 }

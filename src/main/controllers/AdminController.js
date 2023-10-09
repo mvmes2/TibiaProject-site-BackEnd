@@ -1,6 +1,8 @@
 require('dotenv');
+
 module.exports = app => {
-	const { AdminLoginRepository, AdminGetTicketListRepository, getTicketRepository, insertNewStreamerToDB } = app.src.main.repository.AdminRepository;
+	const { AdminLoginRepository, AdminGetTicketListRepository, getTicketRepository, insertNewStreamerToDB,
+		GetAllOfficialStreamersListFromDB, AdminUpdateOfficialStreamerDB } = app.src.main.repository.AdminRepository;
 	const { twitchApi } = require('../modules/twitch/api/twitchApi');
 	const { twitchAuthController } = app.src.main.modules.twitch.controllers.AuthController;
 
@@ -40,15 +42,15 @@ module.exports = app => {
 				'Client-Id': process.env.TWITCH_CLIENT_ID
 			}
 
-			const getUserId = await twitchApi.get(`/helix/users?login=${data.twitch_user_name}`, {headers});
-			
+			const getUserId = await twitchApi.get(`/helix/users?login=${data.twitch_user_name}`, { headers });
+
 			const userID = getUserId?.data?.data[0]?.id;
 
 			if (!userID || userID == undefined || userID == null) {
 				return res.status(400).send({ message: 'Login não existente na twitch, ou erro na api da twitch ao buscar id para este login! confirme o user_name!' });
 			} if (!data.twitch_user_name || !data?.streamer_name || !data?.email) {
 				return res.status(400).send({ message: 'Campos obrigatórios: twitch_user_name, streamer_name, email' });
-			} 
+			}
 			else {
 				const dataWithUserID = {
 					...data,
@@ -64,11 +66,30 @@ module.exports = app => {
 		}
 	}
 
+	const AdminGetOfficialStreamersListController = async (req, res) => {
+
+		try {
+			const resp = await GetAllOfficialStreamersListFromDB();
+			return res.status(resp.status).send(resp?.data ? resp.data : resp.message);
+		} catch (err) {
+			console.log(err);
+			return res.status(500).send({ message: 'internal error!' });
+		}
+	}
+
+	const AdminUpdateOfficialStreamersController = async (req, res) => {
+			const data = req.body;
+			const resp = await AdminUpdateOfficialStreamerDB(data);
+			return res.status(resp.status).send({ message: resp.message });
+	}
+
 	return {
 		LoginAdminAccRequest,
 		AdminValidateJsonTokenRequest,
 		AdmingetTicketListRequest,
 		AdminGetTicketRequest,
-		AdminInsertNewStreamer
+		AdminInsertNewStreamer,
+		AdminGetOfficialStreamersListController,
+		AdminUpdateOfficialStreamersController
 	}
 }
