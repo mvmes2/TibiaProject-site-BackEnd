@@ -33,6 +33,11 @@ module.exports = app => {
 	const AdminInsertNewStreamer = async (req, res) => {
 		try {
 			const data = req.body;
+			if (!data?.streamer) {
+				await insertNewStreamerToDB(dataWithUserID);
+				return res.status(200).send({ message: 'Colaborador criado com sucesso!' });
+			}
+
 			if (!data || !data?.twitch_user_name || data?.twitch_user_name == undefined || data?.twitch_user_name == null) {
 				return res.status(400).send({ message: 'faltando twitch_user_name ou demais informações para inserção do streamer!' });
 			}
@@ -78,9 +83,9 @@ module.exports = app => {
 	}
 
 	const AdminUpdateOfficialStreamersController = async (req, res) => {
-			const data = req.body;
-			const resp = await AdminUpdateOfficialStreamerDB(data);
-			return res.status(resp.status).send({ message: resp.message });
+		const data = req.body;
+		const resp = await AdminUpdateOfficialStreamerDB(data);
+		return res.status(resp.status).send({ message: resp.message });
 	}
 
 	return {
