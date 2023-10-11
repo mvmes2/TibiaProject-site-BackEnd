@@ -60,10 +60,9 @@ module.exports = app => {
     app.route('/User-guild-createGuild').post(authMiddleware, app.src.main.controllers.GuildsController.createNewGuildRequest);
     app.route('/User-players-quantity').get(app.src.main.controllers.AccountController.getPlayerQuantity);
     app.route('/twitch/get-lives').get(app.src.main.modules.twitch.controllers.TwitchApiController.twitch);
+    app.route('/twitch/get-official-streamers').get(app.src.main.modules.twitch.controllers.TwitchApiController.getOfficialStreamersChannelInfo);
     
-    
-
-    /////////////////////////////////////////////////// Admin Routes //////////////////////////////////////////////////////////
+       /////////////////////////////////////////////////// Admin Routes //////////////////////////////////////////////////////////
 
     app.route('/admin-login').post(app.src.main.controllers.AdminController.LoginAdminAccRequest);
     app.route('/validate-token-admin').get(AdminAuthMiddleware, app.src.main.controllers.AdminController.AdminValidateJsonTokenRequest);
@@ -75,8 +74,10 @@ module.exports = app => {
     app.route('/Admin-get-client-version').get(AdminAuthMiddleware, app.src.main.controllers.ClientVersionController.GetClientVersionRequest);
     app.route('/Admin-update-client-version').post(AdminAuthMiddleware, app.src.main.controllers.ClientVersionController.UpdateClientVersionRequest);
     app.route('/Admin/insert-new-streamer').post(AdminAuthMiddleware, app.src.main.controllers.AdminController.AdminInsertNewStreamer);
-    
+    app.route('/Admin/twitch/get-official-streamers').get(AdminAuthMiddleware, app.src.main.controllers.AdminController.AdminGetOfficialStreamersListController);
+    app.route('/Admin/twitch/update-streamers').post(AdminAuthMiddleware, app.src.main.controllers.AdminController.AdminUpdateOfficialStreamersController);
 
+    
     
     //////Error MiddleWare/////
     app.use((err, req, res, next) => {
