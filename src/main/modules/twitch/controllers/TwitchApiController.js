@@ -64,6 +64,7 @@ module.exports = app => {
 
 
 	const twitch = async (req, res) => {
+		console.log('Aqui temos o log do header que vem....', req)
 
 		if (moment().diff(cacheTwitchLastUpdated, 'minutes') < 2) {
 			console.log('cache Twitch feito com sucesso!');

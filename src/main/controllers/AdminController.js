@@ -35,7 +35,7 @@ module.exports = app => {
 			const Reqdata = req.body;
 			const { streamer, ...data} = Reqdata
 
-			if (streamer) {
+			if (!streamer) {
 				await insertNewStreamerToDB(data);
 				return res.status(200).send({ message: 'Colaborador criado com sucesso!' });
 			}
