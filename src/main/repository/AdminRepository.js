@@ -1,6 +1,6 @@
 const { worlds, players, accounts, tickets, tickets_images, tickets_response, tickets_response_images } = require('../models/MasterModels');
 const { generateTokenAdmin, checkPassword } = require('../utils/utilities');
-const { streamers } = require('../models/SlaveModels');
+const { streamers, cupoms, redeem_cupom_storage } = require('../models/SlaveModels');
 
 const AdminLoginRepository = async (data) => {
 	console.log(data)
@@ -98,10 +98,80 @@ const GetAllOfficialStreamersListFromDB = async () => {
 }
 
 const AdminUpdateOfficialStreamerDB = async (data) => {
-console.log('como ta vindo a data de update? ', data);
+	console.log('como ta vindo a data de update? ', data);
 	try {
 		await streamers().update(data.update).where({ id: Number(data.id) });
 		return { status: 200, message: 'Streamer Updated Successfully' }
+	} catch (err) {
+		console.log(err);
+		return { status: 500, message: 'Internal error!' }
+	}
+}
+
+const AdminRemoveOfficialStreameFromDB = async (data) => {
+	console.log('como ta vindo a data de delete Streamer?? ', data);
+	try {
+		await streamers().delete().where({ id: Number(data.id) });
+		return { status: 204, message: 'Streamer has been deleted Successfully!' };
+	} catch (err) {
+		console.log(err);
+		return { status: 500, message: 'Internal error!' }
+	}
+}
+
+const AdminGetCupomByStreamerFromDB = async (data) => {
+	console.log('como ta vindo a data de AdminGetCupomByStreamerFromDB?? ', data);
+	if (!data) {
+		return { status: 400, message: "Data inválida, esperado { headers: { streamer_id: id } }" };
+	}
+	try {
+		const cupomsByStreamer = await cupoms().select('*').where({ streamer_id: Number(data) });
+		return { status: 200, data: cupomsByStreamer };
+	} catch (err) {
+		console.log(err);
+		return { status: 500, message: 'Internal error!' }
+	}
+}
+
+const AdminGetAllCupomsFromDB = async () => {
+	try {
+		const getCupoms = await cupoms().select('*').where({ status: 'active' });
+		return { status: 200, data: getCupoms };
+	} catch (err) {
+		console.log(err);
+		return { status: 500, message: 'Internal error!' }
+	}
+}
+
+const AdminUpdateCupomAtDB = async (data) => {
+	console.log('como ta vindo a data de AdminUpdateCupomAtDB?? ', data);
+	if (!data || !data?.id || !data?.update) {
+		return { status: 400, message: "Data inválida, esperado body{ id: id, update: { 'updateData' } }  " };
+	}
+	try {
+		const cupoms = await cupoms().update(data.update).where({ id: data.id });
+		return { status: 200, message: "Cupom updated successfully!" };
+	} catch (err) {
+		console.log(err);
+		return { status: 500, message: 'Internal error!' }
+	}
+}
+
+const AdminDeleteCupomAtDB = async (data) => {
+	console.log('como ta vindo a data de delete AdminDeleteCupomAtDB?? ', data);
+	try {
+		await cupoms().delete().where({ id: Number(data.id) });
+		return { status: 200, message: 'Cupom has been deleted Successfully!' };
+	} catch (err) {
+		console.log(err);
+		return { status: 500, message: 'Internal error!' }
+	}
+}
+
+const AdminGetRedeemCupomStorageAtDB = async () => {
+	try {
+		const redeemList = await redeem_cupom_storage().select('*');
+		return { status: 200, data: redeemList };
 	} catch (err) {
 		console.log(err);
 		return { status: 500, message: 'Internal error!' }
@@ -114,5 +184,11 @@ module.exports = {
 	getTicketRepository,
 	insertNewStreamerToDB,
 	GetAllOfficialStreamersListFromDB,
-	AdminUpdateOfficialStreamerDB
+	AdminUpdateOfficialStreamerDB,
+	AdminRemoveOfficialStreameFromDB,
+	AdminGetCupomByStreamerFromDB,
+	AdminGetAllCupomsFromDB,
+	AdminUpdateCupomAtDB,
+	AdminDeleteCupomAtDB,
+	AdminGetRedeemCupomStorageAtDB
 }

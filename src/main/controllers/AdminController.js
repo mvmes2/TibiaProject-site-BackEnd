@@ -2,7 +2,8 @@ require('dotenv');
 
 module.exports = app => {
 	const { AdminLoginRepository, AdminGetTicketListRepository, getTicketRepository, insertNewStreamerToDB,
-		GetAllOfficialStreamersListFromDB, AdminUpdateOfficialStreamerDB } = app.src.main.repository.AdminRepository;
+		GetAllOfficialStreamersListFromDB, AdminUpdateOfficialStreamerDB, AdminRemoveOfficialStreameFromDB,
+		AdminGetCupomByStreamerFromDB, AdminGetAllCupomsFromDB, AdminUpdateCupomAtDB, AdminDeleteCupomAtDB } = app.src.main.repository.AdminRepository;
 	const { twitchApi } = require('../modules/twitch/api/twitchApi');
 	const { twitchAuthController } = app.src.main.modules.twitch.controllers.AuthController;
 
@@ -33,7 +34,7 @@ module.exports = app => {
 	const AdminInsertNewStreamer = async (req, res) => {
 		try {
 			const Reqdata = req.body;
-			const { streamer, ...data} = Reqdata
+			const { streamer, ...data } = Reqdata
 
 			if (!streamer) {
 				await insertNewStreamerToDB(data);
@@ -90,6 +91,35 @@ module.exports = app => {
 		return res.status(resp.status).send({ message: resp.message });
 	}
 
+	const AdminRemoveOfficialStreamerController = async (req, res) => {
+		const data = req.body;
+		const resp = await AdminRemoveOfficialStreameFromDB(data);
+		return res.status(resp.status).send({ message: resp.message });
+	}
+
+	const AdminGetCupomByStreamerController = async (req, res) => {
+		const data = req?.headers?.streamer_id;
+		const resp = await AdminGetCupomByStreamerFromDB(data);
+		return res.status(resp.status).send(resp.data);
+	}
+
+	const AdminGetAllCupomsController = async (req, res) => {
+		const resp = await AdminGetAllCupomsFromDB();
+		return res.status(resp.status).send(resp.data);
+	}
+
+	const AdminUpdateCupomController = async (req, res) => {
+		const data = req.body;
+		const resp = await AdminUpdateCupomAtDB(data);
+		return res.status(resp.status).send(resp.message);
+	}
+
+	const AdminDeleteCupomController = async (req, res) => {
+		const data = req.body;
+		const resp = await AdminDeleteCupomAtDB(data);
+		return res.status(resp.status).send(resp.message);
+	}
+
 	return {
 		LoginAdminAccRequest,
 		AdminValidateJsonTokenRequest,
@@ -97,6 +127,11 @@ module.exports = app => {
 		AdminGetTicketRequest,
 		AdminInsertNewStreamer,
 		AdminGetOfficialStreamersListController,
-		AdminUpdateOfficialStreamersController
+		AdminUpdateOfficialStreamersController,
+		AdminRemoveOfficialStreamerController,
+		AdminGetCupomByStreamerController,
+		AdminGetAllCupomsController,
+		AdminUpdateCupomController,
+		AdminDeleteCupomController
 	}
 }

@@ -15,9 +15,11 @@ const cupoms = () => {
 }
 
 const payments = () => {
-    return connectionDBSlave('cupoms');
+    return connectionDBSlave('payments');
 }
 
+const redeem_cupom_storage = () => {
+    return connectionDBSlave('redeem_cupom_storage');
+}
 
-
-module.exports = { streamers, streamers_live_check_time, cupoms, payments }
+module.exports = { streamers, streamers_live_check_time, cupoms, payments, redeem_cupom_storage };

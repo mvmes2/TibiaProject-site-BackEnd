@@ -300,6 +300,39 @@ const ErrorLogCreateFileHandler = async (txtName, warningText, errText) => {
   }
 };
 
+/**
+ * @function
+ * @param {string} txtName - The name of the txt file to be created.
+ * @param {string} warningText - The warning text.
+ */
+const LogCreateFileHandler = async (txtName, warningText, errText) => {
+  
+  const text = warningText;
+  console.log(text);
+  const localDateTime = moment().tz("America/Sao_Paulo").format();
+  const responseText = `${localDateTime} - ${text}\n\n`;
+
+  const logDirectory = path.join(__dirname, '..', 'apiCupomsLogs');
+
+  try {
+    await fs.mkdir(logDirectory, { recursive: true });
+  } catch (error) {
+    if (error.code !== 'EEXIST') {  // Ignore the error if the directory already exists
+      console.error('Erro ao criar o diretório:', error);
+      return;
+    }
+  }
+
+  const logFilePath = path.join(logDirectory, txtName);
+
+  try {
+    await fs.appendFile(logFilePath, responseText);
+    console.log(`Entrada adicionada com sucesso ao ${logFilePath}`);
+  } catch (error) {
+    console.error('Erro ao escrever no arquivo:', error);
+  }
+};
+
 module.exports = {
   checkPassword,
   hashGenerator,
@@ -319,5 +352,6 @@ module.exports = {
   setlastPaymentIDUpdated,
   getlastPaymentIDUpdated,
   sleep,
-  ErrorLogCreateFileHandler
+  ErrorLogCreateFileHandler,
+  LogCreateFileHandler
 }

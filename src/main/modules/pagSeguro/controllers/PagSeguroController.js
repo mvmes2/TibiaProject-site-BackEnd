@@ -183,7 +183,7 @@ module.exports = app => {
 
 								await sleep(1000);
 
-								await insertCoinsAtAccountToApprovedPayment(resp.data.id, consumerData?.customer?.email);
+								await insertCoinsAtAccountToApprovedPayment(resp.data.id, consumerData?.customer?.email, userDataToPay?.cupom_id);
 
 								await sleep(1000);
 								await Payer.RemovePayerFromList(consumerData.reference_id);
