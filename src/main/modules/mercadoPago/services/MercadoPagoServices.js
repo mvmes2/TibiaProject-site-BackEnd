@@ -59,7 +59,6 @@ module.exports = app => {
         // });
         ;
         // console.log('qual a resposta do pix? ', util.inspect(resp, { depth: 2, colors: true }));
-        console.log('wtd essa porra de data? ', resp.data.id)
 
         const insertNewPayerInfo = {
           id: resp.data.id,

@@ -61,6 +61,10 @@ module.exports = app => {
     app.route('/User-players-quantity').get(app.src.main.controllers.AccountController.getPlayerQuantity);
     app.route('/twitch/get-lives').get(app.src.main.modules.twitch.controllers.TwitchApiController.twitch);
     app.route('/twitch/get-official-streamers').get(app.src.main.modules.twitch.controllers.TwitchApiController.getOfficialStreamersChannelInfo);
+
+    /////////////////////////////////////////////////////////////////UNIFIED ROUTES///////////////////////////////////////////////////////////////
+    app.route('/unifiedRoute-donatePage-getProducts').get(app.src.main.controllers.UnifiedCallsController.getProductsToDonateCoinsTableUnifiedCallController);
+    
     
        /////////////////////////////////////////////////// Admin Routes //////////////////////////////////////////////////////////
 
@@ -76,8 +80,11 @@ module.exports = app => {
     app.route('/Admin/insert-new-streamer').post(AdminAuthMiddleware, app.src.main.controllers.AdminController.AdminInsertNewStreamer);
     app.route('/Admin/twitch/get-official-streamers').get(AdminAuthMiddleware, app.src.main.controllers.AdminController.AdminGetOfficialStreamersListController);
     app.route('/Admin/twitch/update-streamers').post(AdminAuthMiddleware, app.src.main.controllers.AdminController.AdminUpdateOfficialStreamersController);
-
-    
+    app.route('/Admin/twitch/remove-streamers').post(AdminAuthMiddleware, app.src.main.controllers.AdminController.AdminRemoveOfficialStreamerController);
+    app.route('/Admin/twitch/getCupom-byStreamer').get(AdminAuthMiddleware, app.src.main.controllers.AdminController.AdminGetCupomByStreamerController);
+    app.route('/Admin/twitch/get-all-cupoms').get(AdminAuthMiddleware, app.src.main.controllers.AdminController.AdminGetAllCupomsController);
+    app.route('/Admin/twitch/update-cupom').put(AdminAuthMiddleware, app.src.main.controllers.AdminController.AdminUpdateCupomController);
+    app.route('/Admin/twitch/delete-cupom').delete(AdminAuthMiddleware, app.src.main.controllers.AdminController.AdminDeleteCupomController);
     
     //////Error MiddleWare/////
     app.use((err, req, res, next) => {

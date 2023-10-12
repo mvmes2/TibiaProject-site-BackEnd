@@ -19,13 +19,13 @@ io.attach(server);
 
 app.use(compression());
 
-const corsOptions = {
-  origin: '*', // Substitua por sua URL de origem
-  methods: 'GET,HEAD,PUT,POST,DELETE',
-  optionsSuccessStatus: 200, // Para navegadores legados (IE11, várias versões do Android)
-};
-
-app.use(cors(corsOptions));
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', "GET, PUT, POST, DELETE");
+  res.header('Access-Control-Allow-Headers', "Content-Type");
+  app.use(cors());
+  next();
+})
 
 app.use(express.urlencoded({ extended: true }));
 // app.use(bodyParser.json());
@@ -109,12 +109,12 @@ consign()
   .then("./src/main/modules/twitch/repository")
   .then("./src/main/modules/twitch")
   .then("./src/main/middlewares")
-  .then("./src/main/repository")
-  .then("./src/main/services")
-  .then("./src/main/controllers")
   .then("./src/main/modules/mercadoPago/repository")
   .then("./src/main/modules/mercadoPago/services")
   .then("./src/main/modules/mercadoPago/")
+  .then("./src/main/repository")
+  .then("./src/main/services")
+  .then("./src/main/controllers")
   .then("./src/main/modules/stripes/repository")
   .then("./src/main/modules/stripes/services")
   .then("./src/main/modules/stripes/")
