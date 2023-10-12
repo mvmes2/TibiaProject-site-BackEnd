@@ -1,9 +1,12 @@
 require('dotenv').config();
 const { worlds, players, products, accounts, payments } = require('../../../models/MasterModels');
 const { userSockets, io } = require('../../../../../server');
-const { projectMailer, getlastPaymentIDUpdated, setlastPaymentIDUpdated, setCreateCharacterController, ErrorLogCreateFileHandler } = require('../../../utils/utilities');
+const { projectMailer, getlastPaymentIDUpdated, setlastPaymentIDUpdated, setCreateCharacterController, ErrorLogCreateFileHandler,
+  LogCreateFileHandler } = require('../../../utils/utilities');
 const moment = require('moment');
 const Enums = require('../../../config/Enums');
+
+const { cupoms, redeem_cupom_storage } = require("./../../../models/SlaveModels");
 
 const getProductsList = async () => {
   try {
@@ -74,7 +77,7 @@ const deleteCancelledPayment = async (data) => {
   }
 }
 
-const insertCoinsAtAccountToApprovedPayment = async (paymentID, pagseguroEmail) => {
+const insertCoinsAtAccountToApprovedPayment = async (paymentID, pagseguroEmail, cupom_id) => {
   console.log(' consolando se estamos recebendo email do pagSeguro!! ', pagseguroEmail);
   console.log('consolando paymentID pra inserção de coins: ', paymentID);
   try {
@@ -106,18 +109,34 @@ const insertCoinsAtAccountToApprovedPayment = async (paymentID, pagseguroEmail) 
     else if (accToPay.product_name.includes("Founder's")) {
 
       try {
-        const getPreviousPackNumberAmmountToSumm = await accounts.query().select('silver_pack', 'gold_pack', 'diamond_pack').where({ id: accToPay.account_id }).first();
+        const getPreviousPackNumberAmmountToSumm = await accounts.query().select('silver_pack', 'gold_pack', 'diamond_pack', 'coins').where({ id: accToPay.account_id }).first();
 
         const packPayFunction = async (packType) => {
 
           const packToPayAmount = (Number(getPreviousPackNumberAmmountToSumm[packType]) + 1);
 
-          const updateAccountInfo = {
-            [packType]: packToPayAmount
+          let totalAmount = Number(getPreviousPackNumberAmmountToSumm.coins);
+          const getCupom = await cupoms().select('*').where({ id: cupom_id }).first();
+          const checkCupomRedeem = await redeem_cupom_storage().select('*').where({ account_id: accToPay.account_id, cupom_id: cupom_id });
+          if (getCupom.cupom_name == "TIBIAPAPO" && checkCupomRedeem.length <= 0) {
+            totalAmount+= Number(getCupom.coins_quantity);
+            console.log('quanto tinha na conta antes do cupom papo?', getPreviousPackNumberAmmountToSumm.coins);
+            console.log('quanto vai dar a brincadeira atual com cupom papo? ', totalAmount);
+            console.log('O Papao deu certo, conta tem que estar com: ', totalAmount, ' coins!');
           }
 
+          const updateAccountInfo = {
+            [packType]: packToPayAmount,
+            coins: totalAmount
+          }
+          console.log('NAO DEU PAPO!!!!!!!!!!!');
           await accounts.query().update(updateAccountInfo).where({ id: accToPay.account_id });
-          await payments.query().update({ coins_paid_date: Date.now() / 1000 }).where({ transaction_id: !paymentID.id ? paymentID.toString() : paymentID.id.toString() });
+          await payments.query().update({ coins_paid_date: Date.now() / 1000, status: 'sent' }).where({ transaction_id: !paymentID.id ? paymentID.toString() : paymentID.id.toString() });
+          if (cupom_id) {
+            await redeem_cupom_storage().insert({ account_id: accToPay.account_id, cupom_id });
+            LogCreateFileHandler("CupomsLogs.txt", `cupom de id: ${cupom_id} inserido com sucesso na Account de id: ${accToPay.account_id}`);
+          }
+          
 
           try {
             const link = `${process.env.BASE_URL_IP_FRONT}/founder_guide`;
@@ -180,8 +199,21 @@ const insertCoinsAtAccountToApprovedPayment = async (paymentID, pagseguroEmail) 
       console.log('como ta vindo os coins antes? ', getPreviousAmmountToSumm)
       console.log('quanto vai dar a brincadeira atual? ', (Number(getPreviousAmmountToSumm.coins) + Number(accToPay.coins_quantity)));
 
-      await accounts.query().update({ coins: (Number(getPreviousAmmountToSumm.coins) + Number(accToPay.coins_quantity)) }).where({ id: accToPay.account_id });
-      await payments.query().update({ coins_paid_date: Date.now() / 1000 }).where({ transaction_id: !paymentID.id ? paymentID.toString() : paymentID.id.toString() });
+      let totalAmount = Number(getPreviousAmmountToSumm.coins) + Number(accToPay.coins_quantity);
+          const getCupom = await cupoms().select('*').where({ id: cupom_id }).first();
+          const checkCupomRedeem = await redeem_cupom_storage().select('*').where({ account_id: accToPay.account_id, cupom_id: cupom_id });
+          if (getCupom.cupom_name == "TIBIAPAPO" && checkCupomRedeem.length <= 0) {
+            totalAmount+= Number(getCupom.coins_quantity);
+            console.log('VAI DAR PAPO quanto vai dar a brincadeira atual com cupom papo? ', totalAmount);
+          }
+          console.log('NAO DEU PAPO!!!!!!!!!!!');
+      await accounts.query().update({ coins: totalAmount }).where({ id: accToPay.account_id });
+      await payments.query().update({ coins_paid_date: Date.now() / 1000, status: 'sent' }).where({ transaction_id: !paymentID.id ? paymentID.toString() : paymentID.id.toString() });
+      if (cupom_id) {
+        await redeem_cupom_storage().insert({ account_id: accToPay.account_id, cupom_id });
+        LogCreateFileHandler("CupomsLogs.txt", `cupom de id: ${cupom_id} inserido com sucesso na Account de id: ${accToPay.account_id}`);
+      }
+      
 
       try {
         projectMailer.coinsPurchase(accToPay.account_email, accToPay.account_name, accToPay.coins_quantity);
