@@ -102,7 +102,7 @@ const GetOfficialStreamersByIDFromDB = async (streamerId) => {
 	try {
 		const streamer = await streamers().select('*').where({ id: streamerId });
 		if (!streamer.length) {
-			return { status: 400, message: 'Not found streamer'}
+			return { status: 400, message: 'Streamer not found!'}
 		}
 		return { status: 200, data: streamer[0] }
 	} catch (err) {
