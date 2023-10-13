@@ -3,7 +3,8 @@ require('dotenv');
 module.exports = app => {
 	const { AdminLoginRepository, AdminGetTicketListRepository, getTicketRepository, insertNewStreamerToDB,
 		GetAllOfficialStreamersListFromDB, AdminUpdateOfficialStreamerDB, AdminRemoveOfficialStreameFromDB,
-		AdminGetCupomByStreamerFromDB, AdminGetAllCupomsFromDB, AdminUpdateCupomAtDB, AdminDeleteCupomAtDB } = app.src.main.repository.AdminRepository;
+		AdminGetCupomByStreamerFromDB, AdminGetAllCupomsFromDB, AdminUpdateCupomAtDB, AdminDeleteCupomAtDB,
+		GetOfficialStreamersByIDFromDB } = app.src.main.repository.AdminRepository;
 	const { twitchApi } = require('../modules/twitch/api/twitchApi');
 	const { twitchAuthController } = app.src.main.modules.twitch.controllers.AuthController;
 
@@ -120,6 +121,12 @@ module.exports = app => {
 		return res.status(resp.status).send(resp.message);
 	}
 
+	const AdminGetOfficialStreamerController = async (req, res) => {
+		const data = req?.headers?.streamer_id;
+		const resp = await GetOfficialStreamersByIDFromDB(data);
+		return res.status(resp.status).send(resp.data);
+	}
+
 	return {
 		LoginAdminAccRequest,
 		AdminValidateJsonTokenRequest,
@@ -132,6 +139,7 @@ module.exports = app => {
 		AdminGetCupomByStreamerController,
 		AdminGetAllCupomsController,
 		AdminUpdateCupomController,
-		AdminDeleteCupomController
+		AdminDeleteCupomController,
+		AdminGetOfficialStreamerController
 	}
 }
