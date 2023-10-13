@@ -19,8 +19,6 @@
 -- Current Database: `tibiaprojectslave`
 --
 
-DROP DATABASE IF EXISTS `tibiaprojectslave`;
-
 CREATE DATABASE /*!32312 IF NOT EXISTS*/ `tibiaprojectslave` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;
 
 USE `tibiaprojectslave`;
@@ -70,10 +68,7 @@ CREATE TABLE `contracts` (
   `active` int NOT NULL,
   `contract_doc_url` varchar(120) DEFAULT NULL,
   `contract_paid_date` bigint DEFAULT NULL,
-  `document` bigint NOT NULL,
-  `person_type` int NOT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `cpf/cnpj_UNIQUE` (`document`),
   UNIQUE KEY `id_UNIQUE` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -226,6 +221,7 @@ CREATE TABLE `redeem_cupom_storage` (
 
 LOCK TABLES `redeem_cupom_storage` WRITE;
 /*!40000 ALTER TABLE `redeem_cupom_storage` DISABLE KEYS */;
+INSERT INTO `redeem_cupom_storage` VALUES (49,1);
 /*!40000 ALTER TABLE `redeem_cupom_storage` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -251,8 +247,11 @@ CREATE TABLE `streamers` (
   `bank_agency_number` varchar(45) DEFAULT NULL,
   `bank_name` varchar(45) DEFAULT NULL,
   `streamer_status` varchar(45) NOT NULL DEFAULT 'inactive',
+  `document` bigint NOT NULL,
+  `person_type` int NOT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `id_UNIQUE` (`id`)
+  UNIQUE KEY `id_UNIQUE` (`id`),
+  UNIQUE KEY `document_UNIQUE` (`document`)
 ) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -262,7 +261,7 @@ CREATE TABLE `streamers` (
 
 LOCK TABLES `streamers` WRITE;
 /*!40000 ALTER TABLE `streamers` DISABLE KEYS */;
-INSERT INTO `streamers` VALUES (12,'134826318','Nattank','nattank','Nattank','Nattank@gmail.com',NULL,'11959579097',NULL,NULL,NULL,NULL,NULL,'inactive'),(13,'573373346','bigodezerah','bigodezerah','bigodezerah','bigodezerah@gmail.com',NULL,'11959579097',NULL,NULL,NULL,NULL,NULL,'active'),(14,'175485842','rhuanzerahh','rhuanzerahh','rhuanzerahh','bigodezerah@gmail.com',NULL,'11959579097',NULL,NULL,NULL,NULL,NULL,'active'),(15,'172232144','EliasTibianoDoido','eliastibianodoido','EliasTibianoDoido','EliasTibianoDoido@gmail.com',NULL,'11959579097',NULL,NULL,NULL,NULL,NULL,'active');
+INSERT INTO `streamers` VALUES (12,'134826318','Nattank','nattank','Nattank','Nattank@gmail.com',NULL,'11959579097',NULL,NULL,NULL,NULL,NULL,'inactive',12,1),(13,'573373346','bigodezerah','bigodezerah','bigodezerah','bigodezerah@gmail.com',NULL,'11959579097',NULL,NULL,NULL,NULL,NULL,'active',13,1),(14,'175485842','rhuanzerahh','rhuanzerahh','rhuanzerahh','bigodezerah@gmail.com',NULL,'11959579097',NULL,NULL,NULL,NULL,NULL,'active',1,1),(15,'172232144','EliasTibianoDoido','eliastibianodoido','EliasTibianoDoido','EliasTibianoDoido@gmail.com',NULL,'11959579097',NULL,NULL,NULL,NULL,NULL,'active',15,1);
 /*!40000 ALTER TABLE `streamers` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -305,4 +304,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2023-10-12 16:42:10
+-- Dump completed on 2023-10-13  9:36:12

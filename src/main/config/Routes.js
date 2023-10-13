@@ -87,8 +87,6 @@ module.exports = app => {
     app.route('/Admin/twitch/delete-cupom').delete(AdminAuthMiddleware, app.src.main.controllers.AdminController.AdminDeleteCupomController);
     app.route('/Admin/twitch/get-streamer-byId').get(AdminAuthMiddleware, app.src.main.controllers.AdminController.AdminGetOfficialStreamerController);
 
-    
-    
     //////Error MiddleWare/////
     app.use((err, req, res, next) => {
         if (err instanceof multer.MulterError || err.message === 'Invalid file type. Only JPEG and PNG files are allowed.') {
