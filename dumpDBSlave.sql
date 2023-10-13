@@ -19,6 +19,8 @@
 -- Current Database: `tibiaprojectslave`
 --
 
+DROP DATABASE IF EXISTS `tibiaprojectslave`;
+
 CREATE DATABASE /*!32312 IF NOT EXISTS*/ `tibiaprojectslave` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;
 
 USE `tibiaprojectslave`;
@@ -68,7 +70,11 @@ CREATE TABLE `contracts` (
   `active` int NOT NULL,
   `contract_doc_url` varchar(120) DEFAULT NULL,
   `contract_paid_date` bigint DEFAULT NULL,
-  PRIMARY KEY (`id`)
+  `document` bigint NOT NULL,
+  `person_type` int NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `cpf/cnpj_UNIQUE` (`document`),
+  UNIQUE KEY `id_UNIQUE` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -82,6 +88,148 @@ LOCK TABLES `contracts` WRITE;
 UNLOCK TABLES;
 
 --
+-- Table structure for table `cupom_type`
+--
+
+DROP TABLE IF EXISTS `cupom_type`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `cupom_type` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
+  `type` varchar(45) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `id_UNIQUE` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `cupom_type`
+--
+
+LOCK TABLES `cupom_type` WRITE;
+/*!40000 ALTER TABLE `cupom_type` DISABLE KEYS */;
+INSERT INTO `cupom_type` VALUES (1,'coins'),(2,'discount');
+/*!40000 ALTER TABLE `cupom_type` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `cupoms`
+--
+
+DROP TABLE IF EXISTS `cupoms`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `cupoms` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
+  `streamer_id` int DEFAULT NULL,
+  `cupom_type` int NOT NULL,
+  `cupom_name` varchar(45) NOT NULL,
+  `discount_percent_limit` int DEFAULT NULL,
+  `earns_percent_limit` int DEFAULT NULL,
+  `coins_quantity` int DEFAULT NULL,
+  `status` varchar(45) NOT NULL DEFAULT 'active',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `id_UNIQUE` (`id`),
+  UNIQUE KEY `cupom_name_UNIQUE` (`cupom_name`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `cupoms`
+--
+
+LOCK TABLES `cupoms` WRITE;
+/*!40000 ALTER TABLE `cupoms` DISABLE KEYS */;
+INSERT INTO `cupoms` VALUES (1,123,1,'TIBIAPAPO',0,0,100,'active');
+/*!40000 ALTER TABLE `cupoms` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `payments`
+--
+
+DROP TABLE IF EXISTS `payments`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `payments` (
+  `id` int DEFAULT NULL,
+  `account_id` int DEFAULT NULL,
+  `account_name` text,
+  `transaction_id` bigint DEFAULT NULL,
+  `transaction_type` text,
+  `product_name` text,
+  `unity_value` double DEFAULT NULL,
+  `coins_quantity` int DEFAULT NULL,
+  `total_value` double DEFAULT NULL,
+  `fee_percentage` double DEFAULT NULL,
+  `status` text,
+  `created_date` int DEFAULT NULL,
+  `approved_date` int DEFAULT NULL,
+  `account_email` text,
+  `payment_currency` text,
+  `payment_company` text,
+  `coins_paid_date` int DEFAULT NULL,
+  `cupom_id` int DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `payments`
+--
+
+LOCK TABLES `payments` WRITE;
+/*!40000 ALTER TABLE `payments` DISABLE KEYS */;
+/*!40000 ALTER TABLE `payments` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `person_type`
+--
+
+DROP TABLE IF EXISTS `person_type`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `person_type` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
+  `type` varchar(45) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `id_UNIQUE` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `person_type`
+--
+
+LOCK TABLES `person_type` WRITE;
+/*!40000 ALTER TABLE `person_type` DISABLE KEYS */;
+INSERT INTO `person_type` VALUES (1,'PJ'),(2,'PF');
+/*!40000 ALTER TABLE `person_type` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `redeem_cupom_storage`
+--
+
+DROP TABLE IF EXISTS `redeem_cupom_storage`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `redeem_cupom_storage` (
+  `account_id` int NOT NULL,
+  `cupom_id` int NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `redeem_cupom_storage`
+--
+
+LOCK TABLES `redeem_cupom_storage` WRITE;
+/*!40000 ALTER TABLE `redeem_cupom_storage` DISABLE KEYS */;
+/*!40000 ALTER TABLE `redeem_cupom_storage` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `streamers`
 --
 
@@ -89,7 +237,7 @@ DROP TABLE IF EXISTS `streamers`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `streamers` (
-  `id` int NOT NULL AUTO_INCREMENT,
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
   `twitch_user_id` varchar(60) DEFAULT NULL,
   `twitch_user_name` varchar(60) DEFAULT NULL,
   `twitch_user_login` varchar(60) DEFAULT NULL,
@@ -126,7 +274,7 @@ DROP TABLE IF EXISTS `streamers_live_check_time`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `streamers_live_check_time` (
-  `id` int NOT NULL AUTO_INCREMENT,
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
   `streamer_twitch_id` varchar(60) NOT NULL,
   `streamer_name` varchar(60) NOT NULL,
   `live_id` varchar(60) NOT NULL,
@@ -157,4 +305,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2023-10-09 12:34:31
+-- Dump completed on 2023-10-12 16:42:10

@@ -97,6 +97,17 @@ const GetAllOfficialStreamersListFromDB = async () => {
 	}
 }
 
+const GetOfficialStreamersByIDFromDB = async (data) => {
+
+	try {
+		const streamer = await streamers().select('*').where({ id: data.id });
+		return { status: 200, data: streamer }
+	} catch (err) {
+		console.log(err);
+		return { status: 500, message: 'Internal error!' }
+	}
+}
+
 const AdminUpdateOfficialStreamerDB = async (data) => {
 	console.log('como ta vindo a data de update? ', data);
 	try {
@@ -190,5 +201,6 @@ module.exports = {
 	AdminGetAllCupomsFromDB,
 	AdminUpdateCupomAtDB,
 	AdminDeleteCupomAtDB,
-	AdminGetRedeemCupomStorageAtDB
+	AdminGetRedeemCupomStorageAtDB,
+	GetOfficialStreamersByIDFromDB
 }
