@@ -29,9 +29,10 @@ const getWorldWideTopFivePlayersRepository = async () => {
   .select('players.name', 'players.level', 'worlds.serverName as world', 'accounts.country')
   .where('group_id', '<', 4)
   .orderBy('players.level', 'desc').limit(5);
+  console.log(topFivePlayers);
   return { status: 200, message: topFivePlayers }
   } catch (err) {
-    console.log('erro ao tentar pegar os top 5 players em: getWorldWideTopFivePlayersRepository ', err);
+    console.log('erro ao tentar pegar os top 5 players em: getWorldWideTopFivePlayersRepository \n', err);
     return { status: 500, message: 'internal error' }
   }
 }

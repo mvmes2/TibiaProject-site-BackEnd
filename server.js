@@ -1,3 +1,4 @@
+require('newrelic');
 const http = require('http');
 const express = require('express');
 const cors = require('cors');
@@ -13,21 +14,20 @@ const bodyParser = require('body-parser');
 
 const server = http.createServer(app);
 
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', "GET, PUT, POST, DELETE");
+  res.header('Access-Control-Allow-Headers', "Content-Type");
+  app.use(cors());
+  app.options('*',cors());
+  next();
+})
 const userSockets = {};
 
 io.attach(server);
 
 app.use(compression());
 
-app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Methods', "GET, PUT, POST, DELETE");
-  res.header('Access-Control-Allow-Headers', "Content-Type");
-  app.use(cors({
-    origin: '*',
-  }));
-  next();
-})
 
 app.use(express.urlencoded({ extended: true }));
 // app.use(bodyParser.json());
@@ -83,10 +83,10 @@ app.use(morgan('dev'));
 app.use(express.static(__dirname + '/client'));
 app.use(express.static(__dirname + '/downloads'));
 
-app.get('/client/version.txt', (req, res) => {
+app.get('/v1/client/version.txt', (req, res) => {
   res.sendFile(path.join(__dirname, 'client', 'version.txt'));
 });
-app.get('/downloads', (req, res) => {
+app.get('/v1/downloads', (req, res) => {
   const filePath = path.join(__dirname, 'downloads', 'tibiaproject_launcher.zip');
 
   res.setHeader('Content-Type', 'application/zip');
@@ -126,7 +126,7 @@ consign()
   .then("./src/main/config/Routes.js")
   .into(app);
 
-const PORT = 3333;
+const PORT = 8880;
 server.listen(PORT, () => {
     console.log(`BackEnd Rodando na porta: ${PORT}!!`);
 });
