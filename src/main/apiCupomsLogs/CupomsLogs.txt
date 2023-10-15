@@ -6,3 +6,7 @@
 
 2023-10-12T17:19:25-03:00 - cupom de id: 1 inserido com sucesso na Account de id: 49
 
+2023-10-15T11:23:06-03:00 - cupom de id: 2 inserido com sucesso na Account de id: 49
+
+2023-10-15T11:26:55-03:00 - cupom de id: 2 inserido com sucesso na Account de id: 49
+

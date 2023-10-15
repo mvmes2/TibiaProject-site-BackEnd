@@ -3,15 +3,40 @@ const stripe = require('stripe')(process.env.STRIPES_ACCESS_KEY);
 const express = require('express');
 const app = express();
 app.use(express.static('public'));
-const { generateToken } = require('../../../utils/utilities');
+const { generateToken, calculateDiscount } = require('../../../utils/utilities');
+const { getPayerByAccountIDFromDB } = require("../../../repository/PayerRepository");
+const moment = require('moment-timezone');
 
 module.exports = app => {
   const { StripesinsertNewPaymentService } = app.src.main.modules.stripes.services.StripesServices;
   const { insertCoinsAtAccountToApprovedPayment } = app.src.main.modules.mercadoPago.repository.MercadoPagoRepository;
+  const { getProductsByID } = app.src.main.repository.ProductsRepository;
+  const { getCupomByID } = app.src.main.repository.CupomsRepository;
 
   const StripesCreateCheckoutController = async (req, res) => {
+    const data = req.body;
+
+    const checkPayerFirst = await getPayerByAccountIDFromDB(data?.account_id);
+		if (checkPayerFirst) {
+			if (moment().diff(checkPayerFirst?.buy_time_limit_lock, 'minutes') < 15) {
+				return res.status(403).send({ message: 'You have to wait 15 minuts before donate again!' });
+			}
+		}
+
     try {
-      const data = req.body;
+
+      let cupom = null;
+
+      const productCheck = await getProductsByID({ id: data.product_id });
+
+      if (data?.cupom_id) {
+        cupom = await getCupomByID({ id: data?.cupom_id });
+      }
+      console.log(productCheck?.data?.unity_value)
+      console.log(cupom?.data?.discount_percent_limit)
+      console.log(calculateDiscount(productCheck?.data?.unity_value, cupom?.data?.discount_percent_limit));
+      
+      data.unity_value = data?.cupom_id && data?.cupom_id == 2 ? calculateDiscount(productCheck?.data?.unity_value, cupom?.data?.discount_percent_limit) : productCheck?.data?.unity_value;
 
       console.log(' O que ta vindo de data no stripes? ', data);
 

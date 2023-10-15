@@ -39,16 +39,6 @@ CREATE TABLE `contract_type` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `contract_type`
---
-
-LOCK TABLES `contract_type` WRITE;
-/*!40000 ALTER TABLE `contract_type` DISABLE KEYS */;
-INSERT INTO `contract_type` VALUES (1,'youtube'),(2,'stream'),(3,'instagram'),(4,'youtube + stream'),(5,'youtube + instagram'),(6,'youtube + stream + instagram'),(7,'stream + instagram');
-/*!40000 ALTER TABLE `contract_type` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
 -- Table structure for table `contracts`
 --
 
@@ -74,15 +64,6 @@ CREATE TABLE `contracts` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `contracts`
---
-
-LOCK TABLES `contracts` WRITE;
-/*!40000 ALTER TABLE `contracts` DISABLE KEYS */;
-/*!40000 ALTER TABLE `contracts` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
 -- Table structure for table `cupom_type`
 --
 
@@ -96,16 +77,6 @@ CREATE TABLE `cupom_type` (
   UNIQUE KEY `id_UNIQUE` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `cupom_type`
---
-
-LOCK TABLES `cupom_type` WRITE;
-/*!40000 ALTER TABLE `cupom_type` DISABLE KEYS */;
-INSERT INTO `cupom_type` VALUES (1,'coins'),(2,'discount');
-/*!40000 ALTER TABLE `cupom_type` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `cupoms`
@@ -130,14 +101,22 @@ CREATE TABLE `cupoms` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `cupoms`
+-- Table structure for table `payer_list`
 --
 
-LOCK TABLES `cupoms` WRITE;
-/*!40000 ALTER TABLE `cupoms` DISABLE KEYS */;
-INSERT INTO `cupoms` VALUES (1,123,1,'TIBIAPAPO',0,0,100,'active');
-/*!40000 ALTER TABLE `cupoms` ENABLE KEYS */;
-UNLOCK TABLES;
+DROP TABLE IF EXISTS `payer_list`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `payer_list` (
+  `transactionID` varchar(60) NOT NULL,
+  `payerLastUpdated` varchar(60) NOT NULL,
+  `payerData` varchar(300) NOT NULL,
+  `account_id` int NOT NULL,
+  `buy_time_limit_lock` varchar(60) NOT NULL,
+  `createdAt` bigint NOT NULL,
+  UNIQUE KEY `transactionID_UNIQUE` (`transactionID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Table structure for table `payments`
@@ -147,35 +126,29 @@ DROP TABLE IF EXISTS `payments`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `payments` (
-  `id` int DEFAULT NULL,
-  `account_id` int DEFAULT NULL,
-  `account_name` text,
-  `transaction_id` bigint DEFAULT NULL,
-  `transaction_type` text,
-  `product_name` text,
-  `unity_value` double DEFAULT NULL,
+  `id` int NOT NULL AUTO_INCREMENT,
+  `account_id` int NOT NULL,
+  `account_name` varchar(60) NOT NULL,
+  `transaction_id` varchar(90) NOT NULL,
+  `transaction_type` varchar(60) NOT NULL,
+  `product_name` varchar(60) NOT NULL,
+  `unity_value` float DEFAULT NULL,
   `coins_quantity` int DEFAULT NULL,
-  `total_value` double DEFAULT NULL,
-  `fee_percentage` double DEFAULT NULL,
-  `status` text,
-  `created_date` int DEFAULT NULL,
-  `approved_date` int DEFAULT NULL,
-  `account_email` text,
-  `payment_currency` text,
-  `payment_company` text,
-  `coins_paid_date` int DEFAULT NULL,
-  `cupom_id` int DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  `total_value` float DEFAULT NULL,
+  `fee_percentage` float DEFAULT NULL,
+  `status` varchar(15) NOT NULL,
+  `created_date` bigint NOT NULL,
+  `approved_date` bigint DEFAULT NULL,
+  `account_email` varchar(60) DEFAULT NULL,
+  `payment_currency` varchar(3) DEFAULT NULL,
+  `payment_company` varchar(60) DEFAULT NULL,
+  `coins_paid_date` bigint DEFAULT NULL,
+  `cupom_id` int DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `transaction_id_UNIQUE` (`transaction_id`),
+  UNIQUE KEY `id_UNIQUE` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `payments`
---
-
-LOCK TABLES `payments` WRITE;
-/*!40000 ALTER TABLE `payments` DISABLE KEYS */;
-/*!40000 ALTER TABLE `payments` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `person_type`
@@ -193,14 +166,20 @@ CREATE TABLE `person_type` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `person_type`
+-- Table structure for table `products`
 --
 
-LOCK TABLES `person_type` WRITE;
-/*!40000 ALTER TABLE `person_type` DISABLE KEYS */;
-INSERT INTO `person_type` VALUES (1,'PJ'),(2,'PF');
-/*!40000 ALTER TABLE `person_type` ENABLE KEYS */;
-UNLOCK TABLES;
+DROP TABLE IF EXISTS `products`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `products` (
+  `id` int DEFAULT NULL,
+  `product_name` text,
+  `unity_value` double DEFAULT NULL,
+  `coins_quantity` int DEFAULT NULL,
+  `payment_type` text
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Table structure for table `redeem_cupom_storage`
@@ -214,16 +193,6 @@ CREATE TABLE `redeem_cupom_storage` (
   `cupom_id` int NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `redeem_cupom_storage`
---
-
-LOCK TABLES `redeem_cupom_storage` WRITE;
-/*!40000 ALTER TABLE `redeem_cupom_storage` DISABLE KEYS */;
-INSERT INTO `redeem_cupom_storage` VALUES (49,1);
-/*!40000 ALTER TABLE `redeem_cupom_storage` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `streamers`
@@ -256,16 +225,6 @@ CREATE TABLE `streamers` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `streamers`
---
-
-LOCK TABLES `streamers` WRITE;
-/*!40000 ALTER TABLE `streamers` DISABLE KEYS */;
-INSERT INTO `streamers` VALUES (12,'134826318','Nattank','nattank','Nattank','Nattank@gmail.com',NULL,'11959579097',NULL,NULL,NULL,NULL,NULL,'inactive',12,1),(13,'573373346','bigodezerah','bigodezerah','bigodezerah','bigodezerah@gmail.com',NULL,'11959579097',NULL,NULL,NULL,NULL,NULL,'active',13,1),(14,'175485842','rhuanzerahh','rhuanzerahh','rhuanzerahh','bigodezerah@gmail.com',NULL,'11959579097',NULL,NULL,NULL,NULL,NULL,'active',1,1),(15,'172232144','EliasTibianoDoido','eliastibianodoido','EliasTibianoDoido','EliasTibianoDoido@gmail.com',NULL,'11959579097',NULL,NULL,NULL,NULL,NULL,'active',15,1);
-/*!40000 ALTER TABLE `streamers` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
 -- Table structure for table `streamers_live_check_time`
 --
 
@@ -286,14 +245,82 @@ CREATE TABLE `streamers_live_check_time` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `streamers_live_check_time`
+-- Table structure for table `tickets`
 --
 
-LOCK TABLES `streamers_live_check_time` WRITE;
-/*!40000 ALTER TABLE `streamers_live_check_time` DISABLE KEYS */;
-INSERT INTO `streamers_live_check_time` VALUES (7,'134826318','Nattank','41902648073','@Nattank Crossbow LENDÁRIO! -> ♥ Sorteio diario de 250 tibia coins ❗sorteiodiario ♥ !osiris !arcana !shadow !seal !reidoscoins !tibiabj','2023-10-01T22:44:42Z',NULL),(8,'573373346','bigodezerah','42849294251','replay /rerun !insta !pix !parceria !moedaz !youtube !loja','2023-10-02T01:38:04Z',NULL),(9,'175485842','Rhuanzerahh','41903866185','ShadowIllusion !shadow !blacktalon !baiakera !sealserver !retronia COMPRO/VENDO TIBIA COINS !!! +18','2023-10-02T08:54:01Z',NULL),(10,'172232144','EliasTibianoDoido','41903993609','!Motivo 🤑 HOJE 🤑 Sorteio de 2.000tc - 🛒 Loja On : Farme Pontos e Troca por ❗Ticket','2023-10-02T11:50:10Z',NULL);
-/*!40000 ALTER TABLE `streamers_live_check_time` ENABLE KEYS */;
-UNLOCK TABLES;
+DROP TABLE IF EXISTS `tickets`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `tickets` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `type` text NOT NULL,
+  `author_name` text NOT NULL,
+  `account_id` int NOT NULL,
+  `account_email` text NOT NULL,
+  `status` text NOT NULL,
+  `content` text NOT NULL,
+  `createdAt` bigint NOT NULL,
+  `deletedAt` bigint DEFAULT NULL,
+  `language` text,
+  `closedAt` bigint DEFAULT NULL,
+  `closed_by_staff_agent` text,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `id_UNIQUE` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `tickets_images`
+--
+
+DROP TABLE IF EXISTS `tickets_images`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `tickets_images` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `ticket_id` int NOT NULL,
+  `image_name` text NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `id_UNIQUE` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `tickets_response`
+--
+
+DROP TABLE IF EXISTS `tickets_response`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `tickets_response` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `ticket_id` int NOT NULL,
+  `content` text NOT NULL,
+  `replyer` text NOT NULL,
+  `createdAt` int NOT NULL,
+  `deletedAt` int DEFAULT NULL,
+  `staff_replyer` text,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `id_UNIQUE` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `tickets_response_images`
+--
+
+DROP TABLE IF EXISTS `tickets_response_images`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `tickets_response_images` (
+  `ìd` int NOT NULL AUTO_INCREMENT,
+  `response_id` int NOT NULL,
+  `image_name` text NOT NULL,
+  `ticket_id` int NOT NULL,
+  PRIMARY KEY (`ìd`),
+  UNIQUE KEY `ìd_UNIQUE` (`ìd`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -304,4 +331,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2023-10-13  9:36:12
+-- Dump completed on 2023-10-15 14:25:15

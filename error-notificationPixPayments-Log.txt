@@ -18,3 +18,117 @@
     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
     at async MercadoPagoPixNotificationController (C:\Projetos\Projetos\tibiaProjectWebSite\TibiaProject-site-BackEnd\src\main\modules\mercadoPago\controllers\MercadoPagoController.js:29:18)
 
+2023-10-15T15:49:28.424Z - ReferenceError: PayerList is not defined
+    at module.exports.GetPayerAtList (C:\Projetos\Projetos\tibiaProjectWebSite\TibiaProject-site-BackEnd\src\main\controllers\PayerController.js:57:17)
+    at ReturnPixNotificationService (C:\Projetos\Projetos\tibiaProjectWebSite\TibiaProject-site-BackEnd\src\main\modules\mercadoPago\services\MercadoPagoServices.js:112:38)
+    at MercadoPagoPixNotificationController (C:\Projetos\Projetos\tibiaProjectWebSite\TibiaProject-site-BackEnd\src\main\modules\mercadoPago\controllers\MercadoPagoController.js:29:24)
+    at Layer.handle [as handle_request] (C:\Projetos\Projetos\tibiaProjectWebSite\TibiaProject-site-BackEnd\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Projetos\Projetos\tibiaProjectWebSite\TibiaProject-site-BackEnd\node_modules\express\lib\router\route.js:144:13)
+    at Route.dispatch (C:\Projetos\Projetos\tibiaProjectWebSite\TibiaProject-site-BackEnd\node_modules\express\lib\router\route.js:114:3)
+    at Layer.handle [as handle_request] (C:\Projetos\Projetos\tibiaProjectWebSite\TibiaProject-site-BackEnd\node_modules\express\lib\router\layer.js:95:5)
+    at C:\Projetos\Projetos\tibiaProjectWebSite\TibiaProject-site-BackEnd\node_modules\express\lib\router\index.js:284:15
+    at Function.process_params (C:\Projetos\Projetos\tibiaProjectWebSite\TibiaProject-site-BackEnd\node_modules\express\lib\router\index.js:346:12)
+    at next (C:\Projetos\Projetos\tibiaProjectWebSite\TibiaProject-site-BackEnd\node_modules\express\lib\router\index.js:280:10)
+
+2023-10-15T15:50:28.911Z - ReferenceError: PayerList is not defined
+    at module.exports.GetPayerAtList (C:\Projetos\Projetos\tibiaProjectWebSite\TibiaProject-site-BackEnd\src\main\controllers\PayerController.js:57:17)
+    at ReturnPixNotificationService (C:\Projetos\Projetos\tibiaProjectWebSite\TibiaProject-site-BackEnd\src\main\modules\mercadoPago\services\MercadoPagoServices.js:112:38)
+    at MercadoPagoPixNotificationController (C:\Projetos\Projetos\tibiaProjectWebSite\TibiaProject-site-BackEnd\src\main\modules\mercadoPago\controllers\MercadoPagoController.js:29:24)
+    at Layer.handle [as handle_request] (C:\Projetos\Projetos\tibiaProjectWebSite\TibiaProject-site-BackEnd\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Projetos\Projetos\tibiaProjectWebSite\TibiaProject-site-BackEnd\node_modules\express\lib\router\route.js:144:13)
+    at Route.dispatch (C:\Projetos\Projetos\tibiaProjectWebSite\TibiaProject-site-BackEnd\node_modules\express\lib\router\route.js:114:3)
+    at Layer.handle [as handle_request] (C:\Projetos\Projetos\tibiaProjectWebSite\TibiaProject-site-BackEnd\node_modules\express\lib\router\layer.js:95:5)
+    at C:\Projetos\Projetos\tibiaProjectWebSite\TibiaProject-site-BackEnd\node_modules\express\lib\router\index.js:284:15
+    at Function.process_params (C:\Projetos\Projetos\tibiaProjectWebSite\TibiaProject-site-BackEnd\node_modules\express\lib\router\index.js:346:12)
+    at next (C:\Projetos\Projetos\tibiaProjectWebSite\TibiaProject-site-BackEnd\node_modules\express\lib\router\index.js:280:10)
+
+2023-10-15T15:50:29.248Z - ReferenceError: PayerList is not defined
+    at module.exports.GetPayerAtList (C:\Projetos\Projetos\tibiaProjectWebSite\TibiaProject-site-BackEnd\src\main\controllers\PayerController.js:57:17)
+    at ReturnPixNotificationService (C:\Projetos\Projetos\tibiaProjectWebSite\TibiaProject-site-BackEnd\src\main\modules\mercadoPago\services\MercadoPagoServices.js:112:38)
+    at MercadoPagoPixNotificationController (C:\Projetos\Projetos\tibiaProjectWebSite\TibiaProject-site-BackEnd\src\main\modules\mercadoPago\controllers\MercadoPagoController.js:29:24)
+    at Layer.handle [as handle_request] (C:\Projetos\Projetos\tibiaProjectWebSite\TibiaProject-site-BackEnd\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Projetos\Projetos\tibiaProjectWebSite\TibiaProject-site-BackEnd\node_modules\express\lib\router\route.js:144:13)
+    at Route.dispatch (C:\Projetos\Projetos\tibiaProjectWebSite\TibiaProject-site-BackEnd\node_modules\express\lib\router\route.js:114:3)
+    at Layer.handle [as handle_request] (C:\Projetos\Projetos\tibiaProjectWebSite\TibiaProject-site-BackEnd\node_modules\express\lib\router\layer.js:95:5)
+    at C:\Projetos\Projetos\tibiaProjectWebSite\TibiaProject-site-BackEnd\node_modules\express\lib\router\index.js:284:15
+    at Function.process_params (C:\Projetos\Projetos\tibiaProjectWebSite\TibiaProject-site-BackEnd\node_modules\express\lib\router\index.js:346:12)
+    at next (C:\Projetos\Projetos\tibiaProjectWebSite\TibiaProject-site-BackEnd\node_modules\express\lib\router\index.js:280:10)
+
+2023-10-15T16:00:28.621Z - TypeError: Cannot read properties of undefined (reading 'payerData')
+    at module.exports.GetPayerAtList (C:\Projetos\Projetos\tibiaProjectWebSite\TibiaProject-site-BackEnd\src\main\controllers\PayerController.js:57:50)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async ReturnPixNotificationService (C:\Projetos\Projetos\tibiaProjectWebSite\TibiaProject-site-BackEnd\src\main\modules\mercadoPago\services\MercadoPagoServices.js:112:26)
+    at async MercadoPagoPixNotificationController (C:\Projetos\Projetos\tibiaProjectWebSite\TibiaProject-site-BackEnd\src\main\modules\mercadoPago\controllers\MercadoPagoController.js:29:18)
+
+2023-10-15T16:01:29.499Z - TypeError: Cannot read properties of undefined (reading 'payerData')
+    at module.exports.GetPayerAtList (C:\Projetos\Projetos\tibiaProjectWebSite\TibiaProject-site-BackEnd\src\main\controllers\PayerController.js:57:50)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async ReturnPixNotificationService (C:\Projetos\Projetos\tibiaProjectWebSite\TibiaProject-site-BackEnd\src\main\modules\mercadoPago\services\MercadoPagoServices.js:112:26)
+    at async MercadoPagoPixNotificationController (C:\Projetos\Projetos\tibiaProjectWebSite\TibiaProject-site-BackEnd\src\main\modules\mercadoPago\controllers\MercadoPagoController.js:29:18)
+
+2023-10-15T16:01:29.936Z - TypeError: Cannot read properties of undefined (reading 'payerData')
+    at module.exports.GetPayerAtList (C:\Projetos\Projetos\tibiaProjectWebSite\TibiaProject-site-BackEnd\src\main\controllers\PayerController.js:57:50)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async ReturnPixNotificationService (C:\Projetos\Projetos\tibiaProjectWebSite\TibiaProject-site-BackEnd\src\main\modules\mercadoPago\services\MercadoPagoServices.js:112:26)
+    at async MercadoPagoPixNotificationController (C:\Projetos\Projetos\tibiaProjectWebSite\TibiaProject-site-BackEnd\src\main\modules\mercadoPago\controllers\MercadoPagoController.js:29:18)
+
+2023-10-15T16:03:21.109Z - TypeError: Cannot read properties of undefined (reading 'payerData')
+    at module.exports.GetPayerAtList (C:\Projetos\Projetos\tibiaProjectWebSite\TibiaProject-site-BackEnd\src\main\controllers\PayerController.js:58:50)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async ReturnPixNotificationService (C:\Projetos\Projetos\tibiaProjectWebSite\TibiaProject-site-BackEnd\src\main\modules\mercadoPago\services\MercadoPagoServices.js:112:26)
+    at async MercadoPagoPixNotificationController (C:\Projetos\Projetos\tibiaProjectWebSite\TibiaProject-site-BackEnd\src\main\modules\mercadoPago\controllers\MercadoPagoController.js:29:18)
+
+2023-10-15T16:04:22.032Z - TypeError: Cannot read properties of undefined (reading 'payerData')
+    at module.exports.GetPayerAtList (C:\Projetos\Projetos\tibiaProjectWebSite\TibiaProject-site-BackEnd\src\main\controllers\PayerController.js:58:50)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async ReturnPixNotificationService (C:\Projetos\Projetos\tibiaProjectWebSite\TibiaProject-site-BackEnd\src\main\modules\mercadoPago\services\MercadoPagoServices.js:112:26)
+    at async MercadoPagoPixNotificationController (C:\Projetos\Projetos\tibiaProjectWebSite\TibiaProject-site-BackEnd\src\main\modules\mercadoPago\controllers\MercadoPagoController.js:29:18)
+
+2023-10-15T16:04:22.408Z - TypeError: Cannot read properties of undefined (reading 'payerData')
+    at module.exports.GetPayerAtList (C:\Projetos\Projetos\tibiaProjectWebSite\TibiaProject-site-BackEnd\src\main\controllers\PayerController.js:58:50)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async ReturnPixNotificationService (C:\Projetos\Projetos\tibiaProjectWebSite\TibiaProject-site-BackEnd\src\main\modules\mercadoPago\services\MercadoPagoServices.js:112:26)
+    at async MercadoPagoPixNotificationController (C:\Projetos\Projetos\tibiaProjectWebSite\TibiaProject-site-BackEnd\src\main\modules\mercadoPago\controllers\MercadoPagoController.js:29:18)
+
+2023-10-15T16:11:22.839Z - TypeError: Cannot read properties of undefined (reading 'payerData')
+    at module.exports.GetPayerAtList (C:\Projetos\Projetos\tibiaProjectWebSite\TibiaProject-site-BackEnd\src\main\controllers\PayerController.js:58:50)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async ReturnPixNotificationService (C:\Projetos\Projetos\tibiaProjectWebSite\TibiaProject-site-BackEnd\src\main\modules\mercadoPago\services\MercadoPagoServices.js:112:26)
+    at async MercadoPagoPixNotificationController (C:\Projetos\Projetos\tibiaProjectWebSite\TibiaProject-site-BackEnd\src\main\modules\mercadoPago\controllers\MercadoPagoController.js:29:18)
+
+2023-10-15T16:37:41.772Z - TypeError: Cannot read properties of undefined (reading 'payerData')
+    at module.exports.GetPayerAtList (C:\Projetos\Projetos\tibiaProjectWebSite\TibiaProject-site-BackEnd\src\main\controllers\PayerController.js:60:50)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async ReturnPixNotificationService (C:\Projetos\Projetos\tibiaProjectWebSite\TibiaProject-site-BackEnd\src\main\modules\mercadoPago\services\MercadoPagoServices.js:121:26)
+    at async MercadoPagoPixNotificationController (C:\Projetos\Projetos\tibiaProjectWebSite\TibiaProject-site-BackEnd\src\main\modules\mercadoPago\controllers\MercadoPagoController.js:29:18)
+
+2023-10-15T16:38:42.300Z - TypeError: Cannot read properties of undefined (reading 'payerData')
+    at module.exports.GetPayerAtList (C:\Projetos\Projetos\tibiaProjectWebSite\TibiaProject-site-BackEnd\src\main\controllers\PayerController.js:60:50)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async ReturnPixNotificationService (C:\Projetos\Projetos\tibiaProjectWebSite\TibiaProject-site-BackEnd\src\main\modules\mercadoPago\services\MercadoPagoServices.js:121:26)
+    at async MercadoPagoPixNotificationController (C:\Projetos\Projetos\tibiaProjectWebSite\TibiaProject-site-BackEnd\src\main\modules\mercadoPago\controllers\MercadoPagoController.js:29:18)
+
+2023-10-15T16:38:42.685Z - TypeError: Cannot read properties of undefined (reading 'payerData')
+    at module.exports.GetPayerAtList (C:\Projetos\Projetos\tibiaProjectWebSite\TibiaProject-site-BackEnd\src\main\controllers\PayerController.js:60:50)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async ReturnPixNotificationService (C:\Projetos\Projetos\tibiaProjectWebSite\TibiaProject-site-BackEnd\src\main\modules\mercadoPago\services\MercadoPagoServices.js:121:26)
+    at async MercadoPagoPixNotificationController (C:\Projetos\Projetos\tibiaProjectWebSite\TibiaProject-site-BackEnd\src\main\modules\mercadoPago\controllers\MercadoPagoController.js:29:18)
+
+2023-10-15T16:45:42.810Z - TypeError: Cannot read properties of undefined (reading 'payerData')
+    at module.exports.GetPayerAtList (C:\Projetos\Projetos\tibiaProjectWebSite\TibiaProject-site-BackEnd\src\main\controllers\PayerController.js:60:50)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async ReturnPixNotificationService (C:\Projetos\Projetos\tibiaProjectWebSite\TibiaProject-site-BackEnd\src\main\modules\mercadoPago\services\MercadoPagoServices.js:122:26)
+    at async MercadoPagoPixNotificationController (C:\Projetos\Projetos\tibiaProjectWebSite\TibiaProject-site-BackEnd\src\main\modules\mercadoPago\controllers\MercadoPagoController.js:29:18)
+
+2023-10-15T16:55:56.839Z - TypeError: Cannot read properties of undefined (reading 'payerData')
+    at module.exports.GetPayerAtList (C:\Projetos\Projetos\tibiaProjectWebSite\TibiaProject-site-BackEnd\src\main\controllers\PayerController.js:60:50)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async ReturnPixNotificationService (C:\Projetos\Projetos\tibiaProjectWebSite\TibiaProject-site-BackEnd\src\main\modules\mercadoPago\services\MercadoPagoServices.js:122:26)
+    at async MercadoPagoPixNotificationController (C:\Projetos\Projetos\tibiaProjectWebSite\TibiaProject-site-BackEnd\src\main\modules\mercadoPago\controllers\MercadoPagoController.js:29:18)
+
+2023-10-15T16:56:00.699Z - TypeError: Cannot read properties of undefined (reading 'payerData')
+    at module.exports.GetPayerAtList (C:\Projetos\Projetos\tibiaProjectWebSite\TibiaProject-site-BackEnd\src\main\controllers\PayerController.js:60:50)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async ReturnPixNotificationService (C:\Projetos\Projetos\tibiaProjectWebSite\TibiaProject-site-BackEnd\src\main\modules\mercadoPago\services\MercadoPagoServices.js:122:26)
+    at async MercadoPagoPixNotificationController (C:\Projetos\Projetos\tibiaProjectWebSite\TibiaProject-site-BackEnd\src\main\modules\mercadoPago\controllers\MercadoPagoController.js:29:18)
+

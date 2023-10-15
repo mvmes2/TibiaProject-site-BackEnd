@@ -1,6 +1,6 @@
-const { worlds, players, accounts, tickets, tickets_images, tickets_response, tickets_response_images } = require('../models/MasterModels');
+const { accounts } = require('../models/MasterModels');
 const { generateTokenAdmin, checkPassword } = require('../utils/utilities');
-const { streamers, cupoms, redeem_cupom_storage } = require('../models/SlaveModels');
+const { streamers, cupoms, redeem_cupom_storage, tickets, tickets_images, tickets_response, tickets_response_images } = require('../models/SlaveModels');
 
 const AdminLoginRepository = async (data) => {
 	console.log(data)
@@ -36,7 +36,7 @@ const AdminLoginRepository = async (data) => {
 
 const AdminGetTicketListRepository = async () => {
 	try {
-		const ticketList = await tickets.query().select('*');
+		const ticketList = await tickets().select('*');
 
 		return { status: 200, message: ticketList }
 	} catch (err) {
@@ -48,12 +48,12 @@ const AdminGetTicketListRepository = async () => {
 
 const getTicketRepository = async (data) => {
 	try {
-		const ticket = await tickets.query().select('*').where({ id: data.id }).first();
-		const ticketImages = await tickets_images.query().select('*').where({ ticket_id: data.id });
-		const ticketReponses = await tickets_response.query().select('*').where({ ticket_id: data.id });
+		const ticket = await tickets().select('*').where({ id: data.id }).first();
+		const ticketImages = await tickets_images().select('*').where({ ticket_id: data.id });
+		const ticketReponses = await tickets_response().select('*').where({ ticket_id: data.id });
 		const responseImagesArr = await Promise.all(
 			ticketReponses.map(async (response) => {
-				const images = await tickets_response_images.query().select('*').where({ response_id: Number(response.id) });
+				const images = await tickets_response_images().select('*').where({ response_id: Number(response.id) });
 				console.log('tem images? ', images);
 				return images;
 			})

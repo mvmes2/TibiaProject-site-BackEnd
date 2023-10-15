@@ -333,6 +333,12 @@ const LogCreateFileHandler = async (txtName, warningText, errText) => {
   }
 };
 
+const calculateDiscount = (totalValue, discountValue) => {
+  const discount = Number(Number(totalValue) * (Number(discountValue) / 100));
+  const finalValue = Number(totalValue) - Number(discount);
+  return Number(finalValue);
+}
+
 module.exports = {
   checkPassword,
   hashGenerator,
@@ -353,5 +359,6 @@ module.exports = {
   getlastPaymentIDUpdated,
   sleep,
   ErrorLogCreateFileHandler,
-  LogCreateFileHandler
+  LogCreateFileHandler,
+  calculateDiscount
 }

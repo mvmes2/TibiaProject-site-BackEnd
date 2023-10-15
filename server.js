@@ -23,7 +23,9 @@ app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Methods', "GET, PUT, POST, DELETE");
   res.header('Access-Control-Allow-Headers', "Content-Type");
-  app.use(cors());
+  app.use(cors({
+    origin: '*',
+  }));
   next();
 })
 
@@ -109,10 +111,10 @@ consign()
   .then("./src/main/modules/twitch/repository")
   .then("./src/main/modules/twitch")
   .then("./src/main/middlewares")
+  .then("./src/main/repository")
   .then("./src/main/modules/mercadoPago/repository")
   .then("./src/main/modules/mercadoPago/services")
   .then("./src/main/modules/mercadoPago/")
-  .then("./src/main/repository")
   .then("./src/main/services")
   .then("./src/main/controllers")
   .then("./src/main/modules/stripes/repository")

@@ -1,15 +1,28 @@
 require('dotenv').config();
 const { api } = require('../api');
 const util = require('util');
-const { sleep, ErrorLogCreateFileHandler } = require('../../../utils/utilities');
+const { sleep, ErrorLogCreateFileHandler, calculateDiscount } = require('../../../utils/utilities');
 const Enums = require('../../../config/Enums');
+const { getPayerByAccountIDFromDB } = require("../../../repository/PayerRepository");
+const moment = require('moment-timezone');
 
 module.exports = app => {
 	const { insertNewPayment,
 		insertCoinsAtAccountToApprovedPayment, updatePayment } = app.src.main.modules.mercadoPago.repository.MercadoPagoRepository;
 	const Payer = require('../../../controllers/PayerController');
+	const { getProductsByID } = app.src.main.repository.ProductsRepository;
+	const { getCupomByID } = app.src.main.repository.CupomsRepository;
 
 	const PagseguroCreatePaymnentController = async (req, res) => {
+		const dataFront = req.body;
+
+		const checkPayerFirst = await getPayerByAccountIDFromDB(dataFront?.account_id);
+		if (checkPayerFirst) {
+			if (moment().diff(checkPayerFirst?.buy_time_limit_lock, 'minutes') < 15) {
+				return res.status(403).send({ message: 'You have to wait 15 minuts before donate again!' });
+			}
+		}
+
 		try {
 			const headers = {
 				'Accept': 'application/json',
@@ -17,7 +30,16 @@ module.exports = app => {
 				'Authorization': `Bearer ${process.env.PAG_SEGURO_ACCESS_TOKEN}`
 			}
 
-			const dataFront = req.body;
+
+			let cupom = null;
+
+			const productCheck = await getProductsByID({ id: dataFront.product_id });
+
+			if (dataFront?.cupom_id) {
+				cupom = await getCupomByID({ id: dataFront?.cupom_id });
+			}
+
+			dataFront.value = dataFront?.cupom_id && dataFront?.cupom_id == 2 ? calculateDiscount(productCheck?.data?.unity_value, cupom?.data?.discount_percent_limit) : productCheck?.data?.unity_value;
 
 			const data = {
 				reference_id: dataFront.order_id,
