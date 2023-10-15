@@ -1,4 +1,4 @@
-const { tickets, tickets_response, tickets_images, tickets_response_images } = require('../models/MasterModels');
+const { tickets, tickets_response, tickets_images, tickets_response_images } = require('../models/SlaveModels');
 const moment = require('moment');
 const fs = require('fs');
 const path = require('path');
@@ -20,7 +20,7 @@ const getTicketListFromUser = async (data) => {
 		getTicketListData = data;
 
 		console.log('NÃO ENTROU NO CACHE DE GETTICKETLIST!!');
-		getTickeListInfo = await tickets.query().select('*').where({ account_id: data.id });
+		getTickeListInfo = await tickets().select('*').where({ account_id: data.id });
 		getTickeListLastUpdated = moment();
 		return { status: 200, message: getTickeListInfo };
 	} catch (err) {
@@ -41,16 +41,16 @@ const CreateNewTicketInDB = async (data, files) => {
 			language: data.language,
 			createdAt: (Date.now() / 1000)
 		}
-		const ticket = await tickets.query().insert(newTicket);
-		console.log('oque temos aqui? ', ticket)
+		const ticket = await tickets().insert(newTicket);
+		console.log('oque temos aqui? ', ticket[0])
 		let ticketImage = null;
 		if (files?.length > 0) {
 			files.map(async (file) => {
 				const newTicketImage = {
-					ticket_id: (Number(ticket.id)),
+					ticket_id: (Number(ticket[0])),
 					image_name: file.filename
 				}
-				ticketImage = await tickets_images.query().insert(newTicketImage);
+				ticketImage = await tickets_images().insert(newTicketImage);
 			})
 			console.log('kd imagens?  ', ticketImage)
 		}
@@ -76,13 +76,13 @@ const getTicket = async (data) => {
 	try {
 		ticketData = data;
 
-		const ticket = await tickets.query().select('*').where({ id: data.id }).first();
-		const ticketImages = await tickets_images.query().select('*').where({ ticket_id: data.id });
-		const ticketReponses = await tickets_response.query().select('*').where({ ticket_id: data.id });
+		const ticket = await tickets().select('*').where({ id: data.id }).first();
+		const ticketImages = await tickets_images().select('*').where({ ticket_id: data.id });
+		const ticketReponses = await tickets_response().select('*').where({ ticket_id: data.id });
 
 		const responseImagesArr = await Promise.all(
 			ticketReponses.map(async (response) => {
-				const images = await tickets_response_images.query().select('*').where({ response_id: Number(response.id) });
+				const images = await tickets_response_images().select('*').where({ response_id: Number(response.id) });
 				return images;
 			})
 		);
@@ -105,7 +105,7 @@ const getTicket = async (data) => {
 
 const updateTicketsRepository = async (data) => {
 	try {
-		await tickets.query().update(data.update).where({ id: data.id });
+		await tickets().update(data.update).where({ id: data.id });
 		return { status: 200, message: 'ticket updated!' }
 	} catch (err) {
 		console.log('Error while trying to update ticket at: updateTicketsRepository... ', err);
@@ -116,7 +116,7 @@ const updateTicketsRepository = async (data) => {
 const insertNewTicketResponseRepository = async (data, files) => {
 	console.log('tem files? ', files)
 	try {
-		const ticketResponse = await tickets_response.query().insert(data);
+		const ticketResponse = await tickets_response().insert(data);
 
 		if (files?.length > 0) {
 			files.map(async (file) => {
@@ -125,7 +125,7 @@ const insertNewTicketResponseRepository = async (data, files) => {
 					response_id: (Number(ticketResponse.id)),
 					image_name: file.filename
 				}
-				await tickets_response_images.query().insert(newTicketImage);
+				await tickets_response_images().insert(newTicketImage);
 			});
 		}
 		return { status: 201, message: 'response inserted!' }
@@ -138,8 +138,8 @@ const insertNewTicketResponseRepository = async (data, files) => {
 const AdminOnDeleteTicketRepository = async (data) => {
 	const folderPath = path.join(__dirname, '..', 'resources', 'tickets-images', 'compressed');
 
-	const responseImgsToDelete = await tickets_response_images.query().select('*').where({ ticket_id: data.id });
-	const ticketImgTodelete = await tickets_images.query().select('*').where({ ticket_id: data.id });
+	const responseImgsToDelete = await tickets_response_images().select('*').where({ ticket_id: data.id });
+	const ticketImgTodelete = await tickets_images().select('*').where({ ticket_id: data.id });
 
 	///Deletando imagens de ticketResponseImages no hd da maquina
 	if (responseImgsToDelete?.length > 0) {
@@ -190,13 +190,13 @@ const AdminOnDeleteTicketRepository = async (data) => {
 	}
 
 	///// deletando TicketResponsesImages
-	await tickets_response_images.query().delete().where({ ticket_id: data.id });
+	await tickets_response_images().delete().where({ ticket_id: data.id });
 	///// deletando TicketImages
-	await tickets_images.query().delete().where({ ticket_id: data.id });
+	await tickets_images().delete().where({ ticket_id: data.id });
 	///// deletando TicketResponses
-	await tickets_response.query().delete().where({ ticket_id: data.id });
+	await tickets_response().delete().where({ ticket_id: data.id });
 	///// deletando Ticket
-	await tickets.query().delete().where({ id: data.id });
+	await tickets().delete().where({ id: data.id });
 	return { status: 200, message: 'Deletado!' }
 }
 

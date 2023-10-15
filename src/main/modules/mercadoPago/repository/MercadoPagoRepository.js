@@ -1,5 +1,6 @@
 require('dotenv').config();
-const { worlds, players, products, accounts, payments } = require('../../../models/MasterModels');
+const { worlds, players, accounts } = require('../../../models/MasterModels');
+const { products , payments } = require('../../../models/SlaveModels');
 const { userSockets, io } = require('../../../../../server');
 const { projectMailer, getlastPaymentIDUpdated, setlastPaymentIDUpdated, setCreateCharacterController, ErrorLogCreateFileHandler,
   LogCreateFileHandler } = require('../../../utils/utilities');
@@ -10,7 +11,7 @@ const { cupoms, redeem_cupom_storage } = require("./../../../models/SlaveModels"
 
 const getProductsList = async () => {
   try {
-    const productsList = await products.query().select('*');
+    const productsList = await products().select('*');
     return { status: 200, message: productsList };
   } catch (err) {
     console.log(err);
@@ -28,7 +29,7 @@ const GetPaymentListLastIDRepository = async () => {
     return { status: 200, message: lastPaymentID === undefined ? 1 : (Number(lastPaymentID.id) + 1) };
   }
   try {
-    lastPaymentID = await payments.query().select('id').orderBy('id', 'desc').first();
+    lastPaymentID = await payments().select('id').orderBy('id', 'desc').first();
     setlastPaymentIDUpdated(moment());
 
     return { status: 200, message: lastPaymentID === undefined ? 1 : (Number(lastPaymentID.id) + 1) };
@@ -42,13 +43,13 @@ const insertNewPayment = async (data) => {
   console.log('ESTAMOS INSERINDO PAGAMENTO!!!!!!!!!!!!!!');
   console.log(data);
   data.transaction_id = data.transaction_id.toString();
-  const checkIfPaymentAlreadyExists = await payments.query().select('transaction_id').where({ transaction_id: data.transaction_id });
+  const checkIfPaymentAlreadyExists = await payments().select('transaction_id').where({ transaction_id: data.transaction_id });
   if (checkIfPaymentAlreadyExists.length > 0) {
     console.log('Pagamento ja existe!');
     return { status: 409, message: 'Pagamento já existe!' }
   }
   try {
-    await payments.query().insert(data);
+    await payments().insert(data);
     setlastPaymentIDUpdated(0);
     return { status: 201, message: 'Pagamento criado com sucesso!' }
   } catch (err) {
@@ -60,7 +61,7 @@ const insertNewPayment = async (data) => {
 
 const updatePayment = async (data) => {
   try {
-    await payments.query().update(data.update).where({ transaction_id: data.transaction_id.toString() });
+    await payments().update(data.update).where({ transaction_id: data.transaction_id.toString() });
   } catch (err) {
     console.log(err);
     await ErrorLogCreateFileHandler(Enums.MERCADOPAGOREPOSITORY_updatePayment_ERROR_FILE_NAME, '', err);
@@ -70,7 +71,7 @@ const updatePayment = async (data) => {
 
 const deleteCancelledPayment = async (data) => {
   try {
-    await payments.query().delete().where({ transaction_id: data.transaction_id.toString() });
+    await payments().delete().where({ transaction_id: data.transaction_id.toString() });
   } catch (err) {
     console.log(err);
     return { status: 500, message: 'Internal error!' }
@@ -81,7 +82,7 @@ const insertCoinsAtAccountToApprovedPayment = async (paymentID, pagseguroEmail, 
   console.log(' consolando se estamos recebendo email do pagSeguro!! ', pagseguroEmail);
   console.log('consolando paymentID pra inserção de coins: ', paymentID);
   try {
-    const getAccountToInsertCoins = await payments.query().select('account_id', 'coins_quantity', 'account_email', 'account_name', 'product_name')
+    const getAccountToInsertCoins = await payments().select('account_id', 'coins_quantity', 'account_email', 'account_name', 'product_name')
       .where({ transaction_id: !paymentID.id ? paymentID.toString() : paymentID.id.toString() })
       .whereNotNull('approved_date')
       .whereNull('coins_paid_date');
@@ -118,6 +119,7 @@ const insertCoinsAtAccountToApprovedPayment = async (paymentID, pagseguroEmail, 
           let totalAmount = Number(getPreviousPackNumberAmmountToSumm.coins);
           const getCupom = await cupoms().select('*').where({ id: cupom_id }).first();
           const checkCupomRedeem = await redeem_cupom_storage().select('*').where({ account_id: accToPay.account_id, cupom_id: cupom_id });
+
           if (getCupom.cupom_name == "TIBIAPAPO" && checkCupomRedeem.length <= 0) {
             totalAmount+= Number(getCupom.coins_quantity);
             console.log('quanto tinha na conta antes do cupom papo?', getPreviousPackNumberAmmountToSumm.coins);
@@ -131,9 +133,10 @@ const insertCoinsAtAccountToApprovedPayment = async (paymentID, pagseguroEmail, 
           }
           console.log('NAO DEU PAPO!!!!!!!!!!!');
           await accounts.query().update(updateAccountInfo).where({ id: accToPay.account_id });
-          await payments.query().update({ coins_paid_date: Date.now() / 1000, status: 'sent' }).where({ transaction_id: !paymentID.id ? paymentID.toString() : paymentID.id.toString() });
+          await payments().update({ coins_paid_date: Date.now() / 1000, status: 'sent' }).where({ transaction_id: !paymentID.id ? paymentID.toString() : paymentID.id.toString() });
           if (cupom_id) {
             await redeem_cupom_storage().insert({ account_id: accToPay.account_id, cupom_id });
+            await payments().update({ cupom_id }).where({ transaction_id: !paymentID.id ? paymentID.toString() : paymentID.id.toString() });
             LogCreateFileHandler("CupomsLogs.txt", `cupom de id: ${cupom_id} inserido com sucesso na Account de id: ${accToPay.account_id}`);
           }
           
@@ -208,9 +211,10 @@ const insertCoinsAtAccountToApprovedPayment = async (paymentID, pagseguroEmail, 
           }
           console.log('NAO DEU PAPO!!!!!!!!!!!');
       await accounts.query().update({ coins: totalAmount }).where({ id: accToPay.account_id });
-      await payments.query().update({ coins_paid_date: Date.now() / 1000, status: 'sent' }).where({ transaction_id: !paymentID.id ? paymentID.toString() : paymentID.id.toString() });
+      await payments().update({ coins_paid_date: Date.now() / 1000, status: 'sent' }).where({ transaction_id: !paymentID.id ? paymentID.toString() : paymentID.id.toString() });
       if (cupom_id) {
         await redeem_cupom_storage().insert({ account_id: accToPay.account_id, cupom_id });
+        await payments().update({ cupom_id }).where({ transaction_id: !paymentID.id ? paymentID.toString() : paymentID.id.toString() });
         LogCreateFileHandler("CupomsLogs.txt", `cupom de id: ${cupom_id} inserido com sucesso na Account de id: ${accToPay.account_id}`);
       }
       

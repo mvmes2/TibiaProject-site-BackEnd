@@ -2,25 +2,48 @@ require('dotenv').config();
 const fs = require('fs');
 const util = require('util');
 const { api } = require('./api');
-const { sleep } = require('../../../utils/utilities');
+const { sleep, calculateDiscount } = require('../../../utils/utilities');
 const Payer = require('../../../controllers/PayerController');
+const { getPayerByAccountIDFromDB } = require("../../../repository/PayerRepository");
+const moment = require('moment-timezone');
 
 module.exports = app => {
   const { insertNewPayment, updatePayment, deleteCancelledPayment, insertCoinsAtAccountToApprovedPayment } = app.src.main.modules.mercadoPago.repository.MercadoPagoRepository;
+  const { getProductsByID } = app.src.main.repository.ProductsRepository;
+  const { getCupomByID } = app.src.main.repository.CupomsRepository;
 
   const headers = {
     Authorization: `Bearer ${process.env.MERCADO_PAGO_ACCESS_TOKEN}`
   }
 
   const CreatePixPayment = async (data) => {
+
+    const checkPayerFirst = await getPayerByAccountIDFromDB(data?.account_id);
+    if (checkPayerFirst) {
+      if (moment().diff(checkPayerFirst?.buy_time_limit_lock, 'minutes') < 15) {
+        return { status: 403, message: 'You have to wait 15 minuts before donate again!' };
+      }
+    }
+//att
+    console.log('Vamos printar qual o data que ta vindo do front pra criar o produto!!! ', data);
     let respuest = { status: 500, message: 'Internal error at payment!' };
+    let cupom = null;
+    
+    const productCheck = await getProductsByID({ id: data.product_id });
+
+    if (data?.cupom_id) {
+      cupom = await getCupomByID({ id: data?.cupom_id });
+    }
+
+    data.value = data?.cupom_id && data?.cupom_id == 2 ? calculateDiscount(productCheck?.data?.unity_value, cupom?.data?.discount_percent_limit) : productCheck?.data?.unity_value;
+
     try {
       const body = {
         payment_method_id: 'pix',
-        transaction_amount: data.value,
+        transaction_amount: data?.value,
         description: data.product_name,
         notification_url: `${process.env.BASE_URL_IP_BACK}/mercado-pago-pix/notification`,
-        statement_descriptor: 'Tibia Project',
+        statement_descriptor: 'Tibia Projectssss',
         payer: {
           first_name: data.name,
           email: data.email,
@@ -33,7 +56,7 @@ module.exports = app => {
               title: data.product_name,
               description: 'Virtual coins to be used at www.tibiaProject.com',
               quantity: 1,
-              unit_price: data.value
+              unit_price: data?.value,
             }
           ]
         }
@@ -68,7 +91,7 @@ module.exports = app => {
         console.log('vai ser inserido na lista de payer?');
         await Payer.AddPayerToList(insertNewPayerInfo);
         console.log('Foi inserido na lista de payer?');
-        return respuest = { status: 201, message: { qr_code: resp.data.point_of_interaction.transaction_data.qr_code_base64, cpy_paste: resp.data.point_of_interaction.transaction_data.qr_code } }
+        return respuest = { status: 201, message: { qr_code: resp.data.point_of_interaction.transaction_data.qr_code_base64, cpy_paste: resp.data.point_of_interaction.transaction_data.qr_code, realPrice: data.value } }
       }).catch((err) => {
         console.log(err);
         return { status: 500, message: 'Internal error at payment!' };
@@ -132,7 +155,7 @@ module.exports = app => {
       }
       if (data?.action === 'payment.updated' && paymentId) {
         console.log('qual id sendo updatado?? ', paymentId)
-        await api.get(`/payments/${paymentId}`, { headers }).then( async (resp) => {
+        await api.get(`/payments/${paymentId}`, { headers }).then(async (resp) => {
           console.log('to recebendo o que de status? ', resp.data.status)
 
           if (resp.data.status === 'cancelled') {

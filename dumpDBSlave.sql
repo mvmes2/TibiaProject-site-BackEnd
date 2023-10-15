@@ -39,16 +39,6 @@ CREATE TABLE `contract_type` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `contract_type`
---
-
-LOCK TABLES `contract_type` WRITE;
-/*!40000 ALTER TABLE `contract_type` DISABLE KEYS */;
-INSERT INTO `contract_type` VALUES (1,'youtube'),(2,'stream'),(3,'instagram'),(4,'youtube + stream'),(5,'youtube + instagram'),(6,'youtube + stream + instagram'),(7,'stream + instagram');
-/*!40000 ALTER TABLE `contract_type` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
 -- Table structure for table `contracts`
 --
 
@@ -68,18 +58,141 @@ CREATE TABLE `contracts` (
   `active` int NOT NULL,
   `contract_doc_url` varchar(120) DEFAULT NULL,
   `contract_paid_date` bigint DEFAULT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `id_UNIQUE` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `contracts`
+-- Table structure for table `cupom_type`
 --
 
-LOCK TABLES `contracts` WRITE;
-/*!40000 ALTER TABLE `contracts` DISABLE KEYS */;
-/*!40000 ALTER TABLE `contracts` ENABLE KEYS */;
-UNLOCK TABLES;
+DROP TABLE IF EXISTS `cupom_type`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `cupom_type` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
+  `type` varchar(45) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `id_UNIQUE` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `cupoms`
+--
+
+DROP TABLE IF EXISTS `cupoms`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `cupoms` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
+  `streamer_id` int DEFAULT NULL,
+  `cupom_type` int NOT NULL,
+  `cupom_name` varchar(45) NOT NULL,
+  `discount_percent_limit` int DEFAULT NULL,
+  `earns_percent_limit` int DEFAULT NULL,
+  `coins_quantity` int DEFAULT NULL,
+  `status` varchar(45) NOT NULL DEFAULT 'active',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `id_UNIQUE` (`id`),
+  UNIQUE KEY `cupom_name_UNIQUE` (`cupom_name`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `payer_list`
+--
+
+DROP TABLE IF EXISTS `payer_list`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `payer_list` (
+  `transactionID` varchar(60) NOT NULL,
+  `payerLastUpdated` varchar(60) NOT NULL,
+  `payerData` varchar(300) NOT NULL,
+  `account_id` int NOT NULL,
+  `buy_time_limit_lock` varchar(60) NOT NULL,
+  `createdAt` bigint NOT NULL,
+  UNIQUE KEY `transactionID_UNIQUE` (`transactionID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `payments`
+--
+
+DROP TABLE IF EXISTS `payments`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `payments` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `account_id` int NOT NULL,
+  `account_name` varchar(60) NOT NULL,
+  `transaction_id` varchar(90) NOT NULL,
+  `transaction_type` varchar(60) NOT NULL,
+  `product_name` varchar(60) NOT NULL,
+  `unity_value` float DEFAULT NULL,
+  `coins_quantity` int DEFAULT NULL,
+  `total_value` float DEFAULT NULL,
+  `fee_percentage` float DEFAULT NULL,
+  `status` varchar(15) NOT NULL,
+  `created_date` bigint NOT NULL,
+  `approved_date` bigint DEFAULT NULL,
+  `account_email` varchar(60) DEFAULT NULL,
+  `payment_currency` varchar(3) DEFAULT NULL,
+  `payment_company` varchar(60) DEFAULT NULL,
+  `coins_paid_date` bigint DEFAULT NULL,
+  `cupom_id` int DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `transaction_id_UNIQUE` (`transaction_id`),
+  UNIQUE KEY `id_UNIQUE` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `person_type`
+--
+
+DROP TABLE IF EXISTS `person_type`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `person_type` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
+  `type` varchar(45) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `id_UNIQUE` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `products`
+--
+
+DROP TABLE IF EXISTS `products`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `products` (
+  `id` int DEFAULT NULL,
+  `product_name` text,
+  `unity_value` double DEFAULT NULL,
+  `coins_quantity` int DEFAULT NULL,
+  `payment_type` text
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `redeem_cupom_storage`
+--
+
+DROP TABLE IF EXISTS `redeem_cupom_storage`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `redeem_cupom_storage` (
+  `account_id` int NOT NULL,
+  `cupom_id` int NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Table structure for table `streamers`
@@ -89,7 +202,7 @@ DROP TABLE IF EXISTS `streamers`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `streamers` (
-  `id` int NOT NULL AUTO_INCREMENT,
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
   `twitch_user_id` varchar(60) DEFAULT NULL,
   `twitch_user_name` varchar(60) DEFAULT NULL,
   `twitch_user_login` varchar(60) DEFAULT NULL,
@@ -103,20 +216,13 @@ CREATE TABLE `streamers` (
   `bank_agency_number` varchar(45) DEFAULT NULL,
   `bank_name` varchar(45) DEFAULT NULL,
   `streamer_status` varchar(45) NOT NULL DEFAULT 'inactive',
+  `document` bigint NOT NULL,
+  `person_type` int NOT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `id_UNIQUE` (`id`)
+  UNIQUE KEY `id_UNIQUE` (`id`),
+  UNIQUE KEY `document_UNIQUE` (`document`)
 ) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `streamers`
---
-
-LOCK TABLES `streamers` WRITE;
-/*!40000 ALTER TABLE `streamers` DISABLE KEYS */;
-INSERT INTO `streamers` VALUES (12,'134826318','Nattank','nattank','Nattank','Nattank@gmail.com',NULL,'11959579097',NULL,NULL,NULL,NULL,NULL,'inactive'),(13,'573373346','bigodezerah','bigodezerah','bigodezerah','bigodezerah@gmail.com',NULL,'11959579097',NULL,NULL,NULL,NULL,NULL,'active'),(14,'175485842','rhuanzerahh','rhuanzerahh','rhuanzerahh','bigodezerah@gmail.com',NULL,'11959579097',NULL,NULL,NULL,NULL,NULL,'active'),(15,'172232144','EliasTibianoDoido','eliastibianodoido','EliasTibianoDoido','EliasTibianoDoido@gmail.com',NULL,'11959579097',NULL,NULL,NULL,NULL,NULL,'active');
-/*!40000 ALTER TABLE `streamers` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `streamers_live_check_time`
@@ -126,7 +232,7 @@ DROP TABLE IF EXISTS `streamers_live_check_time`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `streamers_live_check_time` (
-  `id` int NOT NULL AUTO_INCREMENT,
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
   `streamer_twitch_id` varchar(60) NOT NULL,
   `streamer_name` varchar(60) NOT NULL,
   `live_id` varchar(60) NOT NULL,
@@ -139,14 +245,82 @@ CREATE TABLE `streamers_live_check_time` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `streamers_live_check_time`
+-- Table structure for table `tickets`
 --
 
-LOCK TABLES `streamers_live_check_time` WRITE;
-/*!40000 ALTER TABLE `streamers_live_check_time` DISABLE KEYS */;
-INSERT INTO `streamers_live_check_time` VALUES (7,'134826318','Nattank','41902648073','@Nattank Crossbow LENDÁRIO! -> ♥ Sorteio diario de 250 tibia coins ❗sorteiodiario ♥ !osiris !arcana !shadow !seal !reidoscoins !tibiabj','2023-10-01T22:44:42Z',NULL),(8,'573373346','bigodezerah','42849294251','replay /rerun !insta !pix !parceria !moedaz !youtube !loja','2023-10-02T01:38:04Z',NULL),(9,'175485842','Rhuanzerahh','41903866185','ShadowIllusion !shadow !blacktalon !baiakera !sealserver !retronia COMPRO/VENDO TIBIA COINS !!! +18','2023-10-02T08:54:01Z',NULL),(10,'172232144','EliasTibianoDoido','41903993609','!Motivo 🤑 HOJE 🤑 Sorteio de 2.000tc - 🛒 Loja On : Farme Pontos e Troca por ❗Ticket','2023-10-02T11:50:10Z',NULL);
-/*!40000 ALTER TABLE `streamers_live_check_time` ENABLE KEYS */;
-UNLOCK TABLES;
+DROP TABLE IF EXISTS `tickets`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `tickets` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `type` text NOT NULL,
+  `author_name` text NOT NULL,
+  `account_id` int NOT NULL,
+  `account_email` text NOT NULL,
+  `status` text NOT NULL,
+  `content` text NOT NULL,
+  `createdAt` bigint NOT NULL,
+  `deletedAt` bigint DEFAULT NULL,
+  `language` text,
+  `closedAt` bigint DEFAULT NULL,
+  `closed_by_staff_agent` text,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `id_UNIQUE` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `tickets_images`
+--
+
+DROP TABLE IF EXISTS `tickets_images`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `tickets_images` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `ticket_id` int NOT NULL,
+  `image_name` text NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `id_UNIQUE` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `tickets_response`
+--
+
+DROP TABLE IF EXISTS `tickets_response`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `tickets_response` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `ticket_id` int NOT NULL,
+  `content` text NOT NULL,
+  `replyer` text NOT NULL,
+  `createdAt` int NOT NULL,
+  `deletedAt` int DEFAULT NULL,
+  `staff_replyer` text,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `id_UNIQUE` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `tickets_response_images`
+--
+
+DROP TABLE IF EXISTS `tickets_response_images`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `tickets_response_images` (
+  `ìd` int NOT NULL AUTO_INCREMENT,
+  `response_id` int NOT NULL,
+  `image_name` text NOT NULL,
+  `ticket_id` int NOT NULL,
+  PRIMARY KEY (`ìd`),
+  UNIQUE KEY `ìd_UNIQUE` (`ìd`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -157,4 +331,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2023-10-09 12:34:31
+-- Dump completed on 2023-10-15 14:25:15

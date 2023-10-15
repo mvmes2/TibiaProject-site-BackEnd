@@ -15,11 +15,11 @@ const dbConfig = {
 
 // Opções de exportação do banco de dados
 const dumpOptions = {
-  resultFile: path.join(process.cwd(), 'dumpDBSlave.sql'),
+  resultFile: path.join(process.cwd(), 'dumpDBSlaveDataOnly.sql'),
 };
 
 // Comando para exportar o banco de dados
-const dumpCommand = `mysqldump --column-statistics=0 --host=${dbConfig.host} --user=${dbConfig.user} --password=${dbConfig.password} --databases ${dbConfig.database} > ${dumpOptions.resultFile}`;
+const dumpCommand = `mysqldump --host=${dbConfig.host} --user=${dbConfig.user} --password=${dbConfig.password} --no-create-info --databases ${dbConfig.database} > ${dumpOptions.resultFile}`;
 
 // Executa o comando de exportação do banco de dados
 exec(dumpCommand, (error, stdout, stderr) => {

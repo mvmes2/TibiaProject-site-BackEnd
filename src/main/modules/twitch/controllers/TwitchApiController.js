@@ -93,6 +93,7 @@ module.exports = app => {
 			const checkIfAlreadyExistLiveCheck = await getAllOficialStreamersLiveCheckList();
 
 			if (oficialStreamersList && Array.isArray(oficialStreamersList) && oficialStreamersList.length > 0 && oficialStreamersList.some((streamerSome) => streamerSome.twitch_user_id == item.user_id) && !checkIfAlreadyExistLiveCheck.find((find) => find.live_id == item.id)) {
+
 				const newOficialStreamerToCheck = {
 					streamer_twitch_id: item.user_id,
 					streamer_name: item.user_name,

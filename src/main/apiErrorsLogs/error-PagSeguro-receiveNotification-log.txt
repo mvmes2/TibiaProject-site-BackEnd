@@ -1,2 +1,4 @@
 2023-09-04T17:18:42-03:00 - erro ao tentar confirmar o pagamento com o pagSeguro:, TypeError: Cannot read properties of undefined (reading 'forEach')
 
+2023-10-15T11:14:09-03:00 - erro ao tentar confirmar o pagamento com o pagSeguro:, TypeError: Cannot read properties of undefined (reading 'forEach')
+

@@ -67,7 +67,6 @@ module.exports = app => {
     
     
        /////////////////////////////////////////////////// Admin Routes //////////////////////////////////////////////////////////
-
     app.route('/v1/admin-login').post(app.src.main.controllers.AdminController.LoginAdminAccRequest);
     app.route('/v1/validate-token-admin').get(AdminAuthMiddleware, app.src.main.controllers.AdminController.AdminValidateJsonTokenRequest);
     app.route('/v1/AdminGet-ticketList').get(AdminAuthMiddleware, app.src.main.controllers.AdminController.AdmingetTicketListRequest);
@@ -85,7 +84,7 @@ module.exports = app => {
     app.route('/v1/Admin/twitch/get-all-cupoms').get(AdminAuthMiddleware, app.src.main.controllers.AdminController.AdminGetAllCupomsController);
     app.route('/v1/Admin/twitch/update-cupom').put(AdminAuthMiddleware, app.src.main.controllers.AdminController.AdminUpdateCupomController);
     app.route('/v1/Admin/twitch/delete-cupom').delete(AdminAuthMiddleware, app.src.main.controllers.AdminController.AdminDeleteCupomController);
-    
+
     //////Error MiddleWare/////
     app.use((err, req, res, next) => {
         if (err instanceof multer.MulterError || err.message === 'Invalid file type. Only JPEG and PNG files are allowed.') {

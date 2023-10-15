@@ -2,8 +2,9 @@
 
 	const moment = require('moment');
 
-	const PayerList = [];
-	const TimeToLivePayerInfoHours = 25;
+	const { getPayerListFromDB, insertNewPayer, getPayerByIDFromDB } = require("../repository/PayerRepository");
+
+	const TimeToLivePayerInfoHours = 24;
 
 /**
  * Add a payer to the list after checking for expired payers.
@@ -17,6 +18,8 @@
  * @returns {Promise<boolean>}
  */
 	module.exports.AddPayerToList = async (payerInfo) => {
+		const PayerList = await getPayerListFromDB();
+		console.log(PayerList)
 		// Verifica a expiração de todos os payers
 		for (let i = PayerList.length - 1; i >= 0; i--) {
 			const payer = PayerList[i];
@@ -30,14 +33,17 @@
 		const newPayer = {
 			transactionID: payerInfo.id,
 			payerLastUpdated: moment().toISOString(),
-			payerData: payerInfo.payerData
+			account_id: payerInfo.payerData.account_id,
+			payerData: JSON.stringify(payerInfo.payerData),
+			buy_time_limit_lock: moment().toISOString(),
+			createdAt: (Date.now() / 100)
 		}
 		const payerExists = PayerList.some(payer => payer.transactionID == payerInfo.id);
 
 		if (!payerExists) {
-			PayerList.push(newPayer);
+			await insertNewPayer(newPayer);
 		}
-		console.log('Essa é a lista atual de payers depois de ser adicionado: ', PayerList);
+		console.log('Essa é a lista atual de payers depois de ser adicionado: ', await getPayerListFromDB());
 		return true;
 	}
 
@@ -49,9 +55,10 @@
  * @returns - The payer object from the list.
  */
 	module.exports.GetPayerAtList = async (transactionID) => {
-		console.log(' qual id chegando no getPayer? ', transactionID)
-		const payer = PayerList.find((item) => item.transactionID == transactionID);
-		return payer;
+		const singlePayer = await getPayerByIDFromDB(transactionID);
+		console.log('o que e como vem aqui info do payer? ', singlePayer)
+		singlePayer.payerData = JSON.parse(singlePayer.payerData);
+		return singlePayer;
 	}
 
 	
@@ -62,6 +69,7 @@
  */
 	module.exports.RemovePayerFromList = async (transactionID) => {
 		console.log('Essa é a lista atual de payers antes de ser removido: ', PayerList);
+		const PayerList = await getPayerListFromDB();
 		const index = PayerList.findIndex((item) => item.transactionID == transactionID);
 		if (index !== -1) {
 			PayerList.splice(index, 1);
