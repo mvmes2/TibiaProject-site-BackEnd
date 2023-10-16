@@ -132,3 +132,21 @@
     at async ReturnPixNotificationService (C:\Projetos\Projetos\tibiaProjectWebSite\TibiaProject-site-BackEnd\src\main\modules\mercadoPago\services\MercadoPagoServices.js:122:26)
     at async MercadoPagoPixNotificationController (C:\Projetos\Projetos\tibiaProjectWebSite\TibiaProject-site-BackEnd\src\main\modules\mercadoPago\controllers\MercadoPagoController.js:29:18)
 
+2023-10-15T22:50:22.013Z - TypeError: Cannot read properties of undefined (reading 'payerData')
+    at module.exports.GetPayerAtList (C:\Projetos\Projetos\tibiaProjectWebSite\TibiaProject-site-BackEnd\src\main\controllers\PayerController.js:60:50)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async ReturnPixNotificationService (C:\Projetos\Projetos\tibiaProjectWebSite\TibiaProject-site-BackEnd\src\main\modules\mercadoPago\services\MercadoPagoServices.js:121:26)
+    at async MercadoPagoPixNotificationController (C:\Projetos\Projetos\tibiaProjectWebSite\TibiaProject-site-BackEnd\src\main\modules\mercadoPago\controllers\MercadoPagoController.js:29:18)
+
+2023-10-15T23:01:06.317Z - TypeError: Cannot read properties of undefined (reading 'payerData')
+    at module.exports.GetPayerAtList (C:\Projetos\Projetos\tibiaProjectWebSite\TibiaProject-site-BackEnd\src\main\controllers\PayerController.js:60:50)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async ReturnPixNotificationService (C:\Projetos\Projetos\tibiaProjectWebSite\TibiaProject-site-BackEnd\src\main\modules\mercadoPago\services\MercadoPagoServices.js:121:26)
+    at async MercadoPagoPixNotificationController (C:\Projetos\Projetos\tibiaProjectWebSite\TibiaProject-site-BackEnd\src\main\modules\mercadoPago\controllers\MercadoPagoController.js:29:18)
+
+2023-10-15T23:01:15.959Z - TypeError: Cannot read properties of undefined (reading 'payerData')
+    at module.exports.GetPayerAtList (C:\Projetos\Projetos\tibiaProjectWebSite\TibiaProject-site-BackEnd\src\main\controllers\PayerController.js:60:50)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async ReturnPixNotificationService (C:\Projetos\Projetos\tibiaProjectWebSite\TibiaProject-site-BackEnd\src\main\modules\mercadoPago\services\MercadoPagoServices.js:121:26)
+    at async MercadoPagoPixNotificationController (C:\Projetos\Projetos\tibiaProjectWebSite\TibiaProject-site-BackEnd\src\main\modules\mercadoPago\controllers\MercadoPagoController.js:29:18)
+
