@@ -10,7 +10,7 @@ const morgan = require('morgan');
 const prismicH = require('@prismicio/helpers');
 const compression = require('compression');
 const fs = require('fs');
-const bodyParser = require('body-parser');
+const RunCronCheckLives = require("./src/main/services/CronCheckLiveStreams");
 
 const server = http.createServer(app);
 
@@ -128,5 +128,6 @@ consign()
 
 const PORT = 3333;
 server.listen(PORT, () => {
+    // RunCronCheckLives.start();
     console.log(`BackEnd Rodando na porta: ${PORT}!!`);
 });

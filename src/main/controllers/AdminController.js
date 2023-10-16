@@ -1,12 +1,11 @@
 require('dotenv');
-
+const { twitchAuthController } = require("../utils/utilities");
 module.exports = app => {
 	const { AdminLoginRepository, AdminGetTicketListRepository, getTicketRepository, insertNewStreamerToDB,
 		GetAllOfficialStreamersListFromDB, AdminUpdateOfficialStreamerDB, AdminRemoveOfficialStreameFromDB,
 		AdminGetCupomByStreamerFromDB, AdminGetAllCupomsFromDB, AdminUpdateCupomAtDB, AdminDeleteCupomAtDB,
-		GetOfficialStreamersByIDFromDB } = app.src.main.repository.AdminRepository;
+		GetOfficialStreamersByIDFromDB, AdminInsertNewCupomAtDB } = app.src.main.repository.AdminRepository;
 	const { twitchApi } = require('../modules/twitch/api/twitchApi');
-	const { twitchAuthController } = app.src.main.modules.twitch.controllers.AuthController;
 
 	const LoginAdminAccRequest = async (req, res) => {
 		const data = req.body;
@@ -41,7 +40,7 @@ module.exports = app => {
 				await insertNewStreamerToDB(data);
 				return res.status(200).send({ message: 'Colaborador criado com sucesso!' });
 			}
-
+			console.log(data)
 			if (!data || !data?.twitch_user_name || data?.twitch_user_name == undefined || data?.twitch_user_name == null) {
 				return res.status(400).send({ message: 'faltando twitch_user_name ou demais informações para inserção do streamer!' });
 			}
@@ -115,6 +114,12 @@ module.exports = app => {
 		return res.status(resp.status).send(resp.message);
 	}
 
+	const AdminInsertNewCupomController = async (req, res) => {
+		const data = req.body;
+		const resp = await AdminInsertNewCupomAtDB(data);
+		return res.status(resp.status).send(resp.message);
+	}
+
 	const AdminDeleteCupomController = async (req, res) => {
 		const data = req.body;
 		const resp = await AdminDeleteCupomAtDB(data);
@@ -140,6 +145,7 @@ module.exports = app => {
 		AdminGetAllCupomsController,
 		AdminUpdateCupomController,
 		AdminDeleteCupomController,
-		AdminGetOfficialStreamerController
+		AdminGetOfficialStreamerController,
+		AdminInsertNewCupomController
 	}
 }
