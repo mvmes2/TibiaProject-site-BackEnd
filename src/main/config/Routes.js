@@ -84,6 +84,8 @@ module.exports = app => {
     app.route('/v1/Admin/twitch/get-all-cupoms').get(AdminAuthMiddleware, app.src.main.controllers.AdminController.AdminGetAllCupomsController);
     app.route('/v1/Admin/twitch/update-cupom').put(AdminAuthMiddleware, app.src.main.controllers.AdminController.AdminUpdateCupomController);
     app.route('/v1/Admin/twitch/delete-cupom').delete(AdminAuthMiddleware, app.src.main.controllers.AdminController.AdminDeleteCupomController);
+    app.route('/v1/Admin/twitch/get-streamer-byId').get(AdminAuthMiddleware, app.src.main.controllers.AdminController.AdminGetOfficialStreamerController);
+    
 
     //////Error MiddleWare/////
     app.use((err, req, res, next) => {
