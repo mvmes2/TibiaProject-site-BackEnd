@@ -1,6 +1,7 @@
 const { accounts } = require('../models/MasterModels');
 const { generateTokenAdmin, checkPassword } = require('../utils/utilities');
-const { streamers, cupoms, redeem_cupom_storage, tickets, tickets_images, tickets_response, tickets_response_images } = require('../models/SlaveModels');
+const { streamers, cupoms, redeem_cupom_storage, tickets, tickets_images, tickets_response, tickets_response_images, 
+	contracts_payment_types, contracts } = require('../models/SlaveModels');
 
 const AdminLoginRepository = async (data) => {
 	console.log(data)
@@ -179,7 +180,7 @@ const AdminUpdateCupomAtDB = async (data) => {
 		return { status: 400, message: "Data inválida, esperado body{ id: id, update: { 'updateData' } }  " };
 	}
 	try {
-		const cupoms = await cupoms().update(data.update).where({ id: data.id });
+		await cupoms().update(data.update).where({ id: data.id });
 		return { status: 200, message: "Cupom updated successfully!" };
 	} catch (err) {
 		console.log(err);
@@ -187,10 +188,10 @@ const AdminUpdateCupomAtDB = async (data) => {
 	}
 }
 
-const AdminDeleteCupomAtDB = async (data) => {
-	console.log('como ta vindo a data de delete AdminDeleteCupomAtDB?? ', data);
+const AdminDeleteCupomAtDB = async (id) => {
+	console.log('como ta vindo a data de delete AdminDeleteCupomAtDB?? ', id);
 	try {
-		await cupoms().delete().where({ id: Number(data.id) });
+		await cupoms().delete().where({ id: Number(id) });
 		return { status: 200, message: 'Cupom has been deleted Successfully!' };
 	} catch (err) {
 		console.log(err);
@@ -202,6 +203,72 @@ const AdminGetRedeemCupomStorageAtDB = async () => {
 	try {
 		const redeemList = await redeem_cupom_storage().select('*');
 		return { status: 200, data: redeemList };
+	} catch (err) {
+		console.log(err);
+		return { status: 500, message: 'Internal error!' }
+	}
+}
+
+const AdminInsertNewContractAtDB = async (data) => {
+	console.log('como ta vindo a data de AdminInsertNewContractAtDB?? ', data);
+	if (!data || data == null || data == undefined) {
+		return { status: 400, message: "Data inválida, esperado body para inserir infos!  " };
+	}
+	try {
+		await contracts().insert(data);
+		return { status: 201, message: "Contract created successfully!" };
+	} catch (err) {
+		console.log(err);
+		return { status: 500, message: 'Internal error!' }
+	}
+}
+
+const AdminGetContractsAtDB = async () => {
+	try {
+		const contractList = await contracts().select('*');
+		return { status: 200, data: contractList };
+	} catch (err) {
+		console.log(err);
+		return { status: 500, message: 'Internal error!' }
+	}
+}
+
+const AdminGetContractByStreamerIDAtDB = async (data) => {
+	if (!data) {
+		console.log("AdminGetContractByStreamerIDAtDB, Sem data na requisição, esperamos um id na requisição!");
+		return { status: 400, message: "Sem data na requisição, esperamos um id na requisição!" };
+	}
+	try {
+		const singleContract = await contracts().select('*').where({ streamer_id: Number(data) });
+		return { status: 200, data: singleContract };
+	} catch (err) {
+		console.log(err);
+		return { status: 500, message: 'Internal error!' }
+	}
+}
+
+const AdminUpdateContractAtDB = async (data) => {
+	console.log('como ta vindo a data de AdminUpdateContractAtDB?? ', data);
+	if (!data || !data?.id || !data?.update) {
+		return { status: 400, message: "Data inválida, esperado body{ 'updateData' }  " };
+	}
+	try {
+		await contracts().update(data.update).where({ id: Number(data.id) });
+		return { status: 200, message: "Contract updated successfully!" };
+	} catch (err) {
+		console.log(err);
+		return { status: 500, message: 'Internal error!' }
+	}
+}
+
+const AdminDeleteContractAtDB = async (id) => {
+	console.log('como ta vindo a data de delete AdminDeleteContractAtDB?? ', id);
+	if (!id) {
+		return { status: 400, message: "ID inválido, esperado id por parametro na requisição para o endPoint  " };
+	}
+	try {
+		await cupoms().delete().where({ id: Number(id) });
+		return { status: 200, message: 'Contract has been deleted Successfully!' };
 	} catch (err) {
 		console.log(err);
 		return { status: 500, message: 'Internal error!' }
@@ -222,5 +289,10 @@ module.exports = {
 	AdminDeleteCupomAtDB,
 	AdminGetRedeemCupomStorageAtDB,
 	GetOfficialStreamersByIDFromDB,
-	AdminInsertNewCupomAtDB
+	AdminInsertNewCupomAtDB,
+	AdminGetContractsAtDB,
+	AdminGetContractByStreamerIDAtDB,
+	AdminUpdateContractAtDB,
+	AdminDeleteContractAtDB,
+	AdminInsertNewContractAtDB
 }
