@@ -1,4 +1,5 @@
 const jsSHA = require('jssha');
+require('dotenv').config();
 const jwt = require('jsonwebtoken');
 const mailer = require('../modules/mailer');
 const { addMinutes, format } = require('date-fns');
@@ -9,6 +10,7 @@ const axios = require('axios');
 const fs = require('fs').promises;
 const path = require('path');
 const moment = require('moment-timezone');
+const { twitchApiaUTH, twitchApi } = require('../modules/twitch/api/twitchApi');
 
 const encryptPassword = (password) => {
   const sha1 = new jsSHA("SHA-1", "TEXT");
@@ -339,6 +341,24 @@ const calculateDiscount = (totalValue, discountValue) => {
   return Number(finalValue);
 }
 
+const twitchAuthController = async () => {
+  console.log('id: ', process.env.TWITCH_CLIENT_ID);
+  console.log('secret: ', process.env.TWITCH_CLIENT_SECRET);
+  const body = {
+    client_id: process.env.TWITCH_CLIENT_ID,
+    client_secret: process.env.TWITCH_CLIENT_SECRET,
+    grant_type: 'client_credentials'
+  }
+  try {
+    const resp = await twitchApiaUTH.post('/oauth2/token', body);
+    const token = resp?.data?.access_token;
+    return token;
+  } catch (err) {
+    console.log('err aqui', err);
+    throw new Error(err);
+  }
+}
+
 module.exports = {
   checkPassword,
   hashGenerator,
@@ -360,5 +380,6 @@ module.exports = {
   sleep,
   ErrorLogCreateFileHandler,
   LogCreateFileHandler,
-  calculateDiscount
+  calculateDiscount,
+  twitchAuthController
 }

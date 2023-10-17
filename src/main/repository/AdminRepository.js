@@ -98,9 +98,10 @@ const GetAllOfficialStreamersListFromDB = async () => {
 }
 
 const GetOfficialStreamersByIDFromDB = async (streamerId) => {
+	console.log(' o que esta vindo de GetOfficialStreamersByIDFromDB???', streamerId);
 
 	try {
-		const streamer = await streamers().select('*').where({ id: streamerId });
+		const streamer = await streamers().select('*').where({ id: Number(streamerId) });
 		if (!streamer.length) {
 			return { status: 400, message: 'Streamer not found!'}
 		}
@@ -127,6 +128,20 @@ const AdminRemoveOfficialStreameFromDB = async (data) => {
 	try {
 		await streamers().delete().where({ id: Number(data.id) });
 		return { status: 204, message: 'Streamer has been deleted Successfully!' };
+	} catch (err) {
+		console.log(err);
+		return { status: 500, message: 'Internal error!' }
+	}
+}
+
+const AdminInsertNewCupomAtDB = async (data) => {
+	console.log('como ta vindo a data de AdminInsertNewCupomAtDB?? ', data);
+	if (!data || data == null || data == undefined) {
+		return { status: 400, message: "Data inválida, esperado body para inserir infos!  " };
+	}
+	try {
+		const cupoms = await cupoms().insert(data);
+		return { status: 201, message: "Cupom created successfully!" };
 	} catch (err) {
 		console.log(err);
 		return { status: 500, message: 'Internal error!' }
@@ -205,5 +220,6 @@ module.exports = {
 	AdminUpdateCupomAtDB,
 	AdminDeleteCupomAtDB,
 	AdminGetRedeemCupomStorageAtDB,
-	GetOfficialStreamersByIDFromDB
+	GetOfficialStreamersByIDFromDB,
+	AdminInsertNewCupomAtDB
 }

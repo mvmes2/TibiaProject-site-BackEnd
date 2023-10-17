@@ -1,8 +1,8 @@
-const { twitchApiaUTH, twitchApi } = require('../api/twitchApi');
+const { twitchApi } = require('../api/twitchApi');
+const { twitchAuthController } = require("../../../utils/utilities");
 
 module.exports = app => {
 	const moment = require('moment');
-	const { twitchAuthController } = app.src.main.modules.twitch.controllers.AuthController;
 	const { inserStreamerAtLiveCheckTime, getAllOficialStreamersList, getAllOficialStreamersLiveCheckList,
 	} = app.src.main.modules.twitch.repository.twitchRepository;
 
@@ -93,13 +93,17 @@ module.exports = app => {
 			const checkIfAlreadyExistLiveCheck = await getAllOficialStreamersLiveCheckList();
 
 			if (oficialStreamersList && Array.isArray(oficialStreamersList) && oficialStreamersList.length > 0 && oficialStreamersList.some((streamerSome) => streamerSome.twitch_user_id == item.user_id) && !checkIfAlreadyExistLiveCheck.find((find) => find.live_id == item.id)) {
+				const dateString = item.started_at;
+				const date = new Date(dateString);
+				const timestampMilliseconds = date.getTime();
+				const timestampSeconds = Math.floor(timestampMilliseconds / 1000);
 
 				const newOficialStreamerToCheck = {
 					streamer_twitch_id: item.user_id,
 					streamer_name: item.user_name,
 					live_id: item.id,
 					live_title: item.title,
-					live_started_at: item.started_at
+					live_started_at: timestampSeconds
 				};
 				await inserStreamerAtLiveCheckTime(newOficialStreamerToCheck);
 			}

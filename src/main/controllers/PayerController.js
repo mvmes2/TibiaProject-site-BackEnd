@@ -1,28 +1,10 @@
-
-
 	const moment = require('moment');
 
 	const { getPayerListFromDB, insertNewPayer, getPayerByIDFromDB } = require("../repository/PayerRepository");
 
 	const TimeToLivePayerInfoHours = 24;
 
-	const Payer = require('./PayerController');
-
-/**
- * Remove payer from PayersList.
- * @param {string} transactionID - Usually the transactionID from the payer payment.
- * @returns - {Promise<boolean>}.
- */
-	module.exports.RemovePayerFromList = async (transactionID) => {
-		const PayerList = await getPayerListFromDB();
-		console.log('Essa é a lista atual de payers antes de ser removido: ', PayerList);
-		const index = PayerList.findIndex((item) => item.transactionID == transactionID);
-		if (index !== -1) {
-			PayerList.splice(index, 1);
-		}
-		console.log('Essa é a lista atual de payers depois de ser removido: ', PayerList);
-		return true;
-	}
+	const Payer = require("./PayerController");
 
 /**
  * Add a payer to the list after checking for expired payers.
@@ -77,4 +59,20 @@
 		console.log('o que e como vem aqui info do payer? ', singlePayer)
 		singlePayer.payerData = JSON.parse(singlePayer.payerData);
 		return singlePayer;
+	}
+
+	
+/**
+ * Remove payer from PayersList.
+ * @param {string} transactionID - Usually the transactionID from the payer payment.
+ * @returns - {Promise<boolean>}.
+ */
+	module.exports.RemovePayerFromList = async (transactionID) => {
+		const PayerList = await getPayerListFromDB();
+		const index = PayerList.findIndex((item) => item.transactionID == transactionID);
+		if (index !== -1) {
+			PayerList.splice(index, 1);
+		}
+		console.log('Essa é a lista atual de payers depois de ser removido: ', PayerList);
+		return true;
 	}
