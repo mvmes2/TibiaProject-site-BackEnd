@@ -5,7 +5,8 @@ module.exports = app => {
 		GetAllOfficialStreamersListFromDB, AdminUpdateOfficialStreamerDB, AdminRemoveOfficialStreameFromDB,
 		AdminGetCupomByStreamerFromDB, AdminGetAllCupomsFromDB, AdminUpdateCupomAtDB, AdminDeleteCupomAtDB,
 		GetOfficialStreamersByIDFromDB, AdminInsertNewCupomAtDB, AdminGetContractsAtDB, AdminGetContractByStreamerIDAtDB, 
-		AdminUpdateContractAtDB, AdminDeleteContractAtDB, AdminInsertNewContractAtDB } = app.src.main.repository.AdminRepository;
+		AdminUpdateContractAtDB, AdminDeleteContractAtDB, AdminInsertNewContractAtDB, AdminGetContractTypeAtDB, 
+		AdminGetContractPaymentTypeAtDB } = app.src.main.repository.AdminRepository;
 	const { twitchApi } = require('../modules/twitch/api/twitchApi');
 
 	const LoginAdminAccRequest = async (req, res) => {
@@ -199,11 +200,20 @@ module.exports = app => {
 
 	const AdminInsertNewContractController = async (req, res) => {
 		const data = req.body;
-		const resp = await AdminInsertNewCupomAtDB(data);
+		data.created_at = (Date.now() / 100);
+		const resp = await AdminInsertNewContractAtDB(data);
 		return res.status(resp.status).send(resp.message);
 	}
 
+	const AdminGetContractTypeController = async (req, res) => {
+		const resp = await AdminGetContractTypeAtDB();
+		return res.status(resp.status).send(resp.data);
+	}
 	
+	const AdminGetContractPaymentTypeController = async (req, res) => {
+		const resp = await AdminGetContractPaymentTypeAtDB();
+		return res.status(resp.status).send(resp.data);
+	}
 
 	return {
 		LoginAdminAccRequest,
@@ -224,6 +234,8 @@ module.exports = app => {
 		AdminGetContractController,
 		AdminUpdateContractController,
 		AdminDeleteContractController,
-		AdminInsertNewContractController
+		AdminInsertNewContractController,
+		AdminGetContractTypeController,
+		AdminGetContractPaymentTypeController
 	}
 }

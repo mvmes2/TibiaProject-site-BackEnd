@@ -1,7 +1,7 @@
 const { accounts } = require('../models/MasterModels');
 const { generateTokenAdmin, checkPassword } = require('../utils/utilities');
 const { streamers, cupoms, redeem_cupom_storage, tickets, tickets_images, tickets_response, tickets_response_images, 
-	contracts_payment_types, contracts } = require('../models/SlaveModels');
+	contracts_payment_types, contracts, contract_type } = require('../models/SlaveModels');
 
 const AdminLoginRepository = async (data) => {
 	console.log(data)
@@ -275,6 +275,28 @@ const AdminDeleteContractAtDB = async (id) => {
 	}
 }
 
+const AdminGetContractTypeAtDB = async () => {
+	try {
+		const contractType = await contract_type().select('*');
+		return { status: 200, data: contractType };
+	} catch (err) {
+		console.log(err);
+		return { status: 500, message: 'Internal error!' }
+	}
+}
+
+const AdminGetContractPaymentTypeAtDB = async () => {
+	try {
+		const contractTypePayment = await contracts_payment_types().select('*');
+		return { status: 200, data: contractTypePayment };
+	} catch (err) {
+		console.log(err);
+		return { status: 500, message: 'Internal error!' }
+	}
+}
+
+
+
 module.exports = {
 	AdminLoginRepository,
 	AdminGetTicketListRepository,
@@ -294,5 +316,7 @@ module.exports = {
 	AdminGetContractByStreamerIDAtDB,
 	AdminUpdateContractAtDB,
 	AdminDeleteContractAtDB,
-	AdminInsertNewContractAtDB
+	AdminInsertNewContractAtDB,
+	AdminGetContractTypeAtDB,
+	AdminGetContractPaymentTypeAtDB
 }
