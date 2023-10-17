@@ -115,7 +115,8 @@ const GetOfficialStreamersByIDFromDB = async (streamerId) => {
 const AdminUpdateOfficialStreamerDB = async (data) => {
 	console.log('como ta vindo a data de update? ', data);
 	try {
-		await streamers().update(data.update).where({ id: Number(data.id) });
+		const { id, update } = data
+		await streamers().update(update).where({ id: Number(id) });
 		return { status: 200, message: 'Streamer Updated Successfully' }
 	} catch (err) {
 		console.log(err);

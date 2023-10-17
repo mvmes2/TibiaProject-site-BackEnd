@@ -87,8 +87,43 @@ module.exports = app => {
 
 	const AdminUpdateOfficialStreamersController = async (req, res) => {
 		const data = req.body;
-		const resp = await AdminUpdateOfficialStreamerDB(data);
-		return res.status(resp.status).send({ message: resp.message });
+		const { id, update } = data
+		const { streamer, ...dataUpdate } = update
+		if (!streamer) {
+			await AdminUpdateOfficialStreamerDB({id, update: dataUpdate});
+			return res.status(200).send({ message: 'Colaborador criado com sucesso!' });
+		}
+
+		if (!dataUpdate || !dataUpdate?.twitch_user_name || dataUpdate?.twitch_user_name == undefined || dataUpdate?.twitch_user_name == null) {
+			return res.status(400).send({ message: 'faltando twitch_user_name ou demais informações para inserção do streamer!' });
+		}
+		const twitchAccessToken = await twitchAuthController();
+		const headers = {
+			Authorization: `Bearer ${twitchAccessToken}`,
+			'Client-Id': process.env.TWITCH_CLIENT_ID
+		}
+
+		const getUserId = await twitchApi.get(`/helix/users?login=${dataUpdate.twitch_user_name}`, { headers });
+
+		const userID = getUserId?.data?.data[0]?.id;
+
+		if (!userID || userID == undefined || userID == null) {
+			return res.status(400).send({ message: 'Login não existente na twitch, ou erro na api da twitch ao buscar id para este login! confirme o user_name!' });
+		} if (!dataUpdate.twitch_user_name || !dataUpdate?.streamer_name || !dataUpdate?.email) {
+			return res.status(400).send({ message: 'Campos obrigatórios: twitch_user_name, streamer_name, email' });
+		}
+		else {
+			const dataWithUserID = {
+				id,
+				update: {
+					...dataUpdate,
+					twitch_user_id: userID,
+					twitch_user_login: getUserId?.data?.data[0]?.login,
+				}
+			}
+			const resp = await AdminUpdateOfficialStreamerDB(dataWithUserID);
+			return res.status(resp.status).send({ message: resp.message });		}
+
 	}
 
 	const AdminRemoveOfficialStreamerController = async (req, res) => {
