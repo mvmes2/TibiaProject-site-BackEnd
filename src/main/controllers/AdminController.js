@@ -128,6 +128,7 @@ module.exports = app => {
 
 	const AdminGetOfficialStreamerController = async (req, res) => {
 		const data = req?.headers?.streamer_id;
+		console.log(' o que esta vindo de AdminGetOfficialStreamerController???', data);
 		const resp = await GetOfficialStreamersByIDFromDB(data);
 		return res.status(resp.status).send(resp.data);
 	}

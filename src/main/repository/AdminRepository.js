@@ -98,9 +98,10 @@ const GetAllOfficialStreamersListFromDB = async () => {
 }
 
 const GetOfficialStreamersByIDFromDB = async (streamerId) => {
+	console.log(' o que esta vindo de GetOfficialStreamersByIDFromDB???', streamerId);
 
 	try {
-		const streamer = await streamers().select('*').where({ id: streamerId });
+		const streamer = await streamers().select('*').where({ id: Number(streamerId) });
 		if (!streamer.length) {
 			return { status: 400, message: 'Streamer not found!'}
 		}
