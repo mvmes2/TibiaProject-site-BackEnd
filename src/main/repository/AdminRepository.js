@@ -140,7 +140,7 @@ const AdminInsertNewCupomAtDB = async (data) => {
 		return { status: 400, message: "Data inválida, esperado body para inserir infos!  " };
 	}
 	try {
-		const cupoms = await cupoms().insert(data);
+		await cupoms().insert(data);
 		return { status: 201, message: "Cupom created successfully!" };
 	} catch (err) {
 		console.log(err);
