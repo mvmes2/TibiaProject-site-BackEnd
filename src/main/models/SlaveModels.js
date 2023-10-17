@@ -46,5 +46,17 @@ const payer_list = () => {
     return connectionDBSlave('payer_list');
 }
 
+const contracts = () => {
+    return connectionDBSlave('contracts');
+}
+
+const contracts_payment_types = () => {
+    return connectionDBSlave('contracts_payment_types');
+}
+
+const contract_type = () => {
+    return connectionDBSlave('contract_type');
+}
+
 module.exports = { streamers, streamers_live_check_time, cupoms, payments, redeem_cupom_storage, products, tickets, tickets_images,
-    tickets_response, tickets_response_images, payer_list };
+    tickets_response, tickets_response_images, payer_list, contracts, contracts_payment_types, contract_type };

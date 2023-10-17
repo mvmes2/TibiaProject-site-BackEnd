@@ -83,10 +83,16 @@ module.exports = app => {
     app.route('/v1/Admin/twitch/getCupom-byStreamer').get(AdminAuthMiddleware, app.src.main.controllers.AdminController.AdminGetCupomByStreamerController);
     app.route('/v1/Admin/twitch/get-all-cupoms').get(AdminAuthMiddleware, app.src.main.controllers.AdminController.AdminGetAllCupomsController);
     app.route('/v1/Admin/twitch/update-cupom').put(AdminAuthMiddleware, app.src.main.controllers.AdminController.AdminUpdateCupomController);
-    app.route('/v1/Admin/twitch/delete-cupom').delete(AdminAuthMiddleware, app.src.main.controllers.AdminController.AdminDeleteCupomController);
+    app.route('/v1/Admin/twitch/cupom/:id').delete(AdminAuthMiddleware, app.src.main.controllers.AdminController.AdminDeleteCupomController);
     app.route('/v1/Admin/twitch/get-streamer-byId').get(AdminAuthMiddleware, app.src.main.controllers.AdminController.AdminGetOfficialStreamerController);
     app.route('/v1/Admin/twitch/insert-cupom').post(AdminAuthMiddleware, app.src.main.controllers.AdminController.AdminInsertNewCupomController);
-    
+    app.route('/v1/Admin/contracts').get(AdminAuthMiddleware, app.src.main.controllers.AdminController.AdminGetContractListController);
+    app.route('/v1/Admin/contracts/:id').get(AdminAuthMiddleware, app.src.main.controllers.AdminController.AdminGetContractController);
+    app.route('/v1/Admin/contracts/:id').put(AdminAuthMiddleware, app.src.main.controllers.AdminController.AdminUpdateContractController);
+    app.route('/v1/Admin/contracts/:id').delete(AdminAuthMiddleware, app.src.main.controllers.AdminController.AdminDeleteContractController);
+    app.route('/v1/Admin/contracts').post(AdminAuthMiddleware, app.src.main.controllers.AdminController.AdminInsertNewContractController);
+    app.route('/v1/Admin/contracts/type').get(AdminAuthMiddleware, app.src.main.controllers.AdminController.AdminGetContractTypeController);
+    app.route('/v1/Admin/contracts/payment/type').get(AdminAuthMiddleware, app.src.main.controllers.AdminController.AdminGetContractPaymentTypeAtDB);
     
 //att
     //////Error MiddleWare/////

@@ -11,3 +11,7 @@ client/*
 server.js
 /server.js
 ./server.js
+prod.env
+./prod.env
+newrelic_agent.log
+./newrelic_agent.log

@@ -4,7 +4,9 @@ module.exports = app => {
 	const { AdminLoginRepository, AdminGetTicketListRepository, getTicketRepository, insertNewStreamerToDB,
 		GetAllOfficialStreamersListFromDB, AdminUpdateOfficialStreamerDB, AdminRemoveOfficialStreameFromDB,
 		AdminGetCupomByStreamerFromDB, AdminGetAllCupomsFromDB, AdminUpdateCupomAtDB, AdminDeleteCupomAtDB,
-		GetOfficialStreamersByIDFromDB, AdminInsertNewCupomAtDB } = app.src.main.repository.AdminRepository;
+		GetOfficialStreamersByIDFromDB, AdminInsertNewCupomAtDB, AdminGetContractsAtDB, AdminGetContractByStreamerIDAtDB, 
+		AdminUpdateContractAtDB, AdminDeleteContractAtDB, AdminInsertNewContractAtDB, AdminGetContractTypeAtDB, 
+		AdminGetContractPaymentTypeAtDB } = app.src.main.repository.AdminRepository;
 	const { twitchApi } = require('../modules/twitch/api/twitchApi');
 
 	const LoginAdminAccRequest = async (req, res) => {
@@ -156,8 +158,8 @@ module.exports = app => {
 	}
 
 	const AdminDeleteCupomController = async (req, res) => {
-		const data = req.body;
-		const resp = await AdminDeleteCupomAtDB(data);
+		const id = req.params.id;
+		const resp = await AdminDeleteCupomAtDB(id);
 		return res.status(resp.status).send(resp.message);
 	}
 
@@ -165,6 +167,51 @@ module.exports = app => {
 		const data = req?.headers?.streamerid;
 		console.log(' o que esta vindo de AdminGetOfficialStreamerController???', data);
 		const resp = await GetOfficialStreamersByIDFromDB(data);
+		return res.status(resp.status).send(resp.data);
+	}
+
+	const AdminGetContractListController = async (req, res) => {
+		const resp = await AdminGetContractsAtDB();
+		return res.status(resp.status).send(resp.data);
+	}
+
+	const AdminGetContractController = async (req, res) => {
+		const id = req.params.id;
+		const resp = await AdminGetContractByStreamerIDAtDB(id);
+		return res.status(resp.status).send(resp.data);
+	}
+
+	const AdminUpdateContractController = async (req, res) => {
+		const id = req.params.id;
+		const update = req.body;
+		const data = {
+			id,
+			update
+		}
+		const resp = await AdminUpdateContractAtDB(data);
+		return res.status(resp.status).send(resp.message);
+	}
+
+	const AdminDeleteContractController = async (req, res) => {
+		const id = req.params.id;
+		const resp = await AdminDeleteContractAtDB(id);
+		return res.status(resp.status).send(resp.message);
+	}
+
+	const AdminInsertNewContractController = async (req, res) => {
+		const data = req.body;
+		data.created_at = (Date.now() / 100);
+		const resp = await AdminInsertNewContractAtDB(data);
+		return res.status(resp.status).send(resp.message);
+	}
+
+	const AdminGetContractTypeController = async (req, res) => {
+		const resp = await AdminGetContractTypeAtDB();
+		return res.status(resp.status).send(resp.data);
+	}
+	
+	const AdminGetContractPaymentTypeController = async (req, res) => {
+		const resp = await AdminGetContractPaymentTypeAtDB();
 		return res.status(resp.status).send(resp.data);
 	}
 
@@ -182,6 +229,13 @@ module.exports = app => {
 		AdminUpdateCupomController,
 		AdminDeleteCupomController,
 		AdminGetOfficialStreamerController,
-		AdminInsertNewCupomController
+		AdminInsertNewCupomController,
+		AdminGetContractListController,
+		AdminGetContractController,
+		AdminUpdateContractController,
+		AdminDeleteContractController,
+		AdminInsertNewContractController,
+		AdminGetContractTypeController,
+		AdminGetContractPaymentTypeController
 	}
 }
