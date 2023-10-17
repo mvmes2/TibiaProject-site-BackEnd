@@ -134,6 +134,20 @@ const AdminRemoveOfficialStreameFromDB = async (data) => {
 	}
 }
 
+const AdminInsertNewCupomAtDB = async (data) => {
+	console.log('como ta vindo a data de AdminInsertNewCupomAtDB?? ', data);
+	if (!data || data == null || data == undefined) {
+		return { status: 400, message: "Data inválida, esperado body para inserir infos!  " };
+	}
+	try {
+		const cupoms = await cupoms().insert(data);
+		return { status: 201, message: "Cupom created successfully!" };
+	} catch (err) {
+		console.log(err);
+		return { status: 500, message: 'Internal error!' }
+	}
+}
+
 const AdminGetCupomByStreamerFromDB = async (data) => {
 	console.log('como ta vindo a data de AdminGetCupomByStreamerFromDB?? ', data);
 	if (!data) {
@@ -206,5 +220,6 @@ module.exports = {
 	AdminUpdateCupomAtDB,
 	AdminDeleteCupomAtDB,
 	AdminGetRedeemCupomStorageAtDB,
-	GetOfficialStreamersByIDFromDB
+	GetOfficialStreamersByIDFromDB,
+	AdminInsertNewCupomAtDB
 }

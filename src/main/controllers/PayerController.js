@@ -1,10 +1,10 @@
-
-
 	const moment = require('moment');
 
 	const { getPayerListFromDB, insertNewPayer, getPayerByIDFromDB } = require("../repository/PayerRepository");
 
 	const TimeToLivePayerInfoHours = 24;
+
+	const Payer = require("./PayerController");
 
 /**
  * Add a payer to the list after checking for expired payers.
@@ -26,7 +26,7 @@
 			const duration = moment.duration(moment().diff(moment(payer.payerLastUpdated)));
 
 			if (duration.asHours() > TimeToLivePayerInfoHours) {
-				RemovePayerFromList(payer.transactionID);
+				Payer.RemovePayerFromList(payer.transactionID);
 			}
 		};
 
@@ -68,7 +68,6 @@
  * @returns - {Promise<boolean>}.
  */
 	module.exports.RemovePayerFromList = async (transactionID) => {
-		console.log('Essa é a lista atual de payers antes de ser removido: ', PayerList);
 		const PayerList = await getPayerListFromDB();
 		const index = PayerList.findIndex((item) => item.transactionID == transactionID);
 		if (index !== -1) {
