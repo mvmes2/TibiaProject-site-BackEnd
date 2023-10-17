@@ -85,7 +85,7 @@ module.exports = app => {
     app.route('/v1/Admin/twitch/update-cupom').put(AdminAuthMiddleware, app.src.main.controllers.AdminController.AdminUpdateCupomController);
     app.route('/v1/Admin/twitch/delete-cupom').delete(AdminAuthMiddleware, app.src.main.controllers.AdminController.AdminDeleteCupomController);
     app.route('/v1/Admin/twitch/get-streamer-byId').get(AdminAuthMiddleware, app.src.main.controllers.AdminController.AdminGetOfficialStreamerController);
-    app.route('/v1/Admin/twitch/insert-cupom').get(AdminAuthMiddleware, app.src.main.controllers.AdminController.AdminInsertNewCupomController);
+    app.route('/v1/Admin/twitch/insert-cupom').post(AdminAuthMiddleware, app.src.main.controllers.AdminController.AdminInsertNewCupomController);
     
     
 //att
