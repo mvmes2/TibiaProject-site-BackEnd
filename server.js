@@ -30,9 +30,6 @@ app.use(compression());
 
 
 app.use(express.urlencoded({ extended: true }));
-// app.use(bodyParser.json());
-
-// app.use(bodyParser.urlencoded({ extended: true }));
 
 io.on("connection", (socket) => {
   console.log("Usuário conectado:", socket.id);
@@ -104,7 +101,7 @@ module.exports = {
   io,
   userSockets,
 };
-
+//att
 consign()
   .then("./src/main/config/prismicConfig.js")
   .then("./src/main/utils")
@@ -126,7 +123,7 @@ consign()
   .then("./src/main/config/Routes.js")
   .into(app);
 
-const PORT = 3333;
+const PORT = 8880;
 server.listen(PORT, () => {
     // RunCronCheckLives.start();
     console.log(`BackEnd Rodando na porta: ${PORT}!!`);
