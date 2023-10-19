@@ -11,7 +11,6 @@ const prismicH = require('@prismicio/helpers');
 const compression = require('compression');
 const fs = require('fs');
 const RunCronCheckLives = require("./src/main/services/CronCheckLiveStreams");
-
 const server = http.createServer(app);
 
 app.use((req, res, next) => {

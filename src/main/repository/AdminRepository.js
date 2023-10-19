@@ -247,6 +247,16 @@ const AdminGetContractByStreamerIDAtDB = async (data) => {
 	}
 }
 
+const AdminGetSingleContractAtDB = async (id) => {
+	try {
+		const SingleContract = await contracts().select('*').where({ id: Number(id) });
+		return { status: 200, data: SingleContract };
+	} catch (err) {
+		console.log(err);
+		return { status: 500, message: 'Internal error!' }
+	}
+}
+
 const AdminUpdateContractAtDB = async (data) => {
 	console.log('como ta vindo a data de AdminUpdateContractAtDB?? ', data);
 	if (!data || !data?.id || !data?.update) {
@@ -267,7 +277,7 @@ const AdminDeleteContractAtDB = async (id) => {
 		return { status: 400, message: "ID inválido, esperado id por parametro na requisição para o endPoint  " };
 	}
 	try {
-		await cupoms().delete().where({ id: Number(id) });
+		await contracts().delete().where({ id: Number(id) });
 		return { status: 200, message: 'Contract has been deleted Successfully!' };
 	} catch (err) {
 		console.log(err);
@@ -318,5 +328,6 @@ module.exports = {
 	AdminDeleteContractAtDB,
 	AdminInsertNewContractAtDB,
 	AdminGetContractTypeAtDB,
-	AdminGetContractPaymentTypeAtDB
+	AdminGetContractPaymentTypeAtDB,
+	AdminGetSingleContractAtDB
 }

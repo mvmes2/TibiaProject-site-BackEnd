@@ -87,12 +87,13 @@ module.exports = app => {
     app.route('/v1/Admin/twitch/get-streamer-byId').get(AdminAuthMiddleware, app.src.main.controllers.AdminController.AdminGetOfficialStreamerController);
     app.route('/v1/Admin/twitch/insert-cupom').post(AdminAuthMiddleware, app.src.main.controllers.AdminController.AdminInsertNewCupomController);
     app.route('/v1/Admin/contracts').get(AdminAuthMiddleware, app.src.main.controllers.AdminController.AdminGetContractListController);
-    app.route('/v1/Admin/contracts/:id').get(AdminAuthMiddleware, app.src.main.controllers.AdminController.AdminGetContractController);
+    app.route('/v1/Admin/contracts/streamer/:id').get(AdminAuthMiddleware, app.src.main.controllers.AdminController.AdminGetContractByStreamerController);
     app.route('/v1/Admin/contracts/:id').put(AdminAuthMiddleware, app.src.main.controllers.AdminController.AdminUpdateContractController);
     app.route('/v1/Admin/contracts/:id').delete(AdminAuthMiddleware, app.src.main.controllers.AdminController.AdminDeleteContractController);
     app.route('/v1/Admin/contracts').post(AdminAuthMiddleware, app.src.main.controllers.AdminController.AdminInsertNewContractController);
     app.route('/v1/Admin/contracts/type').get(AdminAuthMiddleware, app.src.main.controllers.AdminController.AdminGetContractTypeController);
-    app.route('/v1/Admin/contracts/payment/type').get(AdminAuthMiddleware, app.src.main.controllers.AdminController.AdminGetContractPaymentTypeAtDB);
+    app.route('/v1/Admin/contracts/payment/type').get(AdminAuthMiddleware, app.src.main.controllers.AdminController.AdminGetContractPaymentTypeController);
+    app.route('/v1/Admin/contracts/:id').get(AdminAuthMiddleware, app.src.main.controllers.AdminController.AdminGetContractByContractIdController);
     
 //att
     //////Error MiddleWare/////

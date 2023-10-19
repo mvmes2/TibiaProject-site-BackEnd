@@ -6,7 +6,7 @@ module.exports = app => {
 		AdminGetCupomByStreamerFromDB, AdminGetAllCupomsFromDB, AdminUpdateCupomAtDB, AdminDeleteCupomAtDB,
 		GetOfficialStreamersByIDFromDB, AdminInsertNewCupomAtDB, AdminGetContractsAtDB, AdminGetContractByStreamerIDAtDB, 
 		AdminUpdateContractAtDB, AdminDeleteContractAtDB, AdminInsertNewContractAtDB, AdminGetContractTypeAtDB, 
-		AdminGetContractPaymentTypeAtDB } = app.src.main.repository.AdminRepository;
+		AdminGetContractPaymentTypeAtDB, AdminGetSingleContractAtDB } = app.src.main.repository.AdminRepository;
 	const { twitchApi } = require('../modules/twitch/api/twitchApi');
 
 	const LoginAdminAccRequest = async (req, res) => {
@@ -175,7 +175,7 @@ module.exports = app => {
 		return res.status(resp.status).send(resp.data);
 	}
 
-	const AdminGetContractController = async (req, res) => {
+	const AdminGetContractByStreamerController = async (req, res) => {
 		const id = req.params.id;
 		const resp = await AdminGetContractByStreamerIDAtDB(id);
 		return res.status(resp.status).send(resp.data);
@@ -215,6 +215,14 @@ module.exports = app => {
 		return res.status(resp.status).send(resp.data);
 	}
 
+	const AdminGetContractByContractIdController = async (req, res) => {
+		const id = req.params.id;
+		const resp = await AdminGetSingleContractAtDB(id);
+		return res.status(resp.status).send(resp.data);
+	}
+
+	
+
 	return {
 		LoginAdminAccRequest,
 		AdminValidateJsonTokenRequest,
@@ -231,11 +239,12 @@ module.exports = app => {
 		AdminGetOfficialStreamerController,
 		AdminInsertNewCupomController,
 		AdminGetContractListController,
-		AdminGetContractController,
+		AdminGetContractByStreamerController,
 		AdminUpdateContractController,
 		AdminDeleteContractController,
 		AdminInsertNewContractController,
 		AdminGetContractTypeController,
-		AdminGetContractPaymentTypeController
+		AdminGetContractPaymentTypeController,
+		AdminGetContractByContractIdController
 	}
 }
