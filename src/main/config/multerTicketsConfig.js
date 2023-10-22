@@ -3,7 +3,7 @@ const multer = require('multer');
 const fs = require('fs');
 const sharp = require('sharp');
 
-const storage = multer.diskStorage({
+const storageTickets = multer.diskStorage({
   destination: (req, file, cb) => {
     const destinationPath = path.join(__dirname, '..', 'resources', 'tickets-images');
     cb(null, destinationPath);
@@ -27,7 +27,7 @@ const fileFilter = (req, file, cb) => {
 };
 
 const upload = multer({
-  storage: storage,
+  storage: storageTickets,
   fileFilter: fileFilter,
   limits: { fileSize: 1 * 600 * 1024 }
 }).array('files', 3);

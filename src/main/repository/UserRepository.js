@@ -1,10 +1,14 @@
 const { accounts, players, players_online, player_deaths, player_items,
   players_comment, players_titles, guild_membership, guilds, guild_ranks } = require('../models/MasterModels');
 const { convertPremiumTimeToDaysLeft, updateLastDayTimeStampEpochFromGivenDays, setCreateCharacterController,
-   getCreateCharacterController, ErrorLogCreateFileHandler } = require('../utils/utilities');
+  getCreateCharacterController, ErrorLogCreateFileHandler } = require('../utils/utilities');
 
 module.exports = app => {
   const moment = require('moment');
+
+  let checkIfAccExistsData = 0;
+  let checkIfAccExistsLastUpdated = 0;
+  let checkAcc = 0;
 
   const updateAcc = async (data) => {
     const findAccountFirst = await accounts.query().select('id').where({ id: data.id });
@@ -36,16 +40,13 @@ module.exports = app => {
       data.coins = 1500;
       const resp = await accounts.query().insert(data);
       const { id, ...rests } = resp;
+      checkIfAccExistsData = 0;
       return { status: 201, message: id };
     } catch (err) {
       console.log(err)
       return { status: 500, message: err }
     }
   }
-
-  let checkIfAccExistsData = 0;
-  let checkIfAccExistsLastUpdated = 0;
-  let checkAcc = 0;
 
   const checkIfAccExists = async (data) => {
     console.log('....................................................!!!!!!!!!!!!!!!: ', data)
@@ -79,13 +80,13 @@ module.exports = app => {
   let validateLoginData = 0;
   let validateLoginLastUpdated = 0;
   let validateLoginAccInfo = 0;
- 
+
   const validateLoginHash = async (data) => {
     // cache
     console.log('Vai entrar no chache?........................................', data, validateLoginData)
     if (validateLoginData.id === data.id && getCreateCharacterController() !== 0 && moment().diff(validateLoginLastUpdated, 'minutes') < 5) {
       console.log('Cache validateLoginAccMannagement aplicado com sucesso!')
-     
+
       return { status: 200, message: validateLoginAccInfo };
     }
 
@@ -93,11 +94,11 @@ module.exports = app => {
       console.log('NÃO ENTROU NO CASH!')
       if (!data?.loginHash || !data.id) { return { status: 403, message: 'You need to Login!' } }
 
-     const validateLoginInfo = await accounts.query().select('loginHash').where({ id: data.id }).first();
+      const validateLoginInfo = await accounts.query().select('loginHash').where({ id: data.id }).first();
 
       if (!validateLoginInfo || validateLoginInfo === undefined) { return { status: 403, message: 'error at login hash' } }
 
-      if (validateLoginInfo.loginHash.trim() !== data?.loginHash.trim()) {
+      if (validateLoginInfo.loginHash?.trim() !== data?.loginHash?.trim()) {
         return {
           status: 403, message: `Error at Login hash, close this page, re-open the website, and try again! or call admin!`
         }
@@ -171,7 +172,7 @@ module.exports = app => {
         'isBanned', 'banReason', 'premdays', 'createdAt', 'day_end_premmy', 'web_lastlogin', 'web_flags', 'type')
         .where({ id: Number(data.id) }).first();
 
-        validateLoginAccInfo = {
+      validateLoginAccInfo = {
         ...accUpdatedPremiumTime,
         editedCharList,
       }
@@ -231,15 +232,15 @@ module.exports = app => {
     data.name = data.name.replaceAll('-', ' ');
     console.log(data.name)
     console.log('qual a dataaa???????????????????????? ', data.name)
-//cache
-  console.log('VAI ENTRAR NO CACHE DE GetPlayerInfo??', PlayerData.name, data.name);
+    //cache
+    console.log('VAI ENTRAR NO CACHE DE GetPlayerInfo??', PlayerData.name, data.name);
     if (PlayerData.name === data.name && moment().diff(PlayerInfoLastUpdated, 'minutes') < 5) {
       console.log('ENTROU NO CACHE!!')
       console.log('CACHE em GetPlayerInfo feito com sucesso!!');
       if (checkPlayerNameInfo.length < 1) { return { status: 404, message: 'Character does not exists!' } }
 
       if (PlayerInfo && PlayerInfo?.owner == false) {
-        return { status: 200, message: PlayerInfo, owner: false } 
+        return { status: 200, message: PlayerInfo, owner: false }
       }
       return { status: 200, message: PlayerInfo, owner: true }
     }
@@ -248,7 +249,7 @@ module.exports = app => {
 
     if (checkPlayerNameInfo.length < 1) {
       PlayerInfoLastUpdated = moment();
-      return { status: 404, message: 'Character does not exists!' } 
+      return { status: 404, message: 'Character does not exists!' }
     }
 
     let checkCharacterOwner = null;
@@ -270,7 +271,7 @@ module.exports = app => {
     }
     if (checkCharacterOwner === undefined || checkCharacterOwner === null) {
       try {
-        
+
         const found = await players.query()
           .join('worlds', 'players.world_id', '=', 'worlds.id')
           .join('vocations', 'players.vocation', 'vocations.vocation_id')
@@ -315,7 +316,7 @@ module.exports = app => {
         const guild = await guild_membership.query().select('player_id', 'guild_id', 'rank_id').where({ player_id: checkCharacterOwner.id }).first();
         const memberRank = guild ? (await guild_ranks.query().select('name').where({ id: guild.rank_id }).first()) : '';
         const GuildName = guild ? (await guilds.query().select('name', 'id').where({ id: guild.guild_id }).first()) : '';
-        
+
         PlayerInfo = {
           ...checkCharacterOwner,
           deathList,
@@ -489,12 +490,12 @@ module.exports = app => {
       if (getTitleData?.id === data?.id && data?.trigger === 'getTitle' && moment().diff(getTitleLastUpdated, 'minutes') < 5) {
         console.log('ENTROU NO CASH!!!');
         console.log('CACHE EM GETTITLE FEITO COM SUCESSO!!!');
-          return { status: 200, message: getTitleInfo }
+        return { status: 200, message: getTitleInfo }
       }
       if (getTitleData?.id === data?.id && moment().diff(getTitleSLastUpdated, 'minutes') < 5) {
         console.log('ENTROU NO CASH!!!');
         console.log('CACHE EM GETTITLES FEITO COM SUCESSO!!!');
-          return { status: 200, message: getTitlesInfo }
+        return { status: 200, message: getTitlesInfo }
       }
 
       console.log('NÃO ENTROU NO CASH!!!');
@@ -538,5 +539,5 @@ module.exports = app => {
     getCharacterTitlesRepo,
     updateCharacterTitleInUseRepo
   }
-  
+
 }

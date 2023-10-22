@@ -264,6 +264,31 @@ const getlastPaymentIDUpdated = () => {
   return Number(lastPaymentIDUpdated);
 }
 
+let checkIfAccExistsData = 0;
+let checkIfAccExistsLastUpdated = 0;
+let checkAcc = 0;
+
+const setCheckIfAccExistsData = (ExistsData) => {
+  checkIfAccExistsData = ExistsData;
+}
+const getCheckIfAccExistsData = () => {
+  return Number(checkIfAccExistsData);
+}
+
+const setCheckIfAccExistsLastUpdated = (number) => {
+  checkIfAccExistsLastUpdated = Number(number);
+}
+const getCheckIfAccExistsLastUpdated = () => {
+  return Number(checkIfAccExistsLastUpdated);
+}
+
+const setCheckAcc = (number) => {
+  checkAcc = Number(number);
+}
+const getCheckAcc = () => {
+  return Number(checkAcc);
+}
+
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
@@ -381,5 +406,11 @@ module.exports = {
   ErrorLogCreateFileHandler,
   LogCreateFileHandler,
   calculateDiscount,
-  twitchAuthController
+  twitchAuthController,
+  setCheckIfAccExistsData,
+  getCheckIfAccExistsData,
+  setCheckIfAccExistsLastUpdated,
+  getCheckIfAccExistsLastUpdated,
+  setCheckAcc,
+  getCheckAcc
 }

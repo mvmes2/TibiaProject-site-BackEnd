@@ -1,7 +1,8 @@
 const authMiddleware = require('../middlewares/AuthMiddleware');
 const AdminAuthMiddleware = require('../middlewares/AdminAuthMiddleware');
 const multer = require('multer');
-const { upload, compressImagesMiddleware } = require('./multerConfig');
+const { upload, compressImagesMiddleware } = require('./multerTicketsConfig');
+const { uploadContract, compressContractImagesMiddleware } = require('./multerContractConfig');
 
 module.exports = app => {
     app.route('/v1/teste').get(app.src.main.controllers.PrismicController.TesteRequest);
@@ -94,7 +95,7 @@ module.exports = app => {
     app.route('/v1/Admin/contracts/type').get(AdminAuthMiddleware, app.src.main.controllers.AdminController.AdminGetContractTypeController);
     app.route('/v1/Admin/contracts/payment/type').get(AdminAuthMiddleware, app.src.main.controllers.AdminController.AdminGetContractPaymentTypeController);
     app.route('/v1/Admin/contracts/:id').get(AdminAuthMiddleware, app.src.main.controllers.AdminController.AdminGetContractByContractIdController);
-    
+    app.route('/v1/Admin/massemail').post(AdminAuthMiddleware, app.src.main.controllers.MassEmailController.createEmailHtmlController);
 //att
     //////Error MiddleWare/////
     app.use((err, req, res, next) => {
