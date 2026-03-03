@@ -187,7 +187,12 @@ module.exports = app => {
 
   const createNewCharacterDB = async (data) => {
     console.log('informações enviadas na criação do personagem no back: ', data)
-    data.createdAt = Math.floor(Date.now() / 1000);
+    if (data.createdAt === undefined || data.createdAt === null) {
+      data.createdAt = Math.floor(Date.now() / 1000);
+    }
+    if (data.conditions === undefined || data.conditions === null) {
+      data.conditions = Buffer.alloc(0);
+    }
     try {
       const checkNameExist = await players.query().select('name').whereRaw('LOWER(name) = ?', data.name.toLowerCase());
       const femaleCharacter = {
@@ -200,17 +205,17 @@ module.exports = app => {
         const getCreatedPlayer = await players.query().select('id').where({ name: data.name }).first();
 
         const newComersIinitialItens = [
-          { player_id: Number(getCreatedPlayer.id), pid: 3, sid: 101, itemtype: 2853, count: 1 },
-          { player_id: Number(getCreatedPlayer.id), pid: 4, sid: 102, itemtype: 3561, count: 1 },
-          { player_id: Number(getCreatedPlayer.id), pid: 101, sid: 104, itemtype: 3291, count: 1 },
-          { player_id: Number(getCreatedPlayer.id), pid: 101, sid: 105, itemtype: 3270, count: 1 },
-          { player_id: Number(getCreatedPlayer.id), pid: 101, sid: 106, itemtype: 3293, count: 1 },
-          { player_id: Number(getCreatedPlayer.id), pid: 101, sid: 107, itemtype: 21401, count: 1 },
-          { player_id: Number(getCreatedPlayer.id), pid: 101, sid: 108, itemtype: 3585, count: 1 }
+          { player_id: Number(getCreatedPlayer.id), pid: 3, sid: 101, itemtype: 2853, count: 1, attributes: Buffer.alloc(0) },
+          { player_id: Number(getCreatedPlayer.id), pid: 4, sid: 102, itemtype: 3561, count: 1, attributes: Buffer.alloc(0) },
+          { player_id: Number(getCreatedPlayer.id), pid: 101, sid: 104, itemtype: 3291, count: 1, attributes: Buffer.alloc(0) },
+          { player_id: Number(getCreatedPlayer.id), pid: 101, sid: 105, itemtype: 3270, count: 1, attributes: Buffer.alloc(0) },
+          { player_id: Number(getCreatedPlayer.id), pid: 101, sid: 106, itemtype: 3293, count: 1, attributes: Buffer.alloc(0) },
+          { player_id: Number(getCreatedPlayer.id), pid: 101, sid: 107, itemtype: 21401, count: 1, attributes: Buffer.alloc(0) },
+          { player_id: Number(getCreatedPlayer.id), pid: 101, sid: 108, itemtype: 3585, count: 1, attributes: Buffer.alloc(0) }
         ]
-        newComersIinitialItens.map(async (each) => {
+        for (const each of newComersIinitialItens) {
           await player_items.query().insert(each);
-        })
+        }
         setCreateCharacterController(0);
         return { status: 201, message: 'Created successfuly' }
       } else {
@@ -410,14 +415,14 @@ module.exports = app => {
         .join('vocations', 'players.vocation', 'vocations.vocation_id')
         .join('accounts', 'players.account_id', '=', 'accounts.id')
         .select('players.id', 'players.name', 'players.level', 'vocation_name as vocation', 'worlds.serverName as world',
-          'players.hidden', 'accounts.country', 'players.skill_fist', 'players.skill_club', 'players.skill_sword',
+          'players.hidden', 'players.skill_fist', 'players.skill_club', 'players.skill_sword',
           'players.skill_axe', 'players.skill_dist', 'players.skill_shielding',
           'players.skill_fishing', 'players.experience', 'players.maglevel')
         .where('players.group_id', '<', 6)
         .where({ 'players.deletedAt': 0 })
         .orderBy(data, 'desc')
         .limit(100);
-
+console.log('highScores: ', highScores)
       switch (data) {
         case 'experience':
           experienceLastUpdated = moment();

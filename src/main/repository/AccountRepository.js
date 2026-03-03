@@ -161,7 +161,7 @@ module.exports = app => {
 
       SELECT count(id_acc) FROM (
         SELECT count(teste.last_ip_agrupado), teste.id_acc FROM (
-        SELECT count(id) as 'quantidade',lastip as 'last_ip_agrupado',account_id as 'id_acc' FROM tibiaproject.players WHERE level >= 8
+        SELECT count(id) as 'quantidade',lastip as 'last_ip_agrupado',account_id as 'id_acc' FROM players WHERE level >= 8
         AND group_id = 1 GROUP BY players.lastip, players.account_id) as teste
         WHERE 1
          GROUP BY teste.id_acc
@@ -178,7 +178,7 @@ module.exports = app => {
                 'lastip as last_ip_agrupado',
                 'account_id as id_acc'
               )
-                .from('tibiaproject.players')
+                .from('players')
                 .where('level', '>=', 8)
                 .andWhere('group_id', 1)
                 .groupBy('players.lastip', 'players.account_id')

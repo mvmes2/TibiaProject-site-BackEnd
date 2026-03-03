@@ -26,7 +26,7 @@ const getWorldWideTopFivePlayersRepository = async () => {
     const topFivePlayers = await players.query()
   .join('worlds', 'players.world_id', '=', 'worlds.id')
   .join('accounts', 'players.account_id', '=', 'accounts.id')
-  .select('players.name', 'players.level', 'worlds.serverName as world', 'accounts.country')
+  .select('players.name', 'players.level', 'worlds.serverName as world')
   .where('group_id', '<', 4)
   .orderBy('players.level', 'desc').limit(5);
   console.log(topFivePlayers);

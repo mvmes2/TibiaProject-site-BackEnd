@@ -6,6 +6,9 @@ const sharp = require('sharp');
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     const destinationPath = path.join(__dirname, '..', 'resources', 'tickets-images');
+    if (!fs.existsSync(destinationPath)) {
+      fs.mkdirSync(destinationPath, { recursive: true });
+    }
     cb(null, destinationPath);
   },
   filename: (req, file, cb) => {
@@ -65,7 +68,7 @@ const compressImagesMiddleware = async (req, res, next) => {
         // Verificar e criar o diretório 'compressed', se necessário
         const compressedDir = path.join(__dirname, '..', 'resources', 'tickets-images', 'compressed');
         if (!fs.existsSync(compressedDir)) {
-          fs.mkdirSync(compressedDir);
+          fs.mkdirSync(compressedDir, { recursive: true });
         }
 
         await compressImage(inputPath, outputPath);
