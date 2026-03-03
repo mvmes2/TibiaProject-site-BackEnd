@@ -16,18 +16,19 @@ module.exports = app => {
 		if (!isPasswordValid) { return { status: 400, message: 'Wrong passwrod, if you forgot your password please use account recovery!' } };
 
 		const hash = hashGenerator(8);
+		acc.login_hash = hash;
 		acc.loginHash = hash;
 		const { password, ...accwithoutPassword } = acc;
 		const newLoginToken = generateToken(1440, accwithoutPassword)
 
 		const updateInfo = {
-			loginHash: hash,
+			login_hash: hash,
 			web_lastlogin: Math.floor(Date.now() / 1000),
 			login_token: newLoginToken
 		}
 
 		await updateAcc({ update: updateInfo, id: acc.id });
-		return { status: 200, message: { id: acc.id, loginHash: hash, name: acc.name, login_token: newLoginToken, email: acc.email, country: acc.country, coins: acc.coins } };
+		return { status: 200, message: { id: acc.id, loginHash: hash, name: acc.name, login_token: newLoginToken, email: acc.email, country: acc.country, coins: acc.project_coins } };
 	}
 	return {
 		LoginAccService,

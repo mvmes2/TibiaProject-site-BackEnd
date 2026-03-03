@@ -1,4 +1,5 @@
 require('newrelic');
+require('dotenv');
 const http = require('http');
 const express = require('express');
 const cors = require('cors');
@@ -11,14 +12,25 @@ const prismicH = require('@prismicio/helpers');
 const compression = require('compression');
 const fs = require('fs');
 const RunCronCheckLives = require("./src/main/services/CronCheckLiveStreams");
-
 const server = http.createServer(app);
-app.use(cors());
-  app.options('*',cors());
+const rateLimit = require("express-rate-limit");
+
+app.set('trust proxy', 1);
+
+const limiter = rateLimit({
+  windowMs: 10 * 1000, // Define uma janela de 20 segundos
+  max: 50, // Limite máximo de solicitações por IP na janela
+  message: "Você atingiu o limite de solicitações. Tente novamente mais tarde.",
+});
+
+app.use(limiter);
+
 app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Methods', "GET, PUT, POST, DELETE");
   res.header('Access-Control-Allow-Headers', "Content-Type");
+  app.use(cors());
+  app.options('*',cors());
   next();
 })
 const userSockets = {};
@@ -26,7 +38,6 @@ const userSockets = {};
 io.attach(server);
 
 app.use(compression());
-
 
 app.use(express.urlencoded({ extended: true }));
 
@@ -56,10 +67,17 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use('/tickets-images/compressed', express.static(path.join(__dirname, 'src', 'main', 'resources', 'tickets-images', 'compressed')));
+app.use('/v1/tickets-images/compressed', express.static(path.join(__dirname, 'src', 'main', 'resources', 'tickets-images', 'compressed')));
+app.use('/v1/guild-logos/compressed', express.static(path.join(__dirname, 'src', 'main', 'resources', 'guild-logos', 'compressed')));
 
 function setCacheHeaders(req, res, next) {
-  if (req.url.startsWith('/tickets-images/compressed')) {
+  if (req.url.startsWith('/v1/tickets-images/compressed')) {
+    res.setHeader('Cache-Control', 'public, max-age=86400'); // 24 horas
+  }
+  next();
+}
+function setCacheHeaders(req, res, next) {
+  if (req.url.startsWith('/v1/guild-logos/compressed')) {
     res.setHeader('Cache-Control', 'public, max-age=86400'); // 24 horas
   }
   next();
@@ -82,11 +100,30 @@ app.use(express.static(__dirname + '/downloads'));
 app.get('/v1/client/version.txt', (req, res) => {
   res.sendFile(path.join(__dirname, 'client', 'version.txt'));
 });
-app.get('/v1/downloads', (req, res) => {
+
+app.get('/v1/downloads/launcher', (req, res) => {
+  if (process.env.TESTSERVER_ON == 'true') {
+    return res.status(401).send({ message: 'Download launcher is bloked right now, check news or discord news!!' });
+  }
+
   const filePath = path.join(__dirname, 'downloads', 'tibiaproject_launcher.zip');
 
   res.setHeader('Content-Type', 'application/zip');
   res.setHeader('Content-Disposition', 'attachment; filename=tibiaproject_launcher.zip');
+
+  const readStream = fs.createReadStream(filePath);
+  readStream.pipe(res);
+});
+
+app.get('/v1/downloads/client', (req, res) => {
+  if (process.env.TESTSERVER_ON == 'true') {
+    return res.status(401).send({ message: 'Download client is bloked right now, check news or discord news!!' });
+  }
+
+  const filePath = path.join(__dirname, 'downloads', 'tibiaproject_client.rar');
+
+  res.setHeader('Content-Type', 'application/zip');
+  res.setHeader('Content-Disposition', 'attachment; filename=tibiaproject_client.rar');
 
   const readStream = fs.createReadStream(filePath);
   readStream.pipe(res);
@@ -100,7 +137,7 @@ module.exports = {
   io,
   userSockets,
 };
-
+//att
 consign()
   .then("./src/main/config/prismicConfig.js")
   .then("./src/main/utils")

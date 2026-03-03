@@ -16,12 +16,12 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Current Database: `projectmain`
+-- Current Database: `otserv_db`
 --
 
-CREATE DATABASE /*!32312 IF NOT EXISTS*/ `projectmain` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;
+CREATE DATABASE /*!32312 IF NOT EXISTS*/ `otserv_db` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;
 
-USE `projectmain`;
+USE `otserv_db`;
 
 --
 -- Table structure for table `account_ban_history`
@@ -135,9 +135,23 @@ CREATE TABLE `accounts` (
   `diamond_pack` int DEFAULT '0',
   `creation` int unsigned NOT NULL DEFAULT '0',
   `recruiter` int DEFAULT '0',
+  `country` varchar(100) DEFAULT NULL,
+  `loginHash` varchar(100) DEFAULT NULL,
+  `isBanned` tinyint(1) DEFAULT '0',
+  `banReason` varchar(255) DEFAULT NULL,
+  `day_end_premmy` bigint DEFAULT '0',
+  `web_lastlogin` bigint DEFAULT '0',
+  `web_flags` varchar(255) DEFAULT NULL,
+  `change_pass_token` varchar(255) DEFAULT NULL,
+  `recovery_key` varchar(100) DEFAULT NULL,
+  `password2` varchar(100) DEFAULT NULL,
+  `login_token` varchar(500) DEFAULT NULL,
+  `createdAt` int unsigned DEFAULT '0',
+  `email_verified` tinyint(1) DEFAULT '0',
+  `created` tinyint(1) DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `accounts_unique` (`name`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb3;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -146,7 +160,7 @@ CREATE TABLE `accounts` (
 
 LOCK TABLES `accounts` WRITE;
 /*!40000 ALTER TABLE `accounts` DISABLE KEYS */;
-INSERT INTO `accounts` VALUES (1,'god','21298df8a3277357ee55b01df9530b535cf08ec1','@god',0,0,5,0,0,0,0,0,0,0);
+INSERT INTO `accounts` VALUES (1,'god','21298df8a3277357ee55b01df9530b535cf08ec1','@god',0,0,5,0,0,0,0,0,0,0,NULL,NULL,0,NULL,0,0,NULL,NULL,NULL,NULL,NULL,0,0,0),(2,'mvmes23','2d0fc5ccb9c6677a6e6febbf59d58dd358b741fc','mvmes23@gmail.com',0,0,1,1500,0,0,0,0,0,0,'bra','ACf0ECg0',0,NULL,0,1771384869,NULL,NULL,NULL,'Mvm19018009***','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7ImVtYWlsIjoibXZtZXMyM0BnbWFpbC5jb20iLCJpZCI6MiwibmFtZSI6Im12bWVzMjMiLCJsb2dpbkhhc2giOiJBQ2YwRUNnMCIsImNvdW50cnkiOiJicmEiLCJjb2lucyI6MTUwMH0sImlhdCI6MTc3MTM4NDg2OSwiZXhwIjoxNzcxNDcxMjY5fQ.y-TbFH5YWVvu_jxgT3j0WP3_MJ958wIanNKZMGLwh40',1771378251,0,0);
 /*!40000 ALTER TABLE `accounts` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -483,10 +497,14 @@ UNLOCK TABLES;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-/*!50003 CREATE*/ /*!50017 DEFINER=`rooter`@`%`*/ /*!50003 TRIGGER `oncreate_guilds` AFTER INSERT ON `guilds` FOR EACH ROW BEGIN
-        INSERT INTO `guild_ranks` (`name`, `level`, `guild_id`) VALUES ('The Leader', 3, NEW.`id`);
-        INSERT INTO `guild_ranks` (`name`, `level`, `guild_id`) VALUES ('Vice-Leader', 2, NEW.`id`);
-        INSERT INTO `guild_ranks` (`name`, `level`, `guild_id`) VALUES ('Member', 1, NEW.`id`);
+/*!50003 CREATE*/ /*!50017 DEFINER=`rooter`@`%`*/ /*!50003 TRIGGER `oncreate_guilds` AFTER INSERT ON `guilds` FOR EACH ROW BEGIN
+
+        INSERT INTO `guild_ranks` (`name`, `level`, `guild_id`) VALUES ('The Leader', 3, NEW.`id`);
+
+        INSERT INTO `guild_ranks` (`name`, `level`, `guild_id`) VALUES ('Vice-Leader', 2, NEW.`id`);
+
+        INSERT INTO `guild_ranks` (`name`, `level`, `guild_id`) VALUES ('Member', 1, NEW.`id`);
+
 END */;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -613,6 +631,56 @@ CREATE TABLE `ip_bans` (
 LOCK TABLES `ip_bans` WRITE;
 /*!40000 ALTER TABLE `ip_bans` DISABLE KEYS */;
 /*!40000 ALTER TABLE `ip_bans` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `knex_migrations`
+--
+
+DROP TABLE IF EXISTS `knex_migrations`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `knex_migrations` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) DEFAULT NULL,
+  `batch` int DEFAULT NULL,
+  `migration_time` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `knex_migrations`
+--
+
+LOCK TABLES `knex_migrations` WRITE;
+/*!40000 ALTER TABLE `knex_migrations` DISABLE KEYS */;
+INSERT INTO `knex_migrations` VALUES (1,'20260217000000_add_founder_packs_to_accounts.js',1,'2026-02-17 23:05:35'),(2,'20260218000000_create_missing_main_tables.js',2,'2026-02-17 23:06:18'),(3,'20260218100000_add_missing_columns_to_players_and_accounts.js',3,'2026-02-17 23:18:15'),(4,'20260218110000_create_vocations_table.js',4,'2026-02-17 23:39:34'),(5,'20260218120000_add_missing_columns_to_players.js',5,'2026-02-17 23:47:35'),(6,'20260218130000_add_createdAt_to_accounts.js',6,'2026-02-18 01:27:41'),(7,'20260218140000_add_email_verified_and_created_to_accounts.js',7,'2026-02-18 01:32:55'),(8,'20260218150000_convert_players_createdAt_to_epoch.js',8,'2026-02-18 02:05:41');
+/*!40000 ALTER TABLE `knex_migrations` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `knex_migrations_lock`
+--
+
+DROP TABLE IF EXISTS `knex_migrations_lock`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `knex_migrations_lock` (
+  `index` int unsigned NOT NULL AUTO_INCREMENT,
+  `is_locked` int DEFAULT NULL,
+  PRIMARY KEY (`index`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `knex_migrations_lock`
+--
+
+LOCK TABLES `knex_migrations_lock` WRITE;
+/*!40000 ALTER TABLE `knex_migrations_lock` DISABLE KEYS */;
+INSERT INTO `knex_migrations_lock` VALUES (1,0);
+/*!40000 ALTER TABLE `knex_migrations_lock` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -902,6 +970,7 @@ CREATE TABLE `player_items` (
 
 LOCK TABLES `player_items` WRITE;
 /*!40000 ALTER TABLE `player_items` DISABLE KEYS */;
+INSERT INTO `player_items` VALUES (8,3,101,2853,1,''),(8,4,102,3561,1,''),(8,101,104,3291,1,''),(8,101,105,3270,1,''),(8,101,106,3293,1,''),(8,101,107,21401,1,''),(8,101,108,3585,1,'');
 /*!40000 ALTER TABLE `player_items` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1249,12 +1318,18 @@ CREATE TABLE `players` (
   `forge_dust_level` bigint NOT NULL DEFAULT '100',
   `randomize_mount` tinyint(1) NOT NULL DEFAULT '0',
   `boss_points` int NOT NULL DEFAULT '0',
+  `world_id` int unsigned DEFAULT NULL,
+  `hidden` tinyint(1) DEFAULT '0',
+  `deletedAt` int unsigned DEFAULT '0',
+  `createdAt` int unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `players_unique` (`name`),
   KEY `account_id` (`account_id`),
   KEY `vocation` (`vocation`),
-  CONSTRAINT `players_account_fk` FOREIGN KEY (`account_id`) REFERENCES `accounts` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb3;
+  KEY `players_world_id_foreign` (`world_id`),
+  CONSTRAINT `players_account_fk` FOREIGN KEY (`account_id`) REFERENCES `accounts` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `players_world_id_foreign` FOREIGN KEY (`world_id`) REFERENCES `worlds` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1263,7 +1338,7 @@ CREATE TABLE `players` (
 
 LOCK TABLES `players` WRITE;
 /*!40000 ALTER TABLE `players` DISABLE KEYS */;
-INSERT INTO `players` VALUES (1,'Rook Sample',1,1,2,0,155,155,100,113,115,95,39,129,0,2,60,60,5936,0,1,0,0,0,'',410,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,43200,-1,2520,10,0,12,155,12,155,12,155,12,93,10,0,10,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,NULL,NULL,0,-1,0,0,0,0,0,0,0,0,0,1,0,0,100,0,0),(2,'Sorcerer Sample',1,1,8,1,185,185,4200,113,115,95,39,129,0,0,90,90,0,0,8,0,0,0,'',470,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,43200,-1,2520,10,0,10,0,10,0,10,0,10,0,10,0,10,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,NULL,NULL,0,-1,0,0,0,0,0,0,0,0,0,1,0,0,100,0,0),(3,'Druid Sample',1,1,8,2,185,185,4200,113,115,95,39,129,0,0,90,90,0,0,8,0,0,0,'',470,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,43200,-1,2520,10,0,10,0,10,0,10,0,10,0,10,0,10,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,NULL,NULL,0,-1,0,0,0,0,0,0,0,0,0,1,0,0,100,0,0),(4,'Paladin Sample',1,1,8,3,185,185,4200,113,115,95,39,129,0,0,90,90,0,0,8,0,0,0,'',470,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,43200,-1,2520,10,0,10,0,10,0,10,0,10,0,10,0,10,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,NULL,NULL,0,-1,0,0,0,0,0,0,0,0,0,1,0,0,100,0,0),(5,'Knight Sample',1,1,8,4,185,185,4200,113,115,95,39,129,0,0,90,90,0,0,8,0,0,0,'',470,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,43200,-1,2520,10,0,10,0,10,0,10,0,10,0,10,0,10,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,NULL,NULL,0,-1,0,0,0,0,0,0,0,0,0,1,0,0,100,0,0),(6,'GOD',6,1,2,0,155,155,100,113,115,95,39,75,0,0,60,60,0,0,8,0,0,0,'',410,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,43200,-1,2520,10,0,10,0,10,0,10,0,10,0,10,0,10,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,NULL,NULL,0,-1,0,0,0,0,0,0,0,0,0,1,0,0,100,0,0);
+INSERT INTO `players` VALUES (1,'Rook Sample',1,1,2,0,155,155,100,113,115,95,39,129,0,2,60,60,5936,0,1,0,0,0,'',410,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,43200,-1,2520,10,0,12,155,12,155,12,155,12,93,10,0,10,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,NULL,NULL,0,-1,0,0,0,0,0,0,0,0,0,1,0,0,100,0,0,1,0,0,1771372055),(2,'Sorcerer Sample',1,1,8,1,185,185,4200,113,115,95,39,129,0,0,90,90,0,0,8,0,0,0,'',470,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,43200,-1,2520,10,0,10,0,10,0,10,0,10,0,10,0,10,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,NULL,NULL,0,-1,0,0,0,0,0,0,0,0,0,1,0,0,100,0,0,1,0,0,1771372055),(3,'Druid Sample',1,1,8,2,185,185,4200,113,115,95,39,129,0,0,90,90,0,0,8,0,0,0,'',470,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,43200,-1,2520,10,0,10,0,10,0,10,0,10,0,10,0,10,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,NULL,NULL,0,-1,0,0,0,0,0,0,0,0,0,1,0,0,100,0,0,1,0,0,1771372055),(4,'Paladin Sample',1,1,8,3,185,185,4200,113,115,95,39,129,0,0,90,90,0,0,8,0,0,0,'',470,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,43200,-1,2520,10,0,10,0,10,0,10,0,10,0,10,0,10,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,NULL,NULL,0,-1,0,0,0,0,0,0,0,0,0,1,0,0,100,0,0,1,0,0,1771372055),(5,'Knight Sample',1,1,8,4,185,185,4200,113,115,95,39,129,0,0,90,90,0,0,8,0,0,0,'',470,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,43200,-1,2520,10,0,10,0,10,0,10,0,10,0,10,0,10,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,NULL,NULL,0,-1,0,0,0,0,0,0,0,0,0,1,0,0,100,0,0,1,0,0,1771372055),(6,'GOD',6,1,2,0,155,155,100,113,115,95,39,75,0,0,60,60,0,0,8,0,0,0,'',410,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,43200,-1,2520,10,0,10,0,10,0,10,0,10,0,10,0,10,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,NULL,NULL,0,-1,0,0,0,0,0,0,0,0,0,1,0,0,100,0,0,1,0,0,1771372055),(8,'Caramellow',1,2,1,0,150,150,0,0,0,0,0,136,0,0,0,0,0,0,1,0,0,0,'',0,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,43200,-1,2520,10,0,10,0,10,0,10,0,10,0,10,0,10,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,NULL,NULL,0,-1,0,0,0,0,0,0,0,0,0,1,0,0,100,0,0,1,1,0,1771379533);
 /*!40000 ALTER TABLE `players` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
@@ -1275,14 +1350,45 @@ UNLOCK TABLES;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-/*!50003 CREATE*/ /*!50017 DEFINER=`rooter`@`%`*/ /*!50003 TRIGGER `ondelete_players` BEFORE DELETE ON `players` FOR EACH ROW BEGIN
-        UPDATE `houses` SET `owner` = 0 WHERE `owner` = OLD.`id`;
+/*!50003 CREATE*/ /*!50017 DEFINER=`rooter`@`%`*/ /*!50003 TRIGGER `ondelete_players` BEFORE DELETE ON `players` FOR EACH ROW BEGIN
+
+        UPDATE `houses` SET `owner` = 0 WHERE `owner` = OLD.`id`;
+
 END */;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
+
+--
+-- Table structure for table `players_comment`
+--
+
+DROP TABLE IF EXISTS `players_comment`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `players_comment` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
+  `player_id` int NOT NULL,
+  `comment` text,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `players_comment_player_id_unique` (`player_id`),
+  CONSTRAINT `players_comment_player_id_foreign` FOREIGN KEY (`player_id`) REFERENCES `players` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `players_comment`
+--
+
+LOCK TABLES `players_comment` WRITE;
+/*!40000 ALTER TABLE `players_comment` DISABLE KEYS */;
+INSERT INTO `players_comment` VALUES (1,8,'Wrauff wrauuuf Auuuuuu!!!','2026-02-18 01:53:06','2026-02-18 01:53:06');
+/*!40000 ALTER TABLE `players_comment` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `players_online`
@@ -1304,6 +1410,36 @@ CREATE TABLE `players_online` (
 LOCK TABLES `players_online` WRITE;
 /*!40000 ALTER TABLE `players_online` DISABLE KEYS */;
 /*!40000 ALTER TABLE `players_online` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `players_titles`
+--
+
+DROP TABLE IF EXISTS `players_titles`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `players_titles` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
+  `player_id` int NOT NULL,
+  `title` varchar(100) NOT NULL,
+  `in_use` tinyint(1) DEFAULT '0',
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `players_titles_player_id_index` (`player_id`),
+  KEY `players_titles_in_use_index` (`in_use`),
+  CONSTRAINT `players_titles_player_id_foreign` FOREIGN KEY (`player_id`) REFERENCES `players` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `players_titles`
+--
+
+LOCK TABLES `players_titles` WRITE;
+/*!40000 ALTER TABLE `players_titles` DISABLE KEYS */;
+/*!40000 ALTER TABLE `players_titles` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -1412,6 +1548,63 @@ LOCK TABLES `towns` WRITE;
 /*!40000 ALTER TABLE `towns` DISABLE KEYS */;
 /*!40000 ALTER TABLE `towns` ENABLE KEYS */;
 UNLOCK TABLES;
+
+--
+-- Table structure for table `vocations`
+--
+
+DROP TABLE IF EXISTS `vocations`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `vocations` (
+  `vocation_id` int unsigned NOT NULL,
+  `vocation_name` varchar(100) NOT NULL,
+  `description` text,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`vocation_id`),
+  UNIQUE KEY `vocations_vocation_name_unique` (`vocation_name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `vocations`
+--
+
+LOCK TABLES `vocations` WRITE;
+/*!40000 ALTER TABLE `vocations` DISABLE KEYS */;
+INSERT INTO `vocations` VALUES (0,'None','No vocation','2026-02-17 23:39:34','2026-02-17 23:39:34'),(1,'Sorcerer','Master of fire and energy','2026-02-17 23:39:34','2026-02-17 23:39:34'),(2,'Druid','Master of nature and healing','2026-02-17 23:39:34','2026-02-17 23:39:34'),(3,'Paladin','Master of ranged combat and healing','2026-02-17 23:39:34','2026-02-17 23:39:34'),(4,'Knight','Master of close combat and defense','2026-02-17 23:39:34','2026-02-17 23:39:34');
+/*!40000 ALTER TABLE `vocations` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `worlds`
+--
+
+DROP TABLE IF EXISTS `worlds`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `worlds` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
+  `serverName` varchar(100) NOT NULL,
+  `pvptype` enum('pvp','no-pvp','pvp-enforced') NOT NULL DEFAULT 'pvp',
+  `location` varchar(100) DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `worlds_servername_unique` (`serverName`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `worlds`
+--
+
+LOCK TABLES `worlds` WRITE;
+/*!40000 ALTER TABLE `worlds` DISABLE KEYS */;
+INSERT INTO `worlds` VALUES (1,'Tibia Test World','pvp','Test Location','2026-02-17 23:59:55','2026-02-17 23:59:55');
+/*!40000 ALTER TABLE `worlds` ENABLE KEYS */;
+UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -1422,4 +1615,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-02-17 18:25:26
+-- Dump completed on 2026-03-03 10:56:24

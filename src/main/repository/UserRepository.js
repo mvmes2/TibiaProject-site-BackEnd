@@ -1,10 +1,15 @@
-const { accounts, players, players_online, player_deaths, player_items,
-  players_comment, players_titles, guild_membership, guilds, guild_ranks } = require('../models/MasterModels');
-const { convertPremiumTimeToDaysLeft, updateLastDayTimeStampEpochFromGivenDays, setCreateCharacterController,
-   getCreateCharacterController, ErrorLogCreateFileHandler } = require('../utils/utilities');
+require('dotenv');
+const { accounts, players, players_online, player_deaths, guild_invites,
+  players_titles, guild_membership, guilds, guild_ranks } = require('../models/MasterModels');
 
+const { convertPremiumTimeToDaysLeft, updateLastDayTimeStampEpochFromGivenDays, setCreateCharacterController,
+  getCreateCharacterController, ErrorLogCreateFileHandler, formatName, vocationsArr, testNameParams } = require('../utils/utilities');
 module.exports = app => {
   const moment = require('moment');
+
+  let checkIfAccExistsData = 0;
+  let checkIfAccExistsLastUpdated = 0;
+  let checkAcc = 0;
 
   const updateAcc = async (data) => {
     const findAccountFirst = await accounts.query().select('id').where({ id: data.id });
@@ -32,20 +37,15 @@ module.exports = app => {
       return { status: 404, message: 'Email already in use!' }
     }
     try {
-      data.createdAt = Math.floor(Date.now() / 1000);
-      data.coins = 1500;
       const resp = await accounts.query().insert(data);
       const { id, ...rests } = resp;
+      checkIfAccExistsData = 0;
       return { status: 201, message: id };
     } catch (err) {
       console.log(err)
       return { status: 500, message: err }
     }
   }
-
-  let checkIfAccExistsData = 0;
-  let checkIfAccExistsLastUpdated = 0;
-  let checkAcc = 0;
 
   const checkIfAccExists = async (data) => {
     console.log('....................................................!!!!!!!!!!!!!!!: ', data)
@@ -54,14 +54,16 @@ module.exports = app => {
     if (checkIfAccExistsData.toString() === data.toString() && moment().diff(checkIfAccExistsLastUpdated, 'minutes') < 5) {
       console.log('Entrou no chache?')
       console.log('Cache checkAcc aplicado com sucesso!')
+
       if (!checkAcc || checkAcc === undefined || checkAcc?.length < 1) {
         return { bool: false };
       } else {
         return { acc: checkAcc, bool: true };
       }
     }
+
     try {
-      checkAcc = await accounts.query().select('email', 'id', 'password', 'name', 'loginHash', 'country', 'coins').where({ email: data });
+      checkAcc = await accounts.query().select('email', 'id', 'password', 'name', 'login_hash', 'country', 'coins', 'coins_transferable').where({ email: data });
       if (!checkAcc || checkAcc === undefined || checkAcc?.length < 1) {
         checkIfAccExistsLastUpdated = moment();
         checkIfAccExistsData = data;
@@ -79,102 +81,81 @@ module.exports = app => {
   let validateLoginData = 0;
   let validateLoginLastUpdated = 0;
   let validateLoginAccInfo = 0;
- 
+
   const validateLoginHash = async (data) => {
     // cache
-    console.log('Vai entrar no chache?........................................', data, validateLoginData)
-    if (validateLoginData.id === data.id && getCreateCharacterController() !== 0 && moment().diff(validateLoginLastUpdated, 'minutes') < 5) {
+
+    if (validateLoginData.id == data.id && getCreateCharacterController() !== 0 && moment().diff(validateLoginLastUpdated, 'minutes') < 5) {
       console.log('Cache validateLoginAccMannagement aplicado com sucesso!')
-     
+
       return { status: 200, message: validateLoginAccInfo };
     }
 
     try {
       console.log('NÃO ENTROU NO CASH!')
-      if (!data?.loginHash || !data.id) { return { status: 403, message: 'You need to Login!' } }
+      const incomingLoginHash = data?.login_hash || data?.loginHash;
+      if (!incomingLoginHash || !data.id) { return { status: 403, message: 'You need to Login!' } }
 
-     const validateLoginInfo = await accounts.query().select('loginHash').where({ id: data.id }).first();
+      const validateLoginInfo = await accounts.query().select('login_hash').where({ id: Number(data.id) }).first();
 
       if (!validateLoginInfo || validateLoginInfo === undefined) { return { status: 403, message: 'error at login hash' } }
 
-      if (validateLoginInfo.loginHash.trim() !== data?.loginHash.trim()) {
+      if (validateLoginInfo.login_hash?.trim() !== incomingLoginHash?.trim()) {
         return {
           status: 403, message: `Error at Login hash, close this page, re-open the website, and try again! or call admin!`
         }
       };
 
-      const acc = await accounts.query().select('id', 'name', 'email', 'country', 'lastday', 'coins', 'isBanned',
-        'banReason', 'premdays', 'createdAt', 'day_end_premmy', 'web_lastlogin', 'web_flags', 'type')
-        .where({ id: Number(data.id) }).first();
-
-      if (Number(acc.premdays) > 0) {
-
-        if (acc.day_end_premmy !== 0 && acc.premdays > 0) {
-
-          const dataToUpdatePremDays = {
-            id: acc.id,
-            update: {
-              premdays: convertPremiumTimeToDaysLeft((Number(acc.day_end_premmy) + 4640))
-            }
-          }
-          await updateAcc(dataToUpdatePremDays);
-        }
-
-        const accToUpdate = await accounts.query().select('*').where({ id: Number(data.id) }).first();
-
-        if (Number(Date.now()) > (Number(accToUpdate.day_end_premmy) * 1000) || Number(accToUpdate.day_end_premmy) == 0 || Number(accToUpdate.premdays) > Number(convertPremiumTimeToDaysLeft((Number(accToUpdate.day_end_premmy) + (29 * 86400))))) {
-
-          let daysDifference = null;
-          if (Number(acc.day_end_premmy) !== 0) {
-            daysDifference = (Number(accToUpdate.premdays) - Number(convertPremiumTimeToDaysLeft(Number(accToUpdate.day_end_premmy))));
-          }
-
-          const updatedLastDays = (updateLastDayTimeStampEpochFromGivenDays(Number(accToUpdate.day_end_premmy) !== 0 ? daysDifference : accToUpdate.premdays, Number(accToUpdate.day_end_premmy)));
-
-          const dataToUpdateLastDay = {
-            id: accToUpdate.id,
-            update: {
-              day_end_premmy: updatedLastDays,
-            }
-          }
-          await updateAcc(dataToUpdateLastDay);
-        }
-      }
-
       const characters = await players.query()
         .join('worlds', 'players.world_id', '=', 'worlds.id')
-        .join('vocations', 'players.vocation', 'vocations.vocation_id')
-        .select('players.id', 'players.name', 'players.level', 'vocation_name as vocation', 'sex', 'lastlogin', 'lastip', 'worlds.serverName as world', 'players.createdAt', 'group_id', 'players.hidden')
-        .where({ account_id: Number(data.id) })
-        .where({ 'players.deletedAt': 0 }).orderBy('players.name', 'asc');
+        .select('players.id', 'players.name', 'players.level', 'sex', 'lastlogin', 'lastip', 'worlds.server_name as world', 'players.created_at', 'group_id', 'players.hidden', 'players.comment')
+        .select(players.raw('CASE players.vocation ' + vocationsArr.map((vocation) => `WHEN ${vocation.vocation_id} THEN '${vocation.vocation_name}'`).join(' ') + ' END as vocation'))
+        .where({ 'players.account_id': Number(data.id) })
+        .where({ 'players.deletion': 0 })
+        .orderBy('players.name', 'asc');
 
       const editedCharList = [];
 
       for (x in characters) {
-        const deathList = await player_deaths.query().select('*').where({ player_id: characters[x].id });
+        const deathList = await player_deaths.query().select('time', 'level', 'killed_by', 'is_player', 'mostdamage_by', 'mostdamage_is_player', 'unjustified', 'mostdamage_unjustified').where({ player_id: characters[x].id });
+
         const online = await players_online.query().select('*').where({ player_id: characters[x].id });
-        const comment = await players_comment.query().select('comment').where({ player_id: characters[x].id }).first();
+
+        const playerGuildID = await guild_membership.query().select('guild_id').where({ player_id: characters[x].id });
+
+        // const playerGuildInvite = await guild_invites.query().select('guild_id').where({ player_id: characters[x].id });
+
+        let playerGuildName = null;
+        let playerAccepGuildInvit = null;
+
+        if (playerGuildID.length > 0) {
+          playerGuildName = await guilds.query().select('name').where({ id: playerGuildID[0]?.guild_id }).first();
+        }
+        // if (playerGuildInvite.length > 0) {
+        //   playerAccepGuildInvit = await guilds.query().select('name').where({ id: playerGuildInvite[0]?.guild_id }).first();
+        // }
 
         deathList.sort((a, b) => b.time - a.time);
 
         deathList.slice(0, 15);
-
+        delete characters[x].id;
         const newCharInfo = {
           ...characters[x],
           deathList,
-          comment: comment?.comment,
           isOnline: online[0]?.player_id ? true : false,
+          guild_name: playerGuildName?.name,
+          guild_invite_name: playerAccepGuildInvit?.name
         }
         editedCharList.push(newCharInfo);
       }
-      const accUpdatedPremiumTime = await accounts.query().select('id', 'name', 'email', 'country', 'lastday', 'coins',
-        'isBanned', 'banReason', 'premdays', 'createdAt', 'day_end_premmy', 'web_lastlogin', 'web_flags', 'type')
+      const accUpdatedPremiumTime = await accounts.query().select('name', 'premdays', 'email', 'country', 'lastday', 'coins', 'coins_transferable', 'created_at', 'lastday', 'web_lastlogin', 'web_flags', 'type')
         .where({ id: Number(data.id) }).first();
-
-        validateLoginAccInfo = {
+      accUpdatedPremiumTime.premdays = (accUpdatedPremiumTime.lastday - (Date.now() / 1000)) > 0 ? Math.floor(((accUpdatedPremiumTime.lastday - (Date.now() / 1000)) / 60 / 60 / 24)) : 0;
+      validateLoginAccInfo = {
         ...accUpdatedPremiumTime,
         editedCharList,
       }
+
       validateLoginLastUpdated = moment();
       validateLoginData = data;
       setCreateCharacterController(1);
@@ -184,41 +165,64 @@ module.exports = app => {
       return { status: 500, message: 'Internal error' };
     }
   }
+  let createNewCharacterDBLastUpdated = 0;
+  let createNewCharacterDBData = '';
+  let createNewCharacterDBUserValidation = 0;
+  const createNewCharacterDB = async (data, isValidToken) => {
 
-  const createNewCharacterDB = async (data) => {
-    console.log('informações enviadas na criação do personagem no back: ', data)
-    if (data.createdAt === undefined || data.createdAt === null) {
-      data.createdAt = Math.floor(Date.now() / 1000);
+    if (process.env.TESTSERVER_ON == 'true') {
+      return { status: 401, message: 'Create character is bloked right now, check news or discord news!' };
     }
-    if (data.conditions === undefined || data.conditions === null) {
-      data.conditions = Buffer.alloc(0);
+
+    if (createNewCharacterDBData?.toLowerCase() == data.name.toLowerCase() && createNewCharacterDBUserValidation == isValidToken?.data?.id && moment().diff(createNewCharacterDBLastUpdated, 'minutes') <= 3) {
+      return { status: 401, message: 'You have to wait 3 minuts to try again!' }
     }
+
+    const nameToCheck = data.name;
+    const warningTextName = 'character name';
+    const checkingNameParams = testNameParams(nameToCheck, 22, 5, warningTextName, false, false);
+    if (checkingNameParams) return checkingNameParams;
+
     try {
+      const checkPlayersQuantity = await players.query().select('name').where({ account_id: data?.account_id ? data?.account_id : 0, deletion: 0 });
+      console.log('LOGANDO QUANTIDADE DE PLAYERS NA CONTA... ', checkPlayersQuantity.length);
+      if (checkPlayersQuantity.length >= 20) {
+        return { status: 401, message: 'Max character limit 20 per account!' };
+      }
+
       const checkNameExist = await players.query().select('name').whereRaw('LOWER(name) = ?', data.name.toLowerCase());
       const femaleCharacter = {
         ...data,
         looktype: 136
       }
-      data.name = data.name.charAt(0).toUpperCase() + data.name.slice(1);
+
+      data.name = formatName(data.name);
       if (!checkNameExist || checkNameExist === undefined || checkNameExist?.length < 1) {
         await players.query().insert(data.sex === 0 ? femaleCharacter : data);
-        const getCreatedPlayer = await players.query().select('id').where({ name: data.name }).first();
+        const getCreatedPlayer = await players.query().select('id').where({ name: data.name, deletion: 0 }).first();
 
-        const newComersIinitialItens = [
-          { player_id: Number(getCreatedPlayer.id), pid: 3, sid: 101, itemtype: 2853, count: 1, attributes: Buffer.alloc(0) },
-          { player_id: Number(getCreatedPlayer.id), pid: 4, sid: 102, itemtype: 3561, count: 1, attributes: Buffer.alloc(0) },
-          { player_id: Number(getCreatedPlayer.id), pid: 101, sid: 104, itemtype: 3291, count: 1, attributes: Buffer.alloc(0) },
-          { player_id: Number(getCreatedPlayer.id), pid: 101, sid: 105, itemtype: 3270, count: 1, attributes: Buffer.alloc(0) },
-          { player_id: Number(getCreatedPlayer.id), pid: 101, sid: 106, itemtype: 3293, count: 1, attributes: Buffer.alloc(0) },
-          { player_id: Number(getCreatedPlayer.id), pid: 101, sid: 107, itemtype: 21401, count: 1, attributes: Buffer.alloc(0) },
-          { player_id: Number(getCreatedPlayer.id), pid: 101, sid: 108, itemtype: 3585, count: 1, attributes: Buffer.alloc(0) }
-        ]
-        for (const each of newComersIinitialItens) {
-          await player_items.query().insert(each);
-        }
+        // const newComersIinitialItens = [
+        //   { player_id: Number(getCreatedPlayer.id), pid: 3, sid: 101, itemtype: 2853, count: 1 },
+        //   { player_id: Number(getCreatedPlayer.id), pid: 4, sid: 102, itemtype: 3561, count: 1 },
+        //   { player_id: Number(getCreatedPlayer.id), pid: 101, sid: 104, itemtype: 3291, count: 1 },
+        //   { player_id: Number(getCreatedPlayer.id), pid: 101, sid: 105, itemtype: 3270, count: 1 },
+        //   { player_id: Number(getCreatedPlayer.id), pid: 101, sid: 106, itemtype: 3293, count: 1 },
+        //   { player_id: Number(getCreatedPlayer.id), pid: 101, sid: 107, itemtype: 21401, count: 1 },
+        //   { player_id: Number(getCreatedPlayer.id), pid: 101, sid: 108, itemtype: 3585, count: 1 }
+        // ]
+        // newComersIinitialItens.map(async (each) => {
+        //   await player_items.query().insert(each);
+        // })
+
         setCreateCharacterController(0);
+        createNewCharacterDBLastUpdated = moment();
+        createNewCharacterDBData = data.name;
+        createNewCharacterDBUserValidation = isValidToken?.data?.id;
         return { status: 201, message: 'Created successfuly' }
       } else {
+        createNewCharacterDBLastUpdated = moment();
+        createNewCharacterDBData = data.name;
+        createNewCharacterDBUserValidation = isValidToken?.data?.id;
         return { status: 400, message: 'Name already in use!' };
       }
     } catch (err) {
@@ -236,24 +240,24 @@ module.exports = app => {
     data.name = data.name.replaceAll('-', ' ');
     console.log(data.name)
     console.log('qual a dataaa???????????????????????? ', data.name)
-//cache
-  console.log('VAI ENTRAR NO CACHE DE GetPlayerInfo??', PlayerData.name, data.name);
+    //cache
+    console.log('VAI ENTRAR NO CACHE DE GetPlayerInfo??', PlayerData.name, data.name);
     if (PlayerData.name === data.name && moment().diff(PlayerInfoLastUpdated, 'minutes') < 5) {
       console.log('ENTROU NO CACHE!!')
       console.log('CACHE em GetPlayerInfo feito com sucesso!!');
       if (checkPlayerNameInfo.length < 1) { return { status: 404, message: 'Character does not exists!' } }
 
       if (PlayerInfo && PlayerInfo?.owner == false) {
-        return { status: 200, message: PlayerInfo, owner: false } 
+        return { status: 200, message: PlayerInfo, owner: false }
       }
       return { status: 200, message: PlayerInfo, owner: true }
     }
 
-    checkPlayerNameInfo = await players.query().select('name', 'account_id').where({ name: data.name });
+    checkPlayerNameInfo = await players.query().select('name', 'account_id').where({ name: data.name, deletion: 0 });
 
     if (checkPlayerNameInfo.length < 1) {
       PlayerInfoLastUpdated = moment();
-      return { status: 404, message: 'Character does not exists!' } 
+      return { status: 404, message: 'Character does not exists!' }
     }
 
     let checkCharacterOwner = null;
@@ -264,34 +268,38 @@ module.exports = app => {
 
       checkCharacterOwner = await players.query()
         .join('worlds', 'players.world_id', '=', 'worlds.id')
-        .join('vocations', 'players.vocation', 'vocations.vocation_id')
-        .select('players.id', 'players.account_id', 'players.hidden', 'players.name', 'players.level', 'vocation_name as vocation', 'sex', 'lastlogin', 'lastip', 'worlds.serverName as world', 'worlds.id as world_id', 'players.createdAt', 'group_id', 'players.hidden')
+        .select('players.id', 'players.account_id', 'players.hidden', 'players.name', 'players.level', 'sex', 'lastlogin', 'lastip', 'worlds.server_name as world', 'worlds.id as world_id', 'players.created_at', 'group_id', 'players.hidden')
+        .select(players.raw('CASE players.vocation ' + vocationsArr.map((vocation) => `WHEN ${vocation.vocation_id} THEN '${vocation.vocation_name}'`).join(' ') + ' END as vocation'))
         .where({ name: data.name })
         .where({ account_id: data.account_id })
-        .where({ 'players.deletedAt': 0 }).first();
+        .where({ 'players.deletion': 0 }).first();
     } catch (err) {
       console.log(err)
       return { status: 500, message: 'erro interno, contate a administração ou abra um ticket!s' }
     }
     if (checkCharacterOwner === undefined || checkCharacterOwner === null) {
       try {
-        
+
         const found = await players.query()
           .join('worlds', 'players.world_id', '=', 'worlds.id')
-          .join('vocations', 'players.vocation', 'vocations.vocation_id')
-          .select('players.id', 'players.account_id', 'players.hidden', 'players.name', 'players.level', 'vocation_name as vocation', 'sex', 'lastlogin', 'lastip', 'worlds.serverName as world', 'worlds.id as world_id', 'players.createdAt', 'group_id')
+          .select('players.id', 'players.account_id', 'players.hidden', 'players.name', 'players.level', 'sex', 'lastlogin', 'lastip', 'worlds.server_name as world', 'worlds.id as world_id', 'players.created_at', 'group_id')
+          .select(players.raw('CASE players.vocation ' + vocationsArr.map((vocation) => `WHEN ${vocation.vocation_id} THEN '${vocation.vocation_name}'`).join(' ') + ' END as vocation'))
           .whereRaw('LOWER(players.name) = ?', data.name.toLowerCase())
-          .where({ 'players.deletedAt': 0 }).first();
+          .where({ 'players.deletion': 0 }).first();
         const deathList = await player_deaths.query()
-          .select('*')
+          .select('time', 'level', 'killed_by', 'is_player', 'mostdamage_by', 'mostdamage_is_player', 'unjustified', 'mostdamage_unjustified')
           .where({ player_id: found.id }).orderBy('time', 'desc').limit(15);
         const online = await players_online.query().select('*').where({ player_id: found.id }).first();
-        const comment = await players_comment.query().select('comment').where({ player_id: found.id }).first();
-        const accountCharList = await players.query().select('name', 'hidden').where({ account_id: found.account_id });
+        const comment = await players.query().select('comment').where({ id: found.id, deletion: 0 }).first();
+        const accountCharList = await players.query().select('name', 'hidden').where({ account_id: found.account_id, deletion: 0 });
         const guild = await guild_membership.query().select('player_id', 'guild_id', 'rank_id').where({ player_id: found.id }).first();
         const memberRank = guild ? (await guild_ranks.query().select('name').where({ id: guild.rank_id }).first()) : '';
         const GuildName = guild ? (await guilds.query().select('name', 'id').where({ id: guild.guild_id }).first()) : '';
-        console.log('wetf guild_id???', GuildName)
+        console.log('wetf guild_id???', GuildName);
+        delete found.id;
+        delete found.account_id;
+        delete found.lastip;
+
         PlayerInfo = {
           ...found,
           deathList,
@@ -301,7 +309,6 @@ module.exports = app => {
           isOnline: online?.player_id ? true : false,
           guild: GuildName.name,
           guild_rank: memberRank.name,
-          guild_id: GuildName.id
         }
         PlayerInfoLastUpdated = moment();
         return { status: 200, message: PlayerInfo, owner: false }
@@ -312,15 +319,18 @@ module.exports = app => {
     } else {
       try {
         const deathList = await player_deaths.query()
-          .select('*')
+          .select('time', 'level', 'killed_by', 'is_player', 'mostdamage_by', 'mostdamage_is_player', 'unjustified', 'mostdamage_unjustified')
           .where({ player_id: checkCharacterOwner.id }).orderBy('time', 'desc').limit(15);
         const online = await players_online.query().select('*').where({ player_id: checkCharacterOwner.id }).first();
-        const comment = await players_comment.query().select('comment').where({ player_id: checkCharacterOwner.id }).first();
-        const accountCharList = await players.query().select('name', 'hidden').where({ account_id: checkCharacterOwner.account_id });
+        const comment = await players.query().select('comment').where({ id: checkCharacterOwner.id, deletion: 0 }).first();
+        const accountCharList = await players.query().select('name', 'hidden').where({ account_id: checkCharacterOwner.account_id, deletion: 0 });
         const guild = await guild_membership.query().select('player_id', 'guild_id', 'rank_id').where({ player_id: checkCharacterOwner.id }).first();
         const memberRank = guild ? (await guild_ranks.query().select('name').where({ id: guild.rank_id }).first()) : '';
         const GuildName = guild ? (await guilds.query().select('name', 'id').where({ id: guild.guild_id }).first()) : '';
-        
+        delete checkCharacterOwner.id;
+        delete checkCharacterOwner.account_id;
+        delete checkCharacterOwner.lastip;
+
         PlayerInfo = {
           ...checkCharacterOwner,
           deathList,
@@ -330,7 +340,6 @@ module.exports = app => {
           isOnline: online?.player_id ? true : false,
           guild: GuildName.name,
           guild_rank: memberRank.name,
-          guild_id: GuildName.id
         }
         PlayerInfoLastUpdated = moment();
         return { status: 200, message: PlayerInfo, owner: true }
@@ -412,17 +421,17 @@ module.exports = app => {
     try {
       const highScores = await players.query()
         .join('worlds', 'players.world_id', '=', 'worlds.id')
-        .join('vocations', 'players.vocation', 'vocations.vocation_id')
         .join('accounts', 'players.account_id', '=', 'accounts.id')
-        .select('players.id', 'players.name', 'players.level', 'vocation_name as vocation', 'worlds.serverName as world',
-          'players.hidden', 'players.skill_fist', 'players.skill_club', 'players.skill_sword',
+        .select('players.name', 'players.level', 'worlds.server_name as world',
+          'players.hidden', 'accounts.country', 'players.skill_fist', 'players.skill_club', 'players.skill_sword',
           'players.skill_axe', 'players.skill_dist', 'players.skill_shielding',
           'players.skill_fishing', 'players.experience', 'players.maglevel')
-        .where('players.group_id', '<', 6)
-        .where({ 'players.deletedAt': 0 })
+        .select(players.raw('CASE players.vocation ' + vocationsArr.map((vocation) => `WHEN ${vocation.vocation_id} THEN '${vocation.vocation_name}'`).join(' ') + ' END as vocation'))
+        .where('players.group_id', '=', 1)
+        .where({ 'players.deletion': 0 })
         .orderBy(data, 'desc')
         .limit(100);
-console.log('highScores: ', highScores)
+
       switch (data) {
         case 'experience':
           experienceLastUpdated = moment();
@@ -488,43 +497,74 @@ console.log('highScores: ', highScores)
   let getTitleData = 0;
 
   const getCharacterTitlesRepo = async (data) => {
-    console.log('VAI ENTRAR NO CACHE GETTITLE???? ', data.id, getTitleData.id)
+    console.log('VAI ENTRAR NO CACHE GETTITLE???? ', data)
     try {
       //cache
-      if (getTitleData?.id === data?.id && data?.trigger === 'getTitle' && moment().diff(getTitleLastUpdated, 'minutes') < 5) {
+      if (getTitleData?.name === data?.name && data?.trigger === 'getTitle' && moment().diff(getTitleLastUpdated, 'minutes') < 5) {
         console.log('ENTROU NO CASH!!!');
         console.log('CACHE EM GETTITLE FEITO COM SUCESSO!!!');
-          return { status: 200, message: getTitleInfo }
+        return { status: 200, message: getTitleInfo }
       }
-      if (getTitleData?.id === data?.id && moment().diff(getTitleSLastUpdated, 'minutes') < 5) {
+      if (getTitleData?.name === data?.name && moment().diff(getTitleSLastUpdated, 'minutes') < 5) {
         console.log('ENTROU NO CASH!!!');
         console.log('CACHE EM GETTITLES FEITO COM SUCESSO!!!');
-          return { status: 200, message: getTitlesInfo }
+        return { status: 200, message: getTitlesInfo }
       }
 
       console.log('NÃO ENTROU NO CASH!!!');
       getTitleData = data;
-
+      console.log('qual foi? ', data.trigger)
+      console.log('qual é?? ', data)
       if (data.trigger === 'getTitle') {
-        getTitleInfo = await players_titles.query().select('*').where({ player_id: data.id }).where({ in_use: 1 }).first();
+        getTitleInfo = await players.query()
+          .join('titles', 'players.title', '=', 'titles.id')
+          .select('titles.title_name', 'players.deletion')
+          .where({ 'players.name': data.name }).first();
+
         getTitleLastUpdated = moment();
         return { status: 200, message: getTitleInfo }
       } else {
-        getTitlesInfo = await players_titles.query().select('*').where({ player_id: data.id });
+        getTitleInfo = await players.query()
+          .join('titles', 'players.title', '=', 'titles.id')
+          .select('titles.title_name', 'players.id')
+          .whereRaw('LOWER(players.name) = ?', data.name.toLowerCase()).first();
+        console.log(data.name)
+        console.log(getTitleInfo)
+
+        getTitlesInfo = getTitleInfo ? await players_titles.query()
+          .join('titles', 'players_titles.title_id', '=', 'titles.id')
+          .select('titles.title_name', 'titles.id')
+          .where({ player_id: getTitleInfo.id }) : [];
+
         getTitleSLastUpdated = moment();
-        return { status: 200, message: getTitlesInfo }
+        const newTitleArray = [...getTitlesInfo, { in_use: getTitleInfo?.title_name }]
+        getTitlesInfo = newTitleArray
+        console.log('como vai title 1? ', newTitleArray)
+        console.log('como vai title 2? ', getTitlesInfo)
+        console.log('como vai title 3? ', getTitleInfo)
+
+        return { status: 200, message: newTitleArray }
       }
     } catch (err) {
       console.log('Error trying get titles at: getCharacterTitlesRepo, ', err)
       return { status: 500, message: 'Internal errror' }
     }
   }
+  let playerName = 0;
+  let updateTitleLastUpdated = 0;
 
   const updateCharacterTitleInUseRepo = async (data) => {
+    console.log('como to recebendo a data de use title?????????????? ', data);
+    if (data.player_name == playerName && moment().diff(updateTitleLastUpdated, 'minutes') < 2) {
+      console.log('ENTROU NO CASH!!!');
+      console.log('CACHE EM GETTITLE FEITO COM SUCESSO!!!');
+      return { status: 404, message: 'You need to wait 2 minuts to update title again!' }
+    }
     try {
-      await players_titles.query().update({ in_use: 0 }).where({ player_id: data.player_id }).whereNot('id', data.title_id);
-
-      await players_titles.query().update({ in_use: 1 }).where({ id: data.title_id });
+      await players.query().update({ title: data.title_id }).where({ name: data.player_name, deletion: 0 });
+      playerName = data.player_name;
+      updateTitleLastUpdated = moment();
+      getTitleData = 0;
       return { status: 200, message: 'Title Updated!' }
     } catch (err) {
       console.log('Error trying update titles at: updateCharacterTitleInUseRepo, ', err)
@@ -543,5 +583,5 @@ console.log('highScores: ', highScores)
     getCharacterTitlesRepo,
     updateCharacterTitleInUseRepo
   }
-  
+
 }

@@ -2,7 +2,7 @@ const { worlds, players } = require('../models/MasterModels');
 
 const getWorldListFromDB = async () => {
   try {
-    const worldList = await worlds.query().select('id', 'serverName', 'pvptype', 'location');
+    const worldList = await worlds.query().select('id', 'server_name', 'pvp_type', 'location');
     return { status: 200, message: worldList };
   } catch (err) {
     console.log(err);
@@ -12,7 +12,7 @@ const getWorldListFromDB = async () => {
 
 const getAllWorldsCharactersFromDB = async () => {
   try {
-    const charlist = await players.query().select('name').where('group_id', '<', 4);
+    const charlist = await players.query().select('name').where('group_id', '<', 4).where({ deletion: 0 });
 
     return { status: 200, message: JSON.stringify(charlist) };
   } catch (err) {
@@ -26,8 +26,9 @@ const getWorldWideTopFivePlayersRepository = async () => {
     const topFivePlayers = await players.query()
   .join('worlds', 'players.world_id', '=', 'worlds.id')
   .join('accounts', 'players.account_id', '=', 'accounts.id')
-  .select('players.name', 'players.level', 'worlds.serverName as world')
-  .where('group_id', '<', 4)
+  .select('players.name', 'players.level', 'worlds.server_name as world', 'accounts.country')
+  .where('group_id', '=', 1)
+  .where({ 'players.deletion': 0 })
   .orderBy('players.level', 'desc').limit(5);
   console.log(topFivePlayers);
   return { status: 200, message: topFivePlayers }
@@ -39,7 +40,7 @@ const getWorldWideTopFivePlayersRepository = async () => {
 
 const getAllPlayersFromWorld = async (data) => {
   try {
-    const charlist = await players.query().select('id', 'name').where({ world_id: data.world_id }).where('group_id', '<', 4);
+    const charlist = await players.query().select('name').where({ world_id: data.world_id }).where('group_id', '<', 4).where({ deletion: 0 });
 
     return { status: 200, message: JSON.stringify(charlist) };
   } catch (err) {
