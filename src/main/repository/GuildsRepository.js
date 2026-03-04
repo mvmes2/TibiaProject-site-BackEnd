@@ -325,16 +325,16 @@ const newGuildInvite = async (data, validatedAccountID) => {
       console.log('vualá!');
 
       const CheckIfHaveGuild = await guild_membership.query().select('player_id').where({ player_id: getPlayerIDToInvite.id });
-      // const CheckIfHaveInvite = await guild_invites.query().select('player_id').where({ player_id: getPlayerIDToInvite.id });
+      const CheckIfHaveInvite = await guild_invites.query().select('player_id').where({ player_id: getPlayerIDToInvite.id });
 
       if (CheckIfHaveGuild?.length > 0) {
         return { status: 403, message: 'Player already in a guild! cannot be invited.' };
       }
-      // if (CheckIfHaveInvite?.length > 0) {
-      //   newGuildInviteLastUpdated = moment();
-      //   newGuildInviteCheckAcc = validatedAccountID;
-      //   return { status: 403, message: 'Player already invited to a guild!' };
-      // }
+      if (CheckIfHaveInvite?.length > 0) {
+        newGuildInviteLastUpdated = moment();
+        newGuildInviteCheckAcc = validatedAccountID;
+        return { status: 403, message: 'Player already invited to a guild!' };
+      }
 
       const insertNewGuildInvite = {
         player_id: getPlayerIDToInvite.id,
@@ -342,6 +342,7 @@ const newGuildInvite = async (data, validatedAccountID) => {
         date: (Date.now() / 1000),
         asked_to_join: data.asked_to_join == 1 ? 1 : 0
       }
+      console.log('como vai invitar? ', insertNewGuildInvite);
       await guild_invites.query().insert(insertNewGuildInvite);
       guildInformationLastUpdated = 6;
       setCreateCharacterController(0);
@@ -382,7 +383,7 @@ const guildInviteCancel = async (data, validatedAccountID) => {
     const getPossiblePlayersFromAccount = await players.query().select('id').where({ account_id: validatedAccountID });
     // console.log('possible accounts check = ', getPossiblePlayersFromAccount);
 
-    // const getGuildInvites = await guild_invites.query().select('player_id').where({ player_id: getPlayerIDToInvite.id, guild_id: getGuildOwnerAndGuildID.id });
+    const getGuildInvites = await guild_invites.query().select('player_id').where({ player_id: getPlayerIDToInvite.id, guild_id: getGuildOwnerAndGuildID.id });
 
     // Estágio 1: Verificando se o jogador tem um invite ativo na guilda
 
@@ -815,9 +816,9 @@ const createNewGuild = async (data, validatedAccountID) => {
   try {
     createNewGuildLastUpdated = moment();
     createNewGuildAccountCheck = validatedAccountID;
-
-    const checkIfHaveCoinsAndTRansferableCoins = await accounts.query().select('project_coins as coins', 'coins_transferable').where({ id: data.account_id }).first();
-
+console.log('&&&', data.account_id);
+    const checkIfHaveCoinsAndTRansferableCoins = await accounts.query().select('project_coins').where({ id: data.account_id }).first();
+console.log('&&& 2', data.insert.name);
     const checkIfGuildNameExists = await guilds.query().select('name').where({ name: data.insert.name });
 
     if (checkIfGuildNameExists?.length > 0) {
@@ -828,6 +829,8 @@ const createNewGuild = async (data, validatedAccountID) => {
     }
 
     // checando se o GuildMaster escolhido está em alguma guild.
+    console.log('&&& 3', data);
+    
     const getGuildOwnerId = await players.query().select('id').where({ name: data.insert.ownername }).first();
     const checkIfGuildMasterAlreadyIsGuildMember = await guild_membership.query().select('player_id').where({ player_id: getGuildOwnerId.id });
     if (checkIfGuildMasterAlreadyIsGuildMember?.length > 0) {
@@ -836,7 +839,7 @@ const createNewGuild = async (data, validatedAccountID) => {
 
     const coinsToPay = 10;
 
-    if (Number(checkIfHaveCoinsAndTRansferableCoins.coins) + Number(checkIfHaveCoinsAndTRansferableCoins.coins_transferable) >= coinsToPay) {
+    if (Number(checkIfHaveCoinsAndTRansferableCoins.project_coins) >= coinsToPay) {
 
       const newGuildToInsert = {
         creationdata: data.insert.creationdata,
@@ -852,25 +855,10 @@ const createNewGuild = async (data, validatedAccountID) => {
       createNewGuildAccountCheck = validatedAccountID;
       getGuildListLastUpdated = 4;
 
-      let remainingCoins = coinsToPay;
+      await accounts.query().update({
+        project_coins: (Number(checkIfHaveCoinsAndTRansferableCoins.project_coins) - coinsToPay),
+      }).where({ id: data.account_id });
 
-      if (Number(checkIfHaveCoinsAndTRansferableCoins.coins) >= remainingCoins) {
-        // Se o jogador tiver moedas suficientes em coins, desconte o valor necessário
-        await accounts.query().update({
-          project_coins: (Number(checkIfHaveCoinsAndTRansferableCoins.coins) - remainingCoins),
-        }).where({ id: data.account_id });
-        remainingCoins = 0; // Todas as moedas necessárias foram descontadas
-      } else {
-        // Se o jogador não tiver moedas suficientes em coins, desconte o máximo possível
-        await accounts.query().update({ project_coins: 0 }).where({ id: data.account_id });
-        remainingCoins -= Number(checkIfHaveCoinsAndTRansferableCoins.coins);
-      }
-      // Se ainda houver moedas restantes para descontar, desconte das moedas transferíveis (coins_transferable)
-      if (remainingCoins > 0) {
-        await accounts.query().update({
-          coins_transferable: (Number(checkIfHaveCoinsAndTRansferableCoins.coins_transferable) - remainingCoins),
-        }).where({ id: data.account_id });
-      }
       return { status: 201, message: 'Guild Created!!' }
     } else {
       return { status: 403, message: 'This account does not have enough coins to pay.' }

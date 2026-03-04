@@ -14,14 +14,14 @@ module.exports = (app) => {
     const resp = await CreateAccService(data);
     res.status(resp.status).send({ message: resp.message });
   };
-  const beforeAccCreateSendEmailRequest = async (req, resp) => {
+  const beforeAccCreateSendEmailRequest = async (req, res) => {
     if (process.env.TESTSERVER_ON == 'true') {
-      return resp.status(401).send({ message: 'Create account is bloked right now, check news or discord news!' });
+      return res.status(401).send({ message: 'Create account is bloked right now, check news or discord news!' });
     }
 
     const data = req.body;
     if (!data || data === undefined || data === null) {
-      return resp.status(400).send({
+      return res.status(400).send({
         message:
           "Internal error, please close the website and try again later, or open ticket!",
       });
@@ -29,7 +29,8 @@ module.exports = (app) => {
     try {
       console.log('o que ta vindo de data do create account? ', data);
 
-      const accountNameValidation = /^(?!.*^\s)(?!.*\s$)(?!.*[@#$%¨&*()~´"-' ])[a-zA-Z0-9]+$/i.test(data.name);
+      const normalizedName = data?.name?.trim();
+      const accountNameValidation = /^[a-zA-Z]+(?: [a-zA-Z]+){0,2}$/i.test(normalizedName);
 
       const invalidAccountName = ["'", "!", "@", "`", "-", "_", "#", "$", "¨", "¨¨", "(", ")", "*", "&", '"'];
       const hasInvalidAccountName = invalidAccountName.some((someName) => data.name.toLowerCase().includes(someName));
@@ -49,23 +50,23 @@ module.exports = (app) => {
       const hasInvalidWord = invalidWordsRegex.test(data.name);
 
       if (hasInvalidAccountName || !accountNameValidation) {
-        return { status: 400, message: 'Invalid Name, Cannot use special characters or accents in the name!' };
+        return res.status(400).send({ message: 'Invalid Name, Cannot use special characters or accents in the name!' });
       }
 
       if (hasInvalidWord) {
-        return { status: 400, message: 'Invalid Name, your name contains forbidden words!' };
+        return res.status(400).send({ message: 'Invalid Name, your name contains forbidden words!' });
       }
 
       if (data?.name?.length < 5) {
-        return { status: 400, message: 'Invalid Name, your name contains less than 5 characters, must have more than 4.' };
+        return res.status(400).send({ message: 'Invalid Name, your name contains less than 5 characters, must have more than 4.' });
       }
 
       if (data?.name?.length > 23) {
-        return { status: 400, message: 'Invalid Name, your name contains more than 23 characters.' };
+        return res.status(400).send({ message: 'Invalid Name, your name contains more than 23 characters.' });
       }
 
       if (accountNameValidationWhiteSpace) {
-        return { status: 400, message: 'Invalid Name, cannot use blank space to create name!' };
+        return res.status(400).send({ message: 'Invalid Name, cannot use blank space to create name!' });
       }
 
       const returnal = await checkNameAndEmail(data);
@@ -83,12 +84,12 @@ module.exports = (app) => {
         console.log("email enviado!");
 
 
-        return resp.status(returnal.status).send({ message: returnal.message });
+        return res.status(returnal.status).send({ message: returnal.message });
       }
-      return resp.status(returnal.status).send({ message: returnal.message });
+      return res.status(returnal.status).send({ message: returnal.message });
     } catch (err) {
       console.log(err);
-      return returnal.status(500).send({
+      return res.status(500).send({
         message:
           "Internal error, please close the website and try again later, or open ticket!",
       });

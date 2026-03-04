@@ -31,7 +31,7 @@ module.exports = app => {
 
 	const GetGuildAcceptInvitationRequest = async (req, res) => {
 		if (process.env.TESTSERVER_ON == 'true') {
-			return { status: 401, message: 'Accept or cancel guild invites are bloked right now, check news or discord news!!' }
+			return res.status(401).send({ message: 'Accept or cancel guild invites are bloked right now, check news or discord news!!' });
 		}
 		const data = req.body;
 		const token = req.headers.authorization;
@@ -48,7 +48,7 @@ module.exports = app => {
 
 	const GuildOnDeleteCharRequest = async (req, res) => {
 		if (process.env.TESTSERVER_ON == 'true') {
-			return { status: 401, message: 'Remove player from guild is bloked right now, check news or discord news!!' }
+			return res.status(401).send({ message: 'Remove player from guild is bloked right now, check news or discord news!!' });
 		}
 
 		const data = req.body;
@@ -62,7 +62,7 @@ module.exports = app => {
 
 	const newGuildInviteRequest = async (req, res) => {
 		if (process.env.TESTSERVER_ON == 'true') {
-			return { status: 401, message: 'Request guild invite is bloked right now, check news or discord news!!' }
+			return res.status(401).send({ message: 'Request guild invite is bloked right now, check news or discord news!!' });
 		}
 		const data = req.body;
 		const token = req.headers.authorization;
@@ -79,7 +79,7 @@ module.exports = app => {
 
 	const guildInviteCancelRequest = async (req, res) => {
 		if (process.env.TESTSERVER_ON == 'true') {
-			return { status: 401, message: 'Cancel guild invite is bloked right now, check news or discord news!!' }
+			return res.status(401).send({ message: 'Cancel guild invite is bloked right now, check news or discord news!!' });
 		}
 		const data = req.body;
 		const token = req.headers.authorization;
@@ -96,7 +96,7 @@ module.exports = app => {
 
 	const guildUpdateMemberRequest = async (req, res) => {
 		if (process.env.TESTSERVER_ON == 'true') {
-			return { status: 401, message: 'Update guild members are bloked right now, check news or discord news!!' }
+			return res.status(401).send({ message: 'Update guild members are bloked right now, check news or discord news!!' });
 		}
 
 		const data = req.body;
@@ -113,7 +113,7 @@ module.exports = app => {
 
 	const guildCreateNewRankRequest = async (req, res) => {
 		if (process.env.TESTSERVER_ON == 'true') {
-			return { status: 401, message: 'Create guild rank is bloked right now, check news or discord news!!' }
+			return res.status(401).send({ message: 'Create guild rank is bloked right now, check news or discord news!!' });
 		}
 		const data = req.body;
 		const token = req.headers.authorization;
@@ -144,7 +144,7 @@ module.exports = app => {
 
 	const guildDeleteRankRequest = async (req, res) => {
 		if (process.env.TESTSERVER_ON == 'true') {
-			return { status: 401, message: 'Delete guild rank is bloked right now, check news or discord news!!' }
+			return res.status(401).send({ message: 'Delete guild rank is bloked right now, check news or discord news!!' });
 		}
 		const data = req.body;
 		const token = req.headers.authorization;
@@ -161,10 +161,11 @@ module.exports = app => {
 
 	const createNewGuildRequest = async (req, res) => {
 		if (process.env.TESTSERVER_ON == 'true') {
-			return { status: 401, message: 'Create guild is bloked right now, check news or discord news!!' }
+			return res.status(401).send({ message: 'Create guild is bloked right now, check news or discord news!!' });
 		}
 
 		const data = req.body;
+		console.log('&&& 2.5', data);
 		const token = req.headers.authorization;
 		const isValidToken = tokenValidation(token)
 		const validatedAccountID = isValidToken?.data?.id;
@@ -180,7 +181,7 @@ module.exports = app => {
 
 	const setGuildDescriptionRequest = async (req, res) => {
 		if (process.env.TESTSERVER_ON == 'true') {
-			return { status: 401, message: 'Change guild description is bloked right now, check news or discord news!!' }
+			return res.status(401).send({ message: 'Change guild description is bloked right now, check news or discord news!!' });
 		}
 
 		const data = req.body;

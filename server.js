@@ -69,6 +69,7 @@ app.use((req, res, next) => {
 
 app.use('/v1/tickets-images/compressed', express.static(path.join(__dirname, 'src', 'main', 'resources', 'tickets-images', 'compressed')));
 app.use('/v1/guild-logos/compressed', express.static(path.join(__dirname, 'src', 'main', 'resources', 'guild-logos', 'compressed')));
+app.use('/guild-logos/compressed', express.static(path.join(__dirname, 'src', 'main', 'resources', 'guild-logos', 'compressed')));
 
 function setCacheHeaders(req, res, next) {
   if (req.url.startsWith('/v1/tickets-images/compressed')) {

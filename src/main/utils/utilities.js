@@ -486,7 +486,7 @@ const testNameParams = (nameTocheck, maxLength, minLength, warningText, allowNum
   if (nameTocheck) {
     const NameValidation = allowNumbers ? /^[a-zA-Z0-9]+$/.test(nameTocheck) : allowEspecial ? /^[a-zA-Z\s].*$/ : /^[a-zA-Z\s]+$/i.test(nameTocheck);
     const invalidName = ["'", "!", "@", "`", "-", "_", "#", "$", "¨", "¨¨", "(", ")", "*", "&", '"', "."];
-    const hasinvalidName = allowEspecial ? !invalidName.some((someName) => nameTocheck.toLowerCase().includes(someName)) : invalidName.some((someName) => nameTocheck.toLowerCase().includes(someName));
+    const hasinvalidName = invalidName.some((someName) => nameTocheck.toLowerCase().includes(someName));
     const nameValidationWhiteSpace = nameTocheck.endsWith(" ") || nameTocheck.startsWith(" ") || nameTocheck.trim() == " ";
     const invalidWords = [
       "input", "null", "utf8", "and", "or", "select", "insert", "update", "delete", "from", "where",

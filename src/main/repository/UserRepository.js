@@ -10,6 +10,25 @@ module.exports = app => {
   let checkIfAccExistsData = 0;
   let checkIfAccExistsLastUpdated = 0;
   let checkAcc = 0;
+  let accountsCreatedAtColumn = null;
+
+  const resolveAccountsCreatedAtColumn = async () => {
+    if (accountsCreatedAtColumn) return accountsCreatedAtColumn;
+
+    const columnsInfo = await accounts.query().columnInfo();
+
+    if (columnsInfo?.created_at) {
+      accountsCreatedAtColumn = 'created_at';
+      return accountsCreatedAtColumn;
+    }
+
+    if (columnsInfo?.createdAt) {
+      accountsCreatedAtColumn = 'createdAt';
+      return accountsCreatedAtColumn;
+    }
+
+    return null;
+  };
 
   const updateAcc = async (data) => {
     const findAccountFirst = await accounts.query().select('id').where({ id: data.id });
@@ -37,7 +56,14 @@ module.exports = app => {
       return { status: 404, message: 'Email already in use!' }
     }
     try {
-      const resp = await accounts.query().insert(data);
+      const dataToInsert = { ...data };
+      const createdAtColumn = await resolveAccountsCreatedAtColumn();
+
+      if (createdAtColumn) {
+        dataToInsert[createdAtColumn] = Math.floor(Date.now() / 1000);
+      }
+
+      const resp = await accounts.query().insert(dataToInsert);
       const { id, ...rests } = resp;
       checkIfAccExistsData = 0;
       return { status: 201, message: id };
@@ -63,7 +89,7 @@ module.exports = app => {
     }
 
     try {
-      checkAcc = await accounts.query().select('email', 'id', 'password', 'name', 'login_hash', 'country', 'coins', 'coins_transferable').where({ email: data });
+      checkAcc = await accounts.query().select('email', 'id', 'password', 'name', 'login_hash', 'country', 'project_coins').where({ email: data });
       if (!checkAcc || checkAcc === undefined || checkAcc?.length < 1) {
         checkIfAccExistsLastUpdated = moment();
         checkIfAccExistsData = data;
@@ -123,7 +149,7 @@ module.exports = app => {
 
         const playerGuildID = await guild_membership.query().select('guild_id').where({ player_id: characters[x].id });
 
-        // const playerGuildInvite = await guild_invites.query().select('guild_id').where({ player_id: characters[x].id });
+        const playerGuildInvite = await guild_invites.query().select('guild_id').where({ player_id: characters[x].id });
 
         let playerGuildName = null;
         let playerAccepGuildInvit = null;
@@ -131,9 +157,9 @@ module.exports = app => {
         if (playerGuildID.length > 0) {
           playerGuildName = await guilds.query().select('name').where({ id: playerGuildID[0]?.guild_id }).first();
         }
-        // if (playerGuildInvite.length > 0) {
-        //   playerAccepGuildInvit = await guilds.query().select('name').where({ id: playerGuildInvite[0]?.guild_id }).first();
-        // }
+        if (playerGuildInvite.length > 0) {
+          playerAccepGuildInvit = await guilds.query().select('name').where({ id: playerGuildInvite[0]?.guild_id }).first();
+        }
 
         deathList.sort((a, b) => b.time - a.time);
 
@@ -148,8 +174,22 @@ module.exports = app => {
         }
         editedCharList.push(newCharInfo);
       }
-      const accUpdatedPremiumTime = await accounts.query().select('name', 'premdays', 'email', 'country', 'lastday', 'coins', 'coins_transferable', 'created_at', 'lastday', 'web_lastlogin', 'web_flags', 'type')
+      const createdAtColumn = await resolveAccountsCreatedAtColumn();
+      const accSelectColumns = ['name', 'premdays', 'email', 'country', 'lastday', 'project_coins', 'web_lastlogin', 'web_flags', 'type'];
+
+      if (createdAtColumn === 'created_at') {
+        accSelectColumns.push('created_at');
+      } else if (createdAtColumn === 'createdAt') {
+        accSelectColumns.push('createdAt as created_at');
+      }
+
+      const accUpdatedPremiumTime = await accounts.query().select(...accSelectColumns)
         .where({ id: Number(data.id) }).first();
+
+      if (accUpdatedPremiumTime?.created_at === undefined || accUpdatedPremiumTime?.created_at === null) {
+        accUpdatedPremiumTime.created_at = 0;
+      }
+
       accUpdatedPremiumTime.premdays = (accUpdatedPremiumTime.lastday - (Date.now() / 1000)) > 0 ? Math.floor(((accUpdatedPremiumTime.lastday - (Date.now() / 1000)) / 60 / 60 / 24)) : 0;
       validateLoginAccInfo = {
         ...accUpdatedPremiumTime,
@@ -165,6 +205,7 @@ module.exports = app => {
       return { status: 500, message: 'Internal error' };
     }
   }
+
   let createNewCharacterDBLastUpdated = 0;
   let createNewCharacterDBData = '';
   let createNewCharacterDBUserValidation = 0;
@@ -191,14 +232,26 @@ module.exports = app => {
       }
 
       const checkNameExist = await players.query().select('name').whereRaw('LOWER(name) = ?', data.name.toLowerCase());
-      const femaleCharacter = {
-        ...data,
-        looktype: 136
-      }
 
-      data.name = formatName(data.name);
+      const normalizedSex =
+        data.sex === 1 ||
+        data.sex === '1' ||
+        data.sex === 'male' ||
+        data.sex === 'Male'
+          ? 1
+          : 0;
+
+      const characterToCreate = {
+        ...data,
+        name: formatName(data.name),
+        sex: normalizedSex,
+        looktype: normalizedSex === 1 ? 128 : 136,
+        conditions: Buffer.alloc(0) // Define a condição inicial como um buffer vazio
+      };
+
+      data.name = characterToCreate.name;
       if (!checkNameExist || checkNameExist === undefined || checkNameExist?.length < 1) {
-        await players.query().insert(data.sex === 0 ? femaleCharacter : data);
+        await players.query().insert(characterToCreate);
         const getCreatedPlayer = await players.query().select('id').where({ name: data.name, deletion: 0 }).first();
 
         // const newComersIinitialItens = [

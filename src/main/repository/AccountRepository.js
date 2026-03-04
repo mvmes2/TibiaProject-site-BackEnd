@@ -83,10 +83,10 @@ module.exports = app => {
   const checkNameAndEmail = async (data) => {
 
     if (!data || data === undefined || data === null) {
-      return resp.status(500).send({
-        message:
-          "Internal error, please close the website and try again later, or open ticket!",
-      });
+      return {
+        status: 500,
+        message: "Internal error, please close the website and try again later, or open ticket!",
+      };
     }
     const checkIfExistEmailFirst = await accounts.query().select('email').where({ email: data.email });
     const checkIfExistNameFirst = await accounts.query().select('email').whereRaw('LOWER(name) = ?', data.name.toLowerCase());
@@ -313,16 +313,37 @@ module.exports = app => {
     console.log('validation 0 ', data);
     console.log('validation 1 ', getCharacterListFromAccountData);
     console.log('validation 2 ', getCharacterListFromAccountDataCheck);
-    if (getCharacterListFromAccountDataCheck.email == data.email && moment().diff(getCharacterListFromAccountLastUpdated, 'minutes') <= 3) {
+    const cacheIdentity = data?.id || data?.email;
+    const prevCacheIdentity = getCharacterListFromAccountDataCheck?.id || getCharacterListFromAccountDataCheck?.email;
+    if (prevCacheIdentity == cacheIdentity && getCharacterListFromAccountDataCheck?.world_id == data?.world_id && moment().diff(getCharacterListFromAccountLastUpdated, 'minutes') <= 3) {
       console.log('ENTROUUUUUU NO CACHE getCharacterListFromAccount!')
       return { status: 200, message: getCharacterListFromAccountData }
     }
     try {
+      if (!data?.id && !data?.email) {
+        return { status: 400, message: 'Missing account identifier (id or email).' }
+      }
+
+      if (data?.world_id === undefined || data?.world_id === null) {
+        return { status: 400, message: 'Missing world_id.' }
+      }
+
       getCharacterListFromAccountDataCheck = data;
-      const characterListCheck = await accounts.query().select('id').where({ email: data.email, deletion: 0 }).first();
+      console.log('unodostres', data)
+
+      if (!data?.email) {
+        return { status: 400, message: 'Missing account_email.' }
+      } 
+
+      const characterListCheck = await accounts.query().select('id').where({email: data?.email}).first();
+      if (!characterListCheck?.id) {
+        return { status: 404, message: 'Account not found.' }
+      }
+
       console.log('charcheck? ', characterListCheck)
-      const characterList = await players.query().select('id', 'name', 'world_id', 'level').where({ account_id: characterListCheck.id, deletion: 0 }).where({ world_id: data.world_id });
+      const characterList = await players.query().select('id', 'name', 'world_id', 'level').where({ account_id: characterListCheck.id, deletion: 0 }).where({ world_id: Number(data.world_id) });
       const editedCharList = [];
+      console.log('unodostres', characterList)
 
       for (x in characterList) {
         const guildMember = await guild_membership.query().select('guild_id').where({ player_id: characterList[x].id }).first();
@@ -330,7 +351,6 @@ module.exports = app => {
         if (guildMember) {
           guildName = await guilds.query().select('name').where({ id: guildMember.guild_id }).first();
         }
-        delete characterList[x].id;
         const newChar = {
           ...characterList[x],
           guild: guildName?.name
@@ -357,7 +377,7 @@ module.exports = app => {
       return { status: 200, message: getInfoFromAccountData }
     }
     try {
-      const account = await accounts.query().select('name', 'coins', 'coins_transferable').where({ id: data.id }).first();
+      const account = await accounts.query().select('name', 'project_coins').where({ id: data.id }).first();
       getInfoFromAccountLastUpdated = moment();
       getInfoFromAccountDataID = data.id;
       getInfoFromAccountData = account;

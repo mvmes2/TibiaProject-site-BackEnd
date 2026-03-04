@@ -105,11 +105,12 @@ module.exports = app => {
 
 	const updateRKRequest = async (req, res) => {
 		try {
-			data = req.body;
+			const data = req.body;
 			const resp = await updateAcc(data);
 			return res.status(resp.status).send({ message: resp.message });
 		} catch (err) {
 			console.log(err)
+			return res.status(500).send({ message: 'Internal error!' });
 		}
 	}
 
@@ -171,7 +172,21 @@ module.exports = app => {
 	}
 
 	const getCharacterListFromAccountRequest = async (req, res) => {
-		const data = req.body;
+		const tokenUserData = req.user?.data || {};
+		const data = {
+			...req.body,
+			id: req.body?.id || tokenUserData?.id,
+			email: req.body?.email || tokenUserData?.email
+		};
+
+		if (!data?.email) {
+			return res.status(401).send({ message: 'You dont have permission to access this account!' });
+		}
+
+		if (Number(data?.id) !== Number(tokenUserData?.id)) {
+			return res.status(401).send({ message: 'You dont have permission to access this account!' });
+		}
+
 		const resp = await getCharacterListFromAccount(data);
 		return res.status(resp.status).send({ message: resp.message });
 	}
