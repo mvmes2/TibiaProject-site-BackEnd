@@ -304,24 +304,22 @@ module.exports = app => {
     }
   }
 
-  let getCharacterListFromAccountLastUpdated = 0;
-  let getCharacterListFromAccountData = 0;
-  let getCharacterListFromAccountDataCheck = 0;
+  const getCharacterListFromAccountCache = new Map();
+  const getCharacterListFromAccountCacheTTL = 3 * 60 * 1000;
+
+  const getCharacterListFromAccountCacheKey = (accountId, worldId) => `${Number(accountId)}:${Number(worldId)}`;
+
+  const clearExpiredCharacterListCache = () => {
+    const now = Date.now();
+    for (const [key, cacheData] of getCharacterListFromAccountCache.entries()) {
+      if (!cacheData?.updatedAt || (now - cacheData.updatedAt) > getCharacterListFromAccountCacheTTL) {
+        getCharacterListFromAccountCache.delete(key);
+      }
+    }
+  }
 
   const getCharacterListFromAccount = async (data) => {
     console.log('oka ta vinda aka???????????????????????????? ', data);
-    console.log('validation 0 ', data);
-    console.log('validation 1 ', getCharacterListFromAccountData);
-    console.log('validation 2 ', getCharacterListFromAccountDataCheck);
-    const cacheIdentity = Number(data?.id);
-    const prevCacheIdentity = Number(getCharacterListFromAccountDataCheck?.id);
-    const cacheWorldId = Number(data?.world_id);
-    const prevCacheWorldId = Number(getCharacterListFromAccountDataCheck?.world_id);
-
-    if (prevCacheIdentity === cacheIdentity && prevCacheWorldId === cacheWorldId && moment().diff(getCharacterListFromAccountLastUpdated, 'minutes') <= 3) {
-      console.log('ENTROUUUUUU NO CACHE getCharacterListFromAccount!')
-      return { status: 200, message: getCharacterListFromAccountData }
-    }
     try {
       if (!data?.id) {
         return { status: 400, message: 'Missing account identifier (id).' }
@@ -331,10 +329,16 @@ module.exports = app => {
         return { status: 400, message: 'Missing world_id.' }
       }
 
-      getCharacterListFromAccountDataCheck = {
-        id: Number(data.id),
-        world_id: Number(data.world_id)
-      };
+      const cacheKey = getCharacterListFromAccountCacheKey(data.id, data.world_id);
+      const cacheEntry = getCharacterListFromAccountCache.get(cacheKey);
+      const now = Date.now();
+
+      if (cacheEntry?.updatedAt && (now - cacheEntry.updatedAt) <= getCharacterListFromAccountCacheTTL) {
+        return { status: 200, message: cacheEntry.data }
+      }
+
+      clearExpiredCharacterListCache();
+
       console.log('unodostres', data)
 
       const characterListCheck = await accounts.query().select('id', 'email').where({ id: Number(data.id) }).first();
@@ -364,9 +368,13 @@ module.exports = app => {
         editedCharList.push(newChar);
 
       }
-      getCharacterListFromAccountLastUpdated = moment();
-      getCharacterListFromAccountData = editedCharList;
-      return { status: 200, message: getCharacterListFromAccountData }
+
+      getCharacterListFromAccountCache.set(cacheKey, {
+        data: editedCharList,
+        updatedAt: now
+      });
+
+      return { status: 200, message: editedCharList }
     } catch (err) {
       console.log('error while trying to retrieve Characterlist at: getCharacterListFromAccount, ', err);
       return { status: 500, message: 'Internal error at trying to get account!' }
