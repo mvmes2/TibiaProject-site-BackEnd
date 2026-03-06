@@ -407,7 +407,7 @@ const guildInviteCancel = async (data, validatedAccountID) => {
     const getGuildRanks = await guild_ranks.query().select('*').where({ guild_id: getGuildOwnerAndGuildID.id });
 
     const hasTargetInviteInGuild = getGuildInvites?.length > 0;
-    const hasGuildInvite = hasTargetInviteInGuild && getPossiblePlayersFromAccount.some((player) => player.id == getPlayerIDToInvite.id)
+    const hasGuildInvite = hasTargetInviteInGuild && Number(getPlayerIDToInvite?.account_id) === Number(validatedAccountID)
 
     const hasLeaderRank = getPossiblePlayersFromAccount.some((player) => {
       const playerMembership = getPlayerGuildMembership.find((member) => member.player_id == player.id);
