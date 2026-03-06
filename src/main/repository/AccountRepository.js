@@ -313,31 +313,37 @@ module.exports = app => {
     console.log('validation 0 ', data);
     console.log('validation 1 ', getCharacterListFromAccountData);
     console.log('validation 2 ', getCharacterListFromAccountDataCheck);
-    const cacheIdentity = data?.id || data?.email;
-    const prevCacheIdentity = getCharacterListFromAccountDataCheck?.id || getCharacterListFromAccountDataCheck?.email;
-    if (prevCacheIdentity == cacheIdentity && getCharacterListFromAccountDataCheck?.world_id == data?.world_id && moment().diff(getCharacterListFromAccountLastUpdated, 'minutes') <= 3) {
+    const cacheIdentity = Number(data?.id);
+    const prevCacheIdentity = Number(getCharacterListFromAccountDataCheck?.id);
+    const cacheWorldId = Number(data?.world_id);
+    const prevCacheWorldId = Number(getCharacterListFromAccountDataCheck?.world_id);
+
+    if (prevCacheIdentity === cacheIdentity && prevCacheWorldId === cacheWorldId && moment().diff(getCharacterListFromAccountLastUpdated, 'minutes') <= 3) {
       console.log('ENTROUUUUUU NO CACHE getCharacterListFromAccount!')
       return { status: 200, message: getCharacterListFromAccountData }
     }
     try {
-      if (!data?.id && !data?.email) {
-        return { status: 400, message: 'Missing account identifier (id or email).' }
+      if (!data?.id) {
+        return { status: 400, message: 'Missing account identifier (id).' }
       }
 
       if (data?.world_id === undefined || data?.world_id === null) {
         return { status: 400, message: 'Missing world_id.' }
       }
 
-      getCharacterListFromAccountDataCheck = data;
+      getCharacterListFromAccountDataCheck = {
+        id: Number(data.id),
+        world_id: Number(data.world_id)
+      };
       console.log('unodostres', data)
 
-      if (!data?.email) {
-        return { status: 400, message: 'Missing account_email.' }
-      } 
-
-      const characterListCheck = await accounts.query().select('id').where({email: data?.email}).first();
+      const characterListCheck = await accounts.query().select('id', 'email').where({ id: Number(data.id) }).first();
       if (!characterListCheck?.id) {
         return { status: 404, message: 'Account not found.' }
+      }
+
+      if (data?.email && characterListCheck?.email?.toLowerCase() !== String(data.email).toLowerCase()) {
+        return { status: 401, message: 'You dont have permission to access this account!' }
       }
 
       console.log('charcheck? ', characterListCheck)

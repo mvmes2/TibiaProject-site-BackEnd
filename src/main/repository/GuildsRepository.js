@@ -163,13 +163,28 @@ const guildAcceptInvitation = async (data, validatedAccountID) => {
     const getGuildRanks = await guild_ranks.query().select('*').where({ guild_id: getGuildOwnerAndGuildID.id });
 
     // console.log('como ta vindo ranks da guilda? ', getGuildRanks);
-    const getGuildInvites = await guild_invites.query().select('*').where({ guild_id: getGuildOwnerAndGuildID.id });
+    const targetGuildInvite = await guild_invites.query().select('*').where({ guild_id: getGuildOwnerAndGuildID.id, player_id: getPlayerIDToInvite.id }).first();
+    if (!targetGuildInvite) {
+      return { status: 404, message: 'No pending invite request found for this character in this guild!' }
+    }
 
-    if (getPossiblePlayersFromAccount.some((invitedSome) => getGuildInvites.some((invitedSome2) => invitedSome2.player_id == invitedSome.id)) || getPossiblePlayersFromAccount.some((itemSome) => getPlayerGuildMembership.some((itemSome2) => itemSome2.player_id == itemSome.id && getGuildRanks.some((itemSome3) => itemSome3.id == itemSome2.rank_id && itemSome.id == itemSome2.player_id && itemSome3.level == 3 | itemSome3.level == 2)))) {
+    const ownsTargetCharacter = getPossiblePlayersFromAccount.some((player) => player.id == getPlayerIDToInvite.id);
+
+    const hasLeaderOrViceRank = getPossiblePlayersFromAccount.some((player) => {
+      const playerMembership = getPlayerGuildMembership.find((member) => member.player_id == player.id);
+      if (playerMembership) {
+        const rankInfo = getGuildRanks.some((guildRank) =>
+          guildRank.id == playerMembership.rank_id && (guildRank.level == 3 || guildRank.level == 2));
+        return !!rankInfo;
+      }
+      return false;
+    });
+
+    if (ownsTargetCharacter || hasLeaderOrViceRank) {
       console.log('vualá!');
 
       // remove guild_invite from accepted character
-      await guild_invites.query().delete().where({ player_id: getPlayerIDToInvite.id });
+      await guild_invites.query().delete().where({ player_id: getPlayerIDToInvite.id, guild_id: getGuildOwnerAndGuildID.id });
       // get Member rank id from accepted guild.
       const getMemberRank = await guild_ranks.query().select('id')
         .where({ guild_id: getGuildOwnerAndGuildID.id })
@@ -365,7 +380,7 @@ const guildInviteCancel = async (data, validatedAccountID) => {
     return { status: 401, message: 'You have to wait at least 1 minute do try again!' }
   }
   try {
-    guildInviteCancelData == data.player_name;
+    guildInviteCancelData = data.player_name;
     guildInviteCancelLastUpdated = moment();
     guildInviteCancelCheckAccount = validatedAccountID;
 
@@ -391,7 +406,8 @@ const guildInviteCancel = async (data, validatedAccountID) => {
 
     const getGuildRanks = await guild_ranks.query().select('*').where({ guild_id: getGuildOwnerAndGuildID.id });
 
-    const hasGuildInvite = getPossiblePlayersFromAccount.some((player) => player.id == getPlayerIDToInvite.id)
+    const hasTargetInviteInGuild = getGuildInvites?.length > 0;
+    const hasGuildInvite = hasTargetInviteInGuild && getPossiblePlayersFromAccount.some((player) => player.id == getPlayerIDToInvite.id)
 
     const hasLeaderRank = getPossiblePlayersFromAccount.some((player) => {
       const playerMembership = getPlayerGuildMembership.find((member) => member.player_id == player.id);
@@ -402,6 +418,10 @@ const guildInviteCancel = async (data, validatedAccountID) => {
       }
       return false;
     });
+
+    if (!hasTargetInviteInGuild) {
+      return { status: 404, message: 'No active invite found for this character in this guild!' }
+    }
 
     if (hasGuildInvite || hasLeaderRank) {
       console.log('vualá!');
@@ -814,10 +834,14 @@ const createNewGuild = async (data, validatedAccountID) => {
     return { status: 401, message: 'You have to wait 3 minuts before try to create a guild!' }
   }
   try {
+    if (!validatedAccountID) {
+      return { status: 401, message: 'You dont have permission to access this account!' }
+    }
+
     createNewGuildLastUpdated = moment();
     createNewGuildAccountCheck = validatedAccountID;
 console.log('&&&', data.account_id);
-    const checkIfHaveCoinsAndTRansferableCoins = await accounts.query().select('project_coins').where({ id: data.account_id }).first();
+    const checkIfHaveCoinsAndTRansferableCoins = await accounts.query().select('project_coins').where({ id: validatedAccountID }).first();
 console.log('&&& 2', data.insert.name);
     const checkIfGuildNameExists = await guilds.query().select('name').where({ name: data.insert.name });
 
@@ -832,6 +856,15 @@ console.log('&&& 2', data.insert.name);
     console.log('&&& 3', data);
     
     const getGuildOwnerId = await players.query().select('id').where({ name: data.insert.ownername }).first();
+    if (!getGuildOwnerId?.id) {
+      return { status: 404, message: 'Guild owner character not found!' }
+    }
+
+    const guildOwnerCharacter = await players.query().select('account_id').where({ id: getGuildOwnerId.id }).first();
+    if (guildOwnerCharacter?.account_id !== validatedAccountID) {
+      return { status: 401, message: 'You can only create guild with characters from your own account!' }
+    }
+
     const checkIfGuildMasterAlreadyIsGuildMember = await guild_membership.query().select('player_id').where({ player_id: getGuildOwnerId.id });
     if (checkIfGuildMasterAlreadyIsGuildMember?.length > 0) {
       return { status: 403, message: 'This character is already in a guild!' }
@@ -857,7 +890,7 @@ console.log('&&& 2', data.insert.name);
 
       await accounts.query().update({
         project_coins: (Number(checkIfHaveCoinsAndTRansferableCoins.project_coins) - coinsToPay),
-      }).where({ id: data.account_id });
+      }).where({ id: validatedAccountID });
 
       return { status: 201, message: 'Guild Created!!' }
     } else {

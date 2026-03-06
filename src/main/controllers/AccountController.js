@@ -174,13 +174,17 @@ module.exports = app => {
 	const getCharacterListFromAccountRequest = async (req, res) => {
 		const tokenUserData = req.user?.data || {};
 		const data = {
-			...req.body,
-			id: req.body?.id || tokenUserData?.id,
-			email: req.body?.email || tokenUserData?.email
+			id: tokenUserData?.id,
+			email: tokenUserData?.email,
+			world_id: req.body?.world_id
 		};
 
-		if (!data?.email) {
+		if (!data?.id || !data?.email) {
 			return res.status(401).send({ message: 'You dont have permission to access this account!' });
+		}
+
+		if (data?.world_id === undefined || data?.world_id === null) {
+			return res.status(400).send({ message: 'Missing world_id.' });
 		}
 
 		if (Number(data?.id) !== Number(tokenUserData?.id)) {
