@@ -69,6 +69,9 @@ module.exports = app => {
     app.route('/v1/twitch/get-lives').get(app.src.main.modules.twitch.controllers.TwitchApiController.twitch);
     app.route('/v1/twitch/get-official-streamers').get(app.src.main.modules.twitch.controllers.TwitchApiController.getOfficialStreamersChannelInfo);
 
+    app.route('/v1/get-house-list').get(app.src.main.controllers.HousesController.getHouseListRequest);
+    app.route('/v1/get-house').get(app.src.main.controllers.HousesController.getHouseByIdRequest);
+
     /////////////////////////////////////////////////////////////////UNIFIED ROUTES/////////////////////////////////////////////////////////////////
     app.route('/v1/unifiedRoute-donatePage-getProducts').get(app.src.main.controllers.UnifiedCallsController.getProductsToDonateCoinsTableUnifiedCallController);
         
