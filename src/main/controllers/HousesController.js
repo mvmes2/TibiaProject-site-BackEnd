@@ -8,14 +8,24 @@ module.exports = app => {
 
     const getHouseListRequest = async (req, res) => {
         const townId = req.query.town_id ? Number(req.query.town_id) : null;
-        const cacheKey = townId ? String(townId) : 'all';
+        const worldId = req.query.world_id ? Number(req.query.world_id) : null;
+
+        if (req.query.town_id && Number.isNaN(townId)) {
+            return res.status(400).send({ message: 'town_id must be a valid number.' });
+        }
+
+        if (req.query.world_id && Number.isNaN(worldId)) {
+            return res.status(400).send({ message: 'world_id must be a valid number.' });
+        }
+
+        const cacheKey = `town:${townId || 'all'}|world:${worldId || 'all'}`;
         const cached = houseListControllerCache.get(cacheKey);
 
         if (cached && moment().diff(cached.updatedAt, 'minutes') < CACHE_TTL_MINUTES) {
             return res.status(cached.status).send({ message: cached.message });
         }
 
-        const result = await getHouseListService(townId);
+        const result = await getHouseListService(townId, worldId);
         if (result.status === 200) {
             houseListControllerCache.set(cacheKey, {
                 status: result.status,

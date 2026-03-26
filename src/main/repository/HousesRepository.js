@@ -22,8 +22,8 @@ module.exports = app => {
         'players.name as owner_name'
     ];
 
-    const getHouseListFromDB = async (townId = null) => {
-        const cacheKey = townId ? String(townId) : 'all';
+    const getHouseListFromDB = async (townId = null, worldId = null) => {
+        const cacheKey = `town:${townId || 'all'}|world:${worldId || 'all'}`;
         const now = Date.now();
         const cached = houseListCache.get(cacheKey);
 
@@ -40,11 +40,14 @@ module.exports = app => {
                 query = query.where('houses.town_id', townId);
             }
 
-            const result = await query.orderBy('houses.name', 'asc');
-            const data = JSON.stringify(result);
+            if (worldId) {
+                query = query.where('houses.world_id', worldId);
+            }
 
-            houseListCache.set(cacheKey, { data, updatedAt: now });
-            return { status: 200, message: data };
+            const result = await query.orderBy('houses.name', 'asc');
+
+            houseListCache.set(cacheKey, { data: result, updatedAt: now });
+            return { status: 200, message: result };
         } catch (err) {
             console.log('[HousesRepository] getHouseListFromDB error:', err);
             return { status: 500, message: 'Internal error, please try again later.' };
@@ -68,10 +71,9 @@ module.exports = app => {
                 .first();
 
             if (!house) return { status: 404, message: 'House not found.' };
-            const data = JSON.stringify(house);
 
-            houseDetailsCache.set(cacheKey, { data, updatedAt: now });
-            return { status: 200, message: data };
+            houseDetailsCache.set(cacheKey, { data: house, updatedAt: now });
+            return { status: 200, message: house };
         } catch (err) {
             console.log('[HousesRepository] getHouseByIdFromDB error:', err);
             return { status: 500, message: 'Internal error, please try again later.' };
