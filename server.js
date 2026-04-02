@@ -21,6 +21,22 @@ const limiter = rateLimit({
   windowMs: 10 * 1000, // Define uma janela de 20 segundos
   max: 50, // Limite máximo de solicitações por IP na janela
   message: "Você atingiu o limite de solicitações. Tente novamente mais tarde.",
+  keyGenerator: (req) => {
+    const cfConnectingIp = req.headers['cf-connecting-ip'];
+    if (typeof cfConnectingIp === 'string' && cfConnectingIp.trim()) {
+      return cfConnectingIp.trim();
+    }
+
+    const xForwardedFor = req.headers['x-forwarded-for'];
+    if (typeof xForwardedFor === 'string' && xForwardedFor.trim()) {
+      return xForwardedFor.split(',')[0].trim();
+    }
+
+    return req.ip;
+  },
+  validate: {
+    xForwardedForHeader: false,
+  },
 });
 
 app.use(limiter);
