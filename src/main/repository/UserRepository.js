@@ -246,7 +246,8 @@ module.exports = app => {
         name: formatName(data.name),
         sex: normalizedSex,
         looktype: normalizedSex === 1 ? 128 : 136,
-        conditions: Buffer.alloc(0) // Define a condição inicial como um buffer vazio
+        conditions: Buffer.alloc(0),
+        created_at: Math.floor(Date.now() / 1000)
       };
 
       data.name = characterToCreate.name;
