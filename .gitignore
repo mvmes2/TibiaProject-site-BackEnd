@@ -2,7 +2,9 @@
 .env
 # Coringa = **/ vai ignorar o arquivo/diretorio em qualquer local do projeto
 # caso não esteja ignorando, remova do cach para poder aplicar o ignore ex: git rm --cached newrelic_agent.log
-**/newrelic_agent.log
+/newrelic_agent.log
+newrelic_agent.log
+./newrelic_agent.log
 prod.env
 ./prod.env
 ./client/client.zip
@@ -16,7 +18,7 @@ client.zip
 /src/main/resources/guild-logos/compressed/*
 /src/main/resources/contract-paymentProof-images/*
 /src/main/resources/contract-paymentProof-images/compressed/*
-
+newrelic_agent.log
 
 /downloads/*
 /client/*
