@@ -138,6 +138,7 @@ module.exports = app => {
         .select(players.raw('CASE players.vocation ' + vocationsArr.map((vocation) => `WHEN ${vocation.vocation_id} THEN '${vocation.vocation_name}'`).join(' ') + ' END as vocation'))
         .where({ 'players.account_id': Number(data.id) })
         .where({ 'players.deletion': 0 })
+        .whereIn('group_id', [1, 2])
         .orderBy('players.name', 'asc');
 
       const editedCharList = [];
@@ -307,7 +308,7 @@ module.exports = app => {
       return { status: 200, message: PlayerInfo, owner: true }
     }
 
-    checkPlayerNameInfo = await players.query().select('name', 'account_id').where({ name: data.name, deletion: 0 });
+    checkPlayerNameInfo = await players.query().select('name', 'account_id').where({ name: data.name, deletion: 0}).whereIn('group_id', [1, 2]);
 
     if (checkPlayerNameInfo.length < 1) {
       PlayerInfoLastUpdated = moment();
@@ -326,7 +327,7 @@ module.exports = app => {
         .select(players.raw('CASE players.vocation ' + vocationsArr.map((vocation) => `WHEN ${vocation.vocation_id} THEN '${vocation.vocation_name}'`).join(' ') + ' END as vocation'))
         .where({ name: data.name })
         .where({ account_id: data.account_id })
-        .where({ 'players.deletion': 0 }).first();
+        .where({ 'players.deletion': 0 }).whereIn('players.group_id', [1, 2]).first();
     } catch (err) {
       console.log(err)
       return { status: 500, message: 'erro interno, contate a administração ou abra um ticket!s' }
@@ -339,13 +340,13 @@ module.exports = app => {
           .select('players.id', 'players.account_id', 'players.hidden', 'players.name', 'players.level', 'sex', 'lastlogin', 'lastip', 'worlds.server_name as world', 'worlds.id as world_id', 'players.created_at', 'group_id')
           .select(players.raw('CASE players.vocation ' + vocationsArr.map((vocation) => `WHEN ${vocation.vocation_id} THEN '${vocation.vocation_name}'`).join(' ') + ' END as vocation'))
           .whereRaw('LOWER(players.name) = ?', data.name.toLowerCase())
-          .where({ 'players.deletion': 0 }).first();
+          .where({ 'players.deletion': 0 }).whereIn('players.group_id', [1, 2]).first();
         const deathList = await player_deaths.query()
           .select('time', 'level', 'killed_by', 'is_player', 'mostdamage_by', 'mostdamage_is_player', 'unjustified', 'mostdamage_unjustified')
           .where({ player_id: found.id }).orderBy('time', 'desc').limit(15);
         const online = await players_online.query().select('*').where({ player_id: found.id }).first();
         const comment = await players.query().select('comment').where({ id: found.id, deletion: 0 }).first();
-        const accountCharList = await players.query().select('name', 'hidden').where({ account_id: found.account_id, deletion: 0 });
+        const accountCharList = await players.query().select('name', 'hidden').where({ account_id: found.account_id, deletion: 0, hidden: 0 }).whereIn('group_id', [1, 2]);
         const guild = await guild_membership.query().select('player_id', 'guild_id', 'rank_id').where({ player_id: found.id }).first();
         const memberRank = guild ? (await guild_ranks.query().select('name').where({ id: guild.rank_id }).first()) : '';
         const GuildName = guild ? (await guilds.query().select('name', 'id').where({ id: guild.guild_id }).first()) : '';
@@ -377,7 +378,7 @@ module.exports = app => {
           .where({ player_id: checkCharacterOwner.id }).orderBy('time', 'desc').limit(15);
         const online = await players_online.query().select('*').where({ player_id: checkCharacterOwner.id }).first();
         const comment = await players.query().select('comment').where({ id: checkCharacterOwner.id, deletion: 0 }).first();
-        const accountCharList = await players.query().select('name', 'hidden').where({ account_id: checkCharacterOwner.account_id, deletion: 0 });
+        const accountCharList = await players.query().select('name', 'hidden').where({ account_id: checkCharacterOwner.account_id, deletion: 0, hidden: 0 }).whereIn('group_id', [1, 2]);
         const guild = await guild_membership.query().select('player_id', 'guild_id', 'rank_id').where({ player_id: checkCharacterOwner.id }).first();
         const memberRank = guild ? (await guild_ranks.query().select('name').where({ id: guild.rank_id }).first()) : '';
         const GuildName = guild ? (await guilds.query().select('name', 'id').where({ id: guild.guild_id }).first()) : '';
@@ -481,8 +482,8 @@ module.exports = app => {
           'players.skill_axe', 'players.skill_dist', 'players.skill_shielding',
           'players.skill_fishing', 'players.experience', 'players.maglevel')
         .select(players.raw('CASE players.vocation ' + vocationsArr.map((vocation) => `WHEN ${vocation.vocation_id} THEN '${vocation.vocation_name}'`).join(' ') + ' END as vocation'))
-        .where('players.group_id', '=', 1)
         .where({ 'players.deletion': 0 })
+        .whereIn('players.group_id', [1, 2])
         .orderBy(data, 'desc')
         .limit(100);
 
