@@ -78,7 +78,6 @@ module.exports = (app) => {
           "Welcome to TibiaProject",
           data.email,
           data.name,
-          '********',
           link
         );
         console.log("email enviado!");

@@ -1,4 +1,4 @@
-const { projectMailer, generateChangeEmailByRKToken, generateEmailPasswordChangeToken, encryptPassword } = require("../utils/utilities");
+const { projectMailer, generateChangeEmailByRKToken, generateEmailPasswordChangeToken } = require("../utils/utilities");
 const moment = require('moment');
 
 module.exports = app => {
@@ -64,7 +64,6 @@ module.exports = app => {
           projectMailer.changePassword(
             acc.email,
             acc.name,
-            '******',
             link
           );
           recoveryAccountGenericEmailChangePassServiceLastUpdate = moment();
@@ -79,11 +78,14 @@ module.exports = app => {
     }
 
     if (data.trigger === 'changePassUpdate') {
+      if (!data?.update?.password || !/^[a-f0-9]{40}$/i.test(data.update.password)) {
+        return { status: 400, message: 'Invalid password format. Expected SHA-1 hash.' };
+      }
       try {
         const up = await updateAccountPasswordByEmail(data);
 
         recoveryAccountGenericEmailChangePassServiceLastUpdate = moment();
-        encryptedPassword = data.token;
+        encryptedPassword = data.update.password;
 
         return { status: up.status, message: up.message }
       } catch (err) {
@@ -133,22 +135,27 @@ module.exports = app => {
   }
 
   let updateAccountPasswordServiceLastUpdated = 0;
-  let updateAccountPasswordServiceData = 0;
+  let updateAccountPasswordServiceAccountId = 0;
 
-  const updateAccountPasswordService = async (data, isValidToken) => {
-    if (updateAccountPasswordServiceData == isValidToken && moment().diff(updateAccountPasswordServiceLastUpdated, 'minutes') <= 3) {
-      return { status: 401, message: 'You have to wait at least 3 minuts to change password again!' }
+  const updateAccountPasswordService = async (data, accountId) => {
+    // Password must arrive pre-encrypted as SHA-1 hex (40 chars) from the frontend
+    if (!data.password || !/^[a-f0-9]{40}$/i.test(data.password)) {
+      return { status: 400, message: 'Invalid password format. Expected SHA-1 hash.' };
     }
-    console.log('como ta vindo o data? ', data)
+
+    if (updateAccountPasswordServiceAccountId == accountId && moment().diff(updateAccountPasswordServiceLastUpdated, 'minutes') <= 3) {
+      return { status: 429, message: 'You have to wait at least 3 minutes to change password again!' };
+    }
+
     const dataToUpdate = {
-      id: data.id,
+      id: Number(accountId),
       update: {
         password: data.password,
       }
-    }
+    };
     const resp = await updateAcc(dataToUpdate);
     updateAccountPasswordServiceLastUpdated = moment();
-    updateAccountPasswordServiceData = isValidToken;
+    updateAccountPasswordServiceAccountId = accountId;
     return { status: resp.status, message: resp.message };
   }
 

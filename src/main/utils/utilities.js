@@ -69,7 +69,7 @@ const formatDateToTimeStampEpoch = (date) => {
 }
 
 const projectMailer = {
-  welcomeAndValidate: function sendEmailTo(email, subject, account_email, account_name, account_pass, activation_link) {
+  welcomeAndValidate: function sendEmailTo(email, subject, account_email, account_name, activation_link) {
     mailer.sendMail({
       from: "tibiaprojectbr@gmail.com",
       to: email,
@@ -78,7 +78,6 @@ const projectMailer = {
       context: {
         account_email,
         account_name,
-        account_pass,
         youtube_logo,
         instagram_logo,
         discord_logo,
@@ -86,7 +85,7 @@ const projectMailer = {
       },
     });
   },
-  changePassword: function sendEmailTo(account_email, account_name, account_pass, changePassword_link) {
+  changePassword: function sendEmailTo(account_email, account_name, changePassword_link) {
     mailer.sendMail({
       from: "tibiaprojectbr@gmail.com",
       to: account_email,
@@ -95,7 +94,6 @@ const projectMailer = {
       context: {
         account_email,
         account_name,
-        account_pass,
         youtube_logo,
         instagram_logo,
         discord_logo,

@@ -37,6 +37,9 @@ module.exports = app => {
     }
     try {
       await accounts.query().update(data.update).where({ id: data.id });
+      if (data.update.password) {
+        checkIfAccExistsData = 0;
+      }
       return { status: 200, message: 'Account updated successfully!' };
     } catch (err) {
       console.log(err);

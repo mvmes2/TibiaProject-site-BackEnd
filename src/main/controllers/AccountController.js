@@ -143,16 +143,15 @@ module.exports = app => {
 	}
 
 	const updateAccountPasswordRequest = async (req, res) => {
-		console.log('como ta vindo esse badybody? ', req.body)
 		const data = req.body;
-		console.log('o que vem de data do front? ', data);
 		const token = req.headers.authorization;
-		const isValidToken = tokenValidation(token)
+		const isValidToken = tokenValidation(token);
 
-		console.log(' o que tem no token? ', isValidToken)
-		console.log('tem token? ', token)
+		if (!isValidToken || !isValidToken.data) {
+			return res.status(401).send({ message: 'Invalid or expired token!' });
+		}
 
-		if (data.id !== isValidToken.data.id) {
+		if (Number(data.id) !== Number(isValidToken.data.id)) {
 			return res.status(401).send({ message: 'You dont have permission to access this account!' });
 		}
 
