@@ -90,17 +90,18 @@ module.exports = app => {
 	}
 
 	const updateCharacterCommentRequest = async (req, res) => {
-		const data = req.body;
+		try {
+			const data = req.body;
+			const token = req.headers.authorization;
+			const isValidToken = tokenValidation(token);
+			const validatedAccountID = isValidToken?.data?.id;
 
-		const token = req.headers.authorization;
-		const isValidToken = tokenValidation(token)
-		const validatedAccountID = isValidToken?.data?.id;
-
-		console.log('o que vem de data do front? ', data);
-		console.log(' o que tem no token? ', isValidToken)
-		console.log('tem token? ', token)
-		const resp = await updateCharacterCommentService(data, validatedAccountID)
-		res.status(resp.status).send({ message: resp.message });
+			const resp = await updateCharacterCommentService(data, validatedAccountID);
+			return res.status(resp.status).send({ message: resp.message });
+		} catch (err) {
+			console.error('updateCharacterCommentRequest error:', err);
+			return res.status(500).send({ message: 'Internal error!' });
+		}
 	}
 
 	const updateRKRequest = async (req, res) => {

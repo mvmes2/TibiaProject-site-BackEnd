@@ -36,18 +36,33 @@ module.exports = app => {
     }
   }
   const updateHidenCharacterInDB = async (data, validatedAccountID) => {
+    if (!data?.name) {
+      return { status: 400, message: 'Missing data, character name is required!' };
+    }
+
     try {
-      const ishiden = await players.query().select('hidden', 'account_id').where({ name: data.name, deletion: 0 }).first();
-      if (validatedAccountID != ishiden.account_id) {
-        return { status: 401, message: 'You dont have permission to access this account!' }
+      const player = await players.query()
+        .select('hidden', 'account_id')
+        .where({ name: data.name, deletion: 0 })
+        .first();
+
+      if (!player) {
+        return { status: 404, message: 'Character not found!' };
       }
 
-      await players.query().update({ hidden: ishiden.hidden === 0 ? 1 : 0 }).where({ name: data.name, deletion: 0 });
+      if (validatedAccountID != player.account_id) {
+        return { status: 401, message: 'You do not have permission to access this character!' };
+      }
+
+      await players.query()
+        .update({ hidden: player.hidden === 0 ? 1 : 0 })
+        .where({ name: data.name, deletion: 0 });
+
       setCreateCharacterController(0);
-      return { status: 200, message: 'Character hidden updated successfuly!' }
+      return { status: 200, message: 'Character visibility updated successfully!' };
     } catch (err) {
-      console.log(err)
-      return { status: 500, message: 'Internal error at trying delete, re-open webSite and try again, or contact Admin!' }
+      console.error('updateHidenCharacterInDB error:', err);
+      return { status: 500, message: 'Internal error, please try again or contact Admin!' };
     }
   }
 
@@ -56,27 +71,47 @@ module.exports = app => {
   let commentCharName = 0;
 
   const updateCharacterCommentInDB = async (data, validatedAccountID) => {
-    console.log('o que ta vindo data em updateCharacterCommentInDB? ', data)
+    if (!data?.name || !data?.comment) {
+      return { status: 400, message: 'Missing data, character name and comment are required!' };
+    }
+
     try {
-      const comment = await players.query().select('comment', 'id', 'account_id').where({ name: data.name, deletion: 0 }).first();
-      console.log(validatedAccountID)
-      if (validatedAccountID != comment?.account_id) {
-        return { status: 401, mesage: 'You do not have permission to access this account!' }
+      const player = await players.query()
+        .select('id', 'account_id', 'comment')
+        .where({ name: data.name, deletion: 0 })
+        .first();
+
+      if (!player) {
+        return { status: 404, message: 'Character not found!' };
       }
 
-      if (commentAccID == validatedAccountID && commentCharName == data.name && moment().diff(commentLastUpdated, 'minutes') < 3) {
-        return { status: 400, message: 'You have to wait 3 minuts to update comment' }
+      if (validatedAccountID != player.account_id) {
+        return { status: 401, message: 'You do not have permission to access this character!' };
       }
-      console.log('qual comment vem ao updatar?', comment)
-      comment == undefined || comment.comment == null || comment?.comment?.toString() != data?.comment?.toString() && await players.query().update({ comment: data.comment }).where({ id: comment.id });
+
+      if (
+        commentAccID == validatedAccountID &&
+        commentCharName == data.name &&
+        moment().diff(commentLastUpdated, 'minutes') < 3
+      ) {
+        return { status: 429, message: 'You must wait 3 minutes before updating the comment again.' };
+      }
+
+      if (player.comment !== data.comment) {
+        await players.query()
+          .update({ comment: data.comment })
+          .where({ id: player.id });
+      }
+
       commentAccID = validatedAccountID;
       commentLastUpdated = moment();
       commentCharName = data.name;
       setCreateCharacterController(0);
-      return { status: 200, message: 'Character comment updated successfuly!' }
+
+      return { status: 200, message: 'Character comment updated successfully!' };
     } catch (err) {
-      console.log(err)
-      return { status: 500, message: 'Internal error at trying delete, re-open webSite and try again, or contact Admin!' }
+      console.error('updateCharacterCommentInDB error:', err);
+      return { status: 500, message: 'Internal error, please try again or contact Admin!' };
     }
   }
 
