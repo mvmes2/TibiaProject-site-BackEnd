@@ -390,14 +390,14 @@ module.exports = app => {
       const editedCharList = [];
       console.log('unodostres', characterList)
 
-      for (x in characterList) {
-        const guildMember = await guild_membership.query().select('guild_id').where({ player_id: characterList[x].id }).first();
+      for (const char of characterList) {
+        const guildMember = await guild_membership.query().select('guild_id').where({ player_id: char.id }).first();
         let guildName = null;
         if (guildMember) {
           guildName = await guilds.query().select('name').where({ id: guildMember.guild_id }).first();
         }
         const newChar = {
-          ...characterList[x],
+          ...char,
           guild: guildName?.name
         }
         editedCharList.push(newChar);
