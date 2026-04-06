@@ -104,11 +104,29 @@ module.exports = app => {
     app.route('/v1/Admin/contracts/payment/type').get(AdminAuthMiddleware, app.src.main.controllers.AdminController.AdminGetContractPaymentTypeController);
     app.route('/v1/Admin/contracts/:id').get(AdminAuthMiddleware, app.src.main.controllers.AdminController.AdminGetContractByContractIdController);
     app.route('/v1/Admin/massemail').post(AdminAuthMiddleware, app.src.main.controllers.MassEmailController.createEmailHtmlController);
+
+    /////////////////////////////////////////////////// Guide Routes //////////////////////////////////////////////////////////
+    app.route('/v1/guides').get(app.src.main.controllers.GuideController.getAllGuidesRequest);
+    app.route('/v1/guides/:slug').get(app.src.main.controllers.GuideController.getGuideBySlugRequest);
+    app.route('/v1/Admin/guides').post(AdminAuthMiddleware, app.src.main.controllers.GuideController.createGuideRequest);
+    app.route('/v1/Admin/guides/:id').put(AdminAuthMiddleware, app.src.main.controllers.GuideController.updateGuideRequest);
+    app.route('/v1/Admin/guides/:id').delete(AdminAuthMiddleware, app.src.main.controllers.GuideController.deleteGuideRequest);
 //att
     //////Error MiddleWare/////
     app.use((err, req, res, next) => {
         if (err instanceof multer.MulterError || err.message === 'Invalid file type. Only JPEG and PNG files are allowed.') {
           return res.status(400).json({ error: err.message });
+        }
+
+        if (err?.type === 'entity.too.large') {
+          const guidePayloadLimit = process.env.ADMIN_GUIDE_REQUEST_BODY_LIMIT || '50mb';
+          const isAdminGuideRoute = /^\/v1\/Admin\/guides(?:\/|$)/.test(req.url || '');
+
+          return res.status(413).json({
+            message: isAdminGuideRoute
+              ? `Request payload too large. Maximum ${guidePayloadLimit} for admin guides.`
+              : 'Request payload too large.',
+          });
         }
       
         next(err);
