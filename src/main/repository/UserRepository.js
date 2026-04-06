@@ -179,7 +179,7 @@ module.exports = app => {
         editedCharList.push(newCharInfo);
       }
       const createdAtColumn = await resolveAccountsCreatedAtColumn();
-      const accSelectColumns = ['name', 'premdays', 'email', 'country', 'lastday', 'project_coins', 'web_lastlogin', 'web_flags', 'type'];
+      const accSelectColumns = ['name', 'premdays', 'email', 'country', 'lastday', 'project_coins', 'web_lastlogin', 'web_flag', 'type'];
 
       if (createdAtColumn === 'created_at') {
         accSelectColumns.push('created_at');

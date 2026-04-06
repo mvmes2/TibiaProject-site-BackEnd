@@ -13,7 +13,7 @@ exports.up = async (knex) => {
     table.string('banReason', 255).nullable().defaultTo(null);
     table.bigInteger('day_end_premmy').defaultTo(0);
     table.bigInteger('web_lastlogin').defaultTo(0);
-    table.string('web_flags', 255).nullable().defaultTo(null);
+    table.string('web_flag', 255).nullable().defaultTo(null);
     table.string('change_pass_token', 255).nullable().defaultTo(null);
     table.string('recovery_key', 100).nullable().defaultTo(null);
     table.string('password2', 100).nullable().defaultTo(null);
@@ -30,7 +30,7 @@ exports.down = async (knex) => {
     table.dropColumn('banReason');
     table.dropColumn('day_end_premmy');
     table.dropColumn('web_lastlogin');
-    table.dropColumn('web_flags');
+    table.dropColumn('web_flag');
     table.dropColumn('change_pass_token');
     table.dropColumn('recovery_key');
     table.dropColumn('password2');
