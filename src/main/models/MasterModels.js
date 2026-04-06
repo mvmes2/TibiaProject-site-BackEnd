@@ -82,7 +82,11 @@ class houses extends Model {
     static tableName = 'houses'
 }
 
+class guides extends Model {
+    static tableName = 'guides'
+}
+
 module.exports = { players_online, accounts, players, player_deaths, worlds, player_items, 
     products, payments, tickets, tickets_response, tickets_images, 
     tickets_response_images, players_titles, guilds, guild_invites, guild_membership, guild_ranks, 
-    guild_wars, guildwar_kills, houses }
+    guild_wars, guildwar_kills, houses, guides }

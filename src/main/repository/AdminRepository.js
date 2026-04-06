@@ -7,7 +7,7 @@ const AdminLoginRepository = async (data) => {
 	console.log(data)
 	try {
 		const adminAccounts = await accounts.query()
-			.select('email', 'name', 'type', 'web_flag', 'password')
+			.select('id', 'email', 'name', 'type', 'web_flag', 'password')
 			.where({ email: data.email })
 			.andWhere('type', '>', 3)
 			.andWhere({ web_flag: 3 });

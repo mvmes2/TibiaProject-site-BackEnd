@@ -15,6 +15,29 @@ const RunCronCheckLives = require("./src/main/services/CronCheckLiveStreams");
 const server = http.createServer(app);
 const rateLimit = require("express-rate-limit");
 
+const DEFAULT_REQUEST_BODY_LIMIT = process.env.DEFAULT_REQUEST_BODY_LIMIT || '100kb';
+const ADMIN_GUIDE_REQUEST_BODY_LIMIT = process.env.ADMIN_GUIDE_REQUEST_BODY_LIMIT || '50mb';
+
+const isAdminGuideRequest = (req) => /^\/v1\/Admin\/guides(?:\/|$)/.test(req.url || req.path || '');
+
+const defaultJsonParser = express.json({ limit: DEFAULT_REQUEST_BODY_LIMIT });
+const adminGuideJsonParser = express.json({ limit: ADMIN_GUIDE_REQUEST_BODY_LIMIT });
+const defaultUrlencodedParser = express.urlencoded({ extended: true, limit: DEFAULT_REQUEST_BODY_LIMIT });
+const adminGuideUrlencodedParser = express.urlencoded({ extended: true, limit: ADMIN_GUIDE_REQUEST_BODY_LIMIT });
+
+const requestBodyParser = (req, res, next) => {
+  const parseUrlencoded = isAdminGuideRequest(req) ? adminGuideUrlencodedParser : defaultUrlencodedParser;
+  const parseJson = isAdminGuideRequest(req) ? adminGuideJsonParser : defaultJsonParser;
+
+  parseUrlencoded(req, res, (urlencodedErr) => {
+    if (urlencodedErr) {
+      return next(urlencodedErr);
+    }
+
+    parseJson(req, res, next);
+  });
+};
+
 app.set('trust proxy', 1);
 
 const limiter = rateLimit({
@@ -55,8 +78,6 @@ io.attach(server);
 
 app.use(compression());
 
-app.use(express.urlencoded({ extended: true }));
-
 io.on("connection", (socket) => {
   console.log("Usuário conectado:", socket.id);
 
@@ -83,6 +104,8 @@ app.use((req, res, next) => {
   next();
 });
 
+app.use(requestBodyParser);
+
 app.use('/v1/tickets-images/compressed', express.static(path.join(__dirname, 'src', 'main', 'resources', 'tickets-images', 'compressed')));
 app.use('/v1/guild-logos/compressed', express.static(path.join(__dirname, 'src', 'main', 'resources', 'guild-logos', 'compressed')));
 app.use('/guild-logos/compressed', express.static(path.join(__dirname, 'src', 'main', 'resources', 'guild-logos', 'compressed')));
@@ -108,7 +131,6 @@ app.use((req, res, next) => {
   }
   next()
 })
-app.use(express.json());
 app.use(morgan('dev'));
 
 app.use(express.static(__dirname + '/client'));
