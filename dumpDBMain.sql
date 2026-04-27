@@ -141,7 +141,7 @@ CREATE TABLE `accounts` (
   `banReason` varchar(255) DEFAULT NULL,
   `day_end_premmy` bigint DEFAULT '0',
   `web_lastlogin` bigint DEFAULT '0',
-  `web_flags` varchar(255) DEFAULT NULL,
+  `web_flag` varchar(255) DEFAULT NULL,
   `change_pass_token` varchar(255) DEFAULT NULL,
   `recovery_key` varchar(100) DEFAULT NULL,
   `password2` varchar(100) DEFAULT NULL,
