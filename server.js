@@ -1,17 +1,19 @@
 require('newrelic');
-require('dotenv');
+require('dotenv').config({ path: require('path').join(__dirname, '.env') });
+process.chdir(__dirname);
 const http = require('http');
 const express = require('express');
 const cors = require('cors');
 const consign = require('consign');
 const path = require('path');
 const app = express();
-const { io } = require('./socket');
+const { io, ALLOWED_ORIGINS, corsOriginCheck } = require('./socket');
 const morgan = require('morgan');
 const prismicH = require('@prismicio/helpers');
 const compression = require('compression');
 const fs = require('fs');
 const RunCronCheckLives = require("./src/main/services/CronCheckLiveStreams");
+const { syncDatabaseSchemas } = require('./syncDatabaseSchemas');
 const server = http.createServer(app);
 const rateLimit = require("express-rate-limit");
 
@@ -64,14 +66,28 @@ const limiter = rateLimit({
 
 app.use(limiter);
 
-app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Methods', "GET, PUT, POST, DELETE");
-  res.header('Access-Control-Allow-Headers', "Content-Type");
-  app.use(cors());
-  app.options('*',cors());
-  next();
-})
+// Stricter rate-limit dedicated to /v1/Admin/* routes. Admin is a tiny set of operators,
+// so brute-force on login or poking around endpoints should be visibly throttled.
+const adminLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 30,
+  message: "Too many admin requests. Slow down.",
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+app.use(['/v1/Admin', '/api/v1/Admin'], adminLimiter);
+
+// Real CORS handling: replaces the previous wildcard middleware. We validate Origin
+// against the allowlist built in socket.js (env-driven, dev-friendly defaults).
+app.use(cors({
+  origin: corsOriginCheck,
+  methods: ['GET', 'PUT', 'POST', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: false,
+}));
+app.options('*', cors({ origin: corsOriginCheck }));
+console.log('[CORS] allowed origins:', ALLOWED_ORIGINS);
+
 const userSockets = {};
 
 io.attach(server);
@@ -81,21 +97,59 @@ app.use(compression());
 io.on("connection", (socket) => {
   console.log("Usuário conectado:", socket.id);
 
-  socket.on("user_connected", ({ userId }) => {
-      console.log("Usuário conectado com ID:", userId, "e socket ID:", socket.id);
-      userSockets[userId] = socket.id;
-    console.log("Objeto userSockets atualizado:", userSockets);
+  socket.on("user_connected", ({ userId } = {}) => {
+    // Sanitize input: only positive numeric ids. This event is the channel used by the
+    // pix payment flow to deliver `payment_approved`. We do NOT trust an arbitrary string
+    // and we keep a 1:1 relationship between socket and userId on this socket only.
+    const numericUserId = Number(userId);
+    if (!Number.isInteger(numericUserId) || numericUserId <= 0) {
+      return;
+    }
+    // Drop any previous socket mapping for this user (avoids stale routing).
+    userSockets[numericUserId] = socket.id;
+    socket.data.userId = numericUserId;
   });
 
   socket.on("disconnect", () => {
-    console.log("Usuário desconectado:", socket.id);
-
-    // remova a associação do id do usuario do socket
-    const userId = Object.keys(userSockets).find((key) => userSockets[key] === socket.id);
-    if (userId) {
-      delete userSockets[userId];
-      console.log(userSockets)
+    const ownedUserId = socket.data && socket.data.userId;
+    if (ownedUserId && userSockets[ownedUserId] === socket.id) {
+      delete userSockets[ownedUserId];
     }
+  });
+});
+
+// Admin namespace (Phase 3+): used by the admin dashboard to receive realtime
+// economy/ticket updates. Auth happens at handshake via JWT signed with
+// TOKEN_GENERATE_SECRET_ADMIN. Connections without a valid admin token are rejected
+// before any event is wired up.
+const { AdmintokenValidation } = require('./src/main/utils/utilities');
+const adminNamespace = io.of('/admin');
+adminNamespace.use((socket, next) => {
+  try {
+    const token = (socket.handshake.auth && socket.handshake.auth.token)
+      || socket.handshake.headers['authorization'];
+    if (!token) {
+      return next(new Error('admin token required'));
+    }
+    const decoded = AdmintokenValidation(token);
+    if (!decoded || !decoded.data) {
+      return next(new Error('invalid admin token'));
+    }
+    const data = decoded.data;
+    if (!(Number(data.type) > 3 && Number(data.web_flag) === 3)) {
+      return next(new Error('not an admin'));
+    }
+    socket.data.adminId = data.id;
+    socket.data.adminEmail = data.email;
+    return next();
+  } catch (err) {
+    return next(new Error('admin auth failure'));
+  }
+});
+adminNamespace.on('connection', (socket) => {
+  console.log('[admin-socket] connected', socket.data.adminEmail || socket.data.adminId);
+  socket.on('disconnect', () => {
+    console.log('[admin-socket] disconnected', socket.data.adminEmail || socket.data.adminId);
   });
 });
 
@@ -175,31 +229,51 @@ io.on("connect_error", (error) => {
 module.exports = {
   io,
   userSockets,
+  adminNamespace,
 };
-//att
-consign()
-  .then("./src/main/config/prismicConfig.js")
-  .then("./src/main/utils")
-  .then("./src/main/modules/twitch/repository")
-  .then("./src/main/modules/twitch")
-  .then("./src/main/middlewares")
-  .then("./src/main/repository")
-  .then("./src/main/modules/mercadoPago/repository")
-  .then("./src/main/modules/mercadoPago/services")
-  .then("./src/main/modules/mercadoPago/")
-  .then("./src/main/services")
-  .then("./src/main/controllers")
-  .then("./src/main/modules/stripes/repository")
-  .then("./src/main/modules/stripes/services")
-  .then("./src/main/modules/stripes/")
-  .then("./src/main/modules/pagSeguro/repository")
-  .then("./src/main/modules/pagSeguro/controllers")
-  .then("./src/main/modules/pagSeguro")
-  .then("./src/main/config/Routes.js")
-  .into(app);
 
-const PORT = 8880;
-server.listen(PORT, () => {
+const loadApplicationModules = () => {
+  consign()
+    .then("./src/main/config/prismicConfig.js")
+    .then("./src/main/utils")
+    .then("./src/main/modules/twitch/repository")
+    .then("./src/main/modules/twitch")
+    .then("./src/main/middlewares")
+    .then("./src/main/repository")
+    .then("./src/main/modules/mercadoPago/repository")
+    .then("./src/main/modules/mercadoPago/services")
+    .then("./src/main/modules/mercadoPago/")
+    .then("./src/main/services")
+    .then("./src/main/controllers")
+    .then("./src/main/modules/stripes/repository")
+    .then("./src/main/modules/stripes/services")
+    .then("./src/main/modules/stripes/")
+    .then("./src/main/modules/pagSeguro/repository")
+    .then("./src/main/modules/pagSeguro/controllers")
+    .then("./src/main/modules/pagSeguro")
+    .then("./src/main/config/Routes.js")
+    .into(app);
+};
+
+const startServer = async () => {
+  await syncDatabaseSchemas();
+  loadApplicationModules();
+
+  const PORT = Number(process.env.PORT) || 8880;
+  server.listen(PORT, () => {
     // RunCronCheckLives.start();
     console.log(`BackEnd Rodando na porta: ${PORT}!!`);
+    try {
+      const EconomyRealtimeService = require('./src/main/services/EconomyRealtimeService');
+      EconomyRealtimeService.start(adminNamespace);
+      console.log('[EconomyRealtimeService] started, broadcasting on /admin namespace.');
+    } catch (err) {
+      console.error('[EconomyRealtimeService] failed to start:', err && err.message);
+    }
+  });
+};
+
+startServer().catch((err) => {
+  console.error('Failed to sync database schemas on startup:', err);
+  process.exit(1);
 });

@@ -104,6 +104,13 @@ module.exports = app => {
     app.route('/v1/Admin/contracts/payment/type').get(AdminAuthMiddleware, app.src.main.controllers.AdminController.AdminGetContractPaymentTypeController);
     app.route('/v1/Admin/contracts/:id').get(AdminAuthMiddleware, app.src.main.controllers.AdminController.AdminGetContractByContractIdController);
     app.route('/v1/Admin/massemail').post(AdminAuthMiddleware, app.src.main.controllers.MassEmailController.createEmailHtmlController);
+    app.route('/v1/Admin/economy/dashboard').get(AdminAuthMiddleware, app.src.main.controllers.EconomyController.AdminEconomyDashboardRequest);
+    app.route('/v1/Admin/economy/monsters').get(AdminAuthMiddleware, app.src.main.controllers.EconomyController.AdminEconomyMonsterListRequest);
+    app.route('/v1/Admin/economy/monsters/ranking').get(AdminAuthMiddleware, app.src.main.controllers.EconomyController.AdminEconomyMonsterRankingRequest);
+    app.route('/v1/Admin/economy/monsters/:id/gold').get(AdminAuthMiddleware, app.src.main.controllers.EconomyController.AdminEconomyMonsterDetailsRequest);
+    app.route('/v1/Admin/economy/interventions').get(AdminAuthMiddleware, app.src.main.controllers.EconomyController.AdminEconomyInterventionsRequest);
+    app.route('/v1/Admin/economy/breakdown/:compartment').get(AdminAuthMiddleware, app.src.main.controllers.EconomyController.AdminEconomyBreakdownRequest);
+    app.route('/v1/Admin/economy/transfers').get(AdminAuthMiddleware, app.src.main.controllers.EconomyController.AdminEconomyTransfersRequest);
 
     /////////////////////////////////////////////////// Guide Routes //////////////////////////////////////////////////////////
     app.route('/v1/guides').get(app.src.main.controllers.GuideController.getAllGuidesRequest);
