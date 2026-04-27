@@ -1,21 +1,36 @@
 const { Server } = require("socket.io");
 
+const normalizeOriginCandidate = (value) => {
+  if (!value || typeof value !== 'string') return null;
+  const trimmed = value.trim();
+  if (!trimmed) return null;
+
+  try {
+    return new URL(trimmed).origin;
+  } catch {
+    return trimmed;
+  }
+};
+
+const SOCKET_IO_PATH = process.env.SOCKET_IO_PATH || '/api/socket.io';
+
 // Build allowed origins for both HTTP and Socket.IO from env. We accept a
 // comma-separated list in CORS_ALLOWED_ORIGINS. If unset, we fall back to
 // BASE_URL_IP_FRONT and a small dev whitelist so local development keeps working.
 const parseAllowedOrigins = () => {
   const raw = process.env.CORS_ALLOWED_ORIGINS;
   if (raw && raw.trim().length > 0) {
-    return raw.split(',').map(s => s.trim()).filter(Boolean);
+    return Array.from(new Set(raw.split(',').map(s => normalizeOriginCandidate(s)).filter(Boolean)));
   }
   const fallback = [
-    process.env.BASE_URL_IP_FRONT,
+    normalizeOriginCandidate(process.env.BASE_URL_IP_FRONT),
+    normalizeOriginCandidate(process.env.BASE_URL_IP_BACK),
     'http://localhost:3000',
     'http://localhost:3333',
     'http://127.0.0.1:3000',
     'http://127.0.0.1:3333',
   ].filter(Boolean);
-  return fallback;
+  return Array.from(new Set(fallback));
 };
 
 const ALLOWED_ORIGINS = parseAllowedOrigins();
@@ -28,6 +43,7 @@ const corsOriginCheck = (origin, callback) => {
 };
 
 const io = new Server({
+  path: SOCKET_IO_PATH,
   cors: {
     origin: corsOriginCheck,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
@@ -35,4 +51,4 @@ const io = new Server({
   }
 });
 
-module.exports = { io, ALLOWED_ORIGINS, corsOriginCheck };
+module.exports = { io, ALLOWED_ORIGINS, corsOriginCheck, SOCKET_IO_PATH };

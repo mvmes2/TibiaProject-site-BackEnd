@@ -7,7 +7,7 @@ const cors = require('cors');
 const consign = require('consign');
 const path = require('path');
 const app = express();
-const { io, ALLOWED_ORIGINS, corsOriginCheck } = require('./socket');
+const { io, ALLOWED_ORIGINS, corsOriginCheck, SOCKET_IO_PATH } = require('./socket');
 const morgan = require('morgan');
 const prismicH = require('@prismicio/helpers');
 const compression = require('compression');
@@ -87,6 +87,7 @@ app.use(cors({
 }));
 app.options('*', cors({ origin: corsOriginCheck }));
 console.log('[CORS] allowed origins:', ALLOWED_ORIGINS);
+console.log('[socket.io] path:', SOCKET_IO_PATH);
 
 const userSockets = {};
 
