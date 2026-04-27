@@ -194,7 +194,6 @@ module.exports = app => {
         accUpdatedPremiumTime.created_at = 0;
       }
 
-      accUpdatedPremiumTime.premdays = (accUpdatedPremiumTime.lastday - (Date.now() / 1000)) > 0 ? Math.floor(((accUpdatedPremiumTime.lastday - (Date.now() / 1000)) / 60 / 60 / 24)) : 0;
       validateLoginAccInfo = {
         ...accUpdatedPremiumTime,
         editedCharList,

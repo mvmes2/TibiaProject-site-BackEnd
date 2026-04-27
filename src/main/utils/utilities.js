@@ -219,23 +219,19 @@ const generateTokenAdmin = (duration, userData) => {
 }
 
 const tokenValidation = (token) => {
-  console.log('recebendo token', token)
   try {
     const decoded = jwt.verify(token, process.env.TOKEN_GENERATE_SECRET);
     return decoded;
   } catch (err) {
-    console.log(err);
     return false;
   }
 }
 
 const AdmintokenValidation = (token) => {
-  console.log('recebendo token', token)
   try {
     const decoded = jwt.verify(token, process.env.TOKEN_GENERATE_SECRET_ADMIN);
     return decoded;
   } catch (err) {
-    console.log(err);
     return false;
   }
 }

@@ -86,7 +86,19 @@ class guides extends Model {
     static tableName = 'guides'
 }
 
+class economy_player_snapshots extends Model {
+    static tableName = 'economy_player_snapshots'
+}
+
+class economy_project_coins_snapshots extends Model {
+    static tableName = 'economy_project_coins_snapshots'
+}
+
+class economy_snapshots extends Model {
+    static tableName = 'economy_snapshots'
+}
+
 module.exports = { players_online, accounts, players, player_deaths, worlds, player_items, 
     products, payments, tickets, tickets_response, tickets_images, 
     tickets_response_images, players_titles, guilds, guild_invites, guild_membership, guild_ranks, 
-    guild_wars, guildwar_kills, houses, guides }
+    guild_wars, guildwar_kills, houses, guides, economy_player_snapshots, economy_project_coins_snapshots, economy_snapshots }
