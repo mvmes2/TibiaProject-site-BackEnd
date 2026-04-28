@@ -110,6 +110,10 @@ module.exports = app => {
     app.route('/v1/Admin/economy/monsters/:id/gold').get(AdminAuthMiddleware, app.src.main.controllers.EconomyController.AdminEconomyMonsterDetailsRequest);
     app.route('/v1/Admin/economy/interventions').get(AdminAuthMiddleware, app.src.main.controllers.EconomyController.AdminEconomyInterventionsRequest);
     app.route('/v1/Admin/economy/breakdown/:compartment').get(AdminAuthMiddleware, app.src.main.controllers.EconomyController.AdminEconomyBreakdownRequest);
+    app.route('/v1/Admin/economy/players/financial-locks').get(AdminAuthMiddleware, app.src.main.controllers.EconomyController.AdminEconomyLockedPlayersRequest);
+    app.route('/v1/Admin/economy/players/:id').get(AdminAuthMiddleware, app.src.main.controllers.EconomyController.AdminEconomyPlayerProfileRequest);
+    app.route('/v1/Admin/economy/players/:id/financial-history').get(AdminAuthMiddleware, app.src.main.controllers.EconomyController.AdminEconomyPlayerFinancialHistoryRequest);
+    app.route('/v1/Admin/economy/players/:id/financial-lock').post(AdminAuthMiddleware, app.src.main.controllers.EconomyController.AdminEconomyPlayerFinancialLockRequest);
     app.route('/v1/Admin/economy/transfers').get(AdminAuthMiddleware, app.src.main.controllers.EconomyController.AdminEconomyTransfersRequest);
 
     /////////////////////////////////////////////////// Guide Routes //////////////////////////////////////////////////////////

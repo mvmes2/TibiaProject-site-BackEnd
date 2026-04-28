@@ -42,6 +42,21 @@ const requestBodyParser = (req, res, next) => {
 
 app.set('trust proxy', 1);
 
+// Real CORS handling: replaces the previous wildcard middleware. We validate Origin
+// against the allowlist built in socket.js (env-driven, dev-friendly defaults).
+// IMPORTANT: CORS must be registered BEFORE rate-limit middlewares, otherwise a
+// 429 response is emitted without `Access-Control-Allow-Origin` and the browser
+// surfaces it to axios as a generic "Network Error" instead of a real HTTP 429.
+app.use(cors({
+  origin: corsOriginCheck,
+  methods: ['GET', 'PUT', 'POST', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: false,
+}));
+app.options('*', cors({ origin: corsOriginCheck }));
+console.log('[CORS] allowed origins:', ALLOWED_ORIGINS);
+console.log('[socket.io] path:', SOCKET_IO_PATH);
+
 const limiter = rateLimit({
   windowMs: 10 * 1000, // Define uma janela de 20 segundos
   max: 50, // Limite máximo de solicitações por IP na janela
@@ -67,27 +82,29 @@ const limiter = rateLimit({
 app.use(limiter);
 
 // Stricter rate-limit dedicated to /v1/Admin/* routes. Admin is a tiny set of operators,
-// so brute-force on login or poking around endpoints should be visibly throttled.
+// so brute-force on login or poking around endpoints should be visibly throttled. The
+// economy dashboard fans out ~4 parallel requests per refresh and reacts to a realtime
+// poll, so 30/min is too tight in practice; 180/min still throttles abuse without
+// breaking the legitimate admin workflow.
 const adminLimiter = rateLimit({
   windowMs: 60 * 1000,
-  max: 30,
+  max: 180,
   message: "Too many admin requests. Slow down.",
   standardHeaders: true,
   legacyHeaders: false,
 });
 app.use(['/v1/Admin', '/api/v1/Admin'], adminLimiter);
 
-// Real CORS handling: replaces the previous wildcard middleware. We validate Origin
-// against the allowlist built in socket.js (env-driven, dev-friendly defaults).
-app.use(cors({
-  origin: corsOriginCheck,
-  methods: ['GET', 'PUT', 'POST', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: false,
-}));
-app.options('*', cors({ origin: corsOriginCheck }));
-console.log('[CORS] allowed origins:', ALLOWED_ORIGINS);
-console.log('[socket.io] path:', SOCKET_IO_PATH);
+app.use((req, res, next) => {
+  if (/^\/(?:api\/)?v1\/Admin\/economy(?:\/|$)/.test(req.url || '')) {
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+    res.setHeader('Surrogate-Control', 'no-store');
+  }
+
+  next();
+});
 
 const userSockets = {};
 
@@ -149,6 +166,9 @@ adminNamespace.use((socket, next) => {
 });
 adminNamespace.on('connection', (socket) => {
   console.log('[admin-socket] connected', socket.data.adminEmail || socket.data.adminId);
+  socket.emit('economy:refresh', {
+    reason: 'socket-connected',
+  });
   socket.on('disconnect', () => {
     console.log('[admin-socket] disconnected', socket.data.adminEmail || socket.data.adminId);
   });

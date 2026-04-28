@@ -12,6 +12,30 @@ const normalizeOriginCandidate = (value) => {
   }
 };
 
+const expandOriginVariants = (origin) => {
+  if (!origin) return [];
+
+  try {
+    const parsed = new URL(origin);
+    const variants = new Set([parsed.origin]);
+    const { protocol, port, hostname } = parsed;
+    const isIpAddress = /^\d{1,3}(?:\.\d{1,3}){3}$/.test(hostname);
+    const isLocalHost = hostname === 'localhost' || hostname === '127.0.0.1';
+
+    if (!isIpAddress && !isLocalHost && hostname.includes('.')) {
+      if (hostname.startsWith('www.')) {
+        variants.add(`${protocol}//${hostname.slice(4)}${port ? `:${port}` : ''}`);
+      } else {
+        variants.add(`${protocol}//www.${hostname}${port ? `:${port}` : ''}`);
+      }
+    }
+
+    return Array.from(variants);
+  } catch {
+    return [origin];
+  }
+};
+
 const SOCKET_IO_PATH = process.env.SOCKET_IO_PATH || '/api/socket.io';
 
 // Build allowed origins for both HTTP and Socket.IO from env. We accept a
@@ -20,7 +44,11 @@ const SOCKET_IO_PATH = process.env.SOCKET_IO_PATH || '/api/socket.io';
 const parseAllowedOrigins = () => {
   const raw = process.env.CORS_ALLOWED_ORIGINS;
   if (raw && raw.trim().length > 0) {
-    return Array.from(new Set(raw.split(',').map(s => normalizeOriginCandidate(s)).filter(Boolean)));
+    return Array.from(new Set(raw
+      .split(',')
+      .map(s => normalizeOriginCandidate(s))
+      .filter(Boolean)
+      .flatMap(expandOriginVariants)));
   }
   const fallback = [
     normalizeOriginCandidate(process.env.BASE_URL_IP_FRONT),
@@ -29,7 +57,7 @@ const parseAllowedOrigins = () => {
     'http://localhost:3333',
     'http://127.0.0.1:3000',
     'http://127.0.0.1:3333',
-  ].filter(Boolean);
+  ].filter(Boolean).flatMap(expandOriginVariants);
   return Array.from(new Set(fallback));
 };
 

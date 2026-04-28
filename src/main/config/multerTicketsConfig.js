@@ -3,12 +3,16 @@ const multer = require('multer');
 const fs = require('fs');
 const sharp = require('sharp');
 
+const ensureDirectoryExists = (dirPath) => {
+  if (!fs.existsSync(dirPath)) {
+    fs.mkdirSync(dirPath, { recursive: true });
+  }
+};
+
 const storageTickets = multer.diskStorage({
   destination: (req, file, cb) => {
     const destinationPath = path.join(__dirname, '..', 'resources', 'tickets-images');
-    if (!fs.existsSync(destinationPath)) {
-      fs.mkdirSync(destinationPath, { recursive: true });
-  }
+    ensureDirectoryExists(destinationPath);
     cb(null, destinationPath);
   },
   filename: (req, file, cb) => {
@@ -68,9 +72,7 @@ const compressImagesMiddleware = async (req, res, next) => {
 
         // Verificar e criar o diretório 'compressed', se necessário
         const compressedDir = path.join(__dirname, '..', 'resources', 'tickets-images', 'compressed');
-        if (!fs.existsSync(compressedDir)) {
-          fs.mkdirSync(compressedDir);
-        }
+        ensureDirectoryExists(compressedDir);
 
         await compressImage(inputPath, outputPath);
         req.files[i].filename = outputFileName + ext;

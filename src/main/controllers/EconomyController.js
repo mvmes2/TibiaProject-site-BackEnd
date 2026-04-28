@@ -6,8 +6,13 @@ module.exports = app => {
         getEconomyMonsterDetailsRepository,
         getEconomyInterventionsRepository,
         getEconomyBreakdownRepository,
+        getEconomyPlayerProfileRepository,
+        getEconomyPlayerFinancialHistoryRepository,
+        getEconomyLockedPlayersRepository,
+        setEconomyPlayerFinancialLockRepository,
         getEconomyTransfersRepository,
     } = app.src.main.repository.EconomyRepository;
+    const { emitAdminEvent } = app.src.main.services.AdminRealtimeService;
 
     const DAY_IN_MS = 24 * 60 * 60 * 1000;
     const DEFAULT_WINDOW_DAYS = 7;
@@ -68,6 +73,33 @@ module.exports = app => {
         }
 
         return parsed;
+    };
+
+    const resolveBoolean = (value) => {
+        if (typeof value === 'boolean') {
+            return value;
+        }
+
+        if (typeof value === 'number') {
+            return value !== 0;
+        }
+
+        if (typeof value === 'string') {
+            const normalized = value.trim().toLowerCase();
+            if (['true', '1', 'yes', 'on', 'lock', 'locked'].includes(normalized)) {
+                return true;
+            }
+            if (['false', '0', 'no', 'off', 'unlock', 'unlocked'].includes(normalized)) {
+                return false;
+            }
+        }
+
+        return null;
+    };
+
+    const resolvePlayerFinancialHistoryViewMode = (value) => {
+        const normalized = String(value || '').trim().toLowerCase();
+        return normalized === 'detailed' ? 'detailed' : 'grouped';
     };
 
     const AdminEconomyDashboardRequest = async (req, res) => {
@@ -153,6 +185,75 @@ module.exports = app => {
         return res.status(response.status).send({ message: response.message });
     };
 
+    const AdminEconomyPlayerProfileRequest = async (req, res) => {
+        const playerId = resolvePositiveInteger(req.params.id, 0);
+
+        if (!playerId) {
+            return res.status(400).send({ message: 'Invalid player id.' });
+        }
+
+        const response = await getEconomyPlayerProfileRepository(playerId);
+        return res.status(response.status).send({ message: response.message });
+    };
+
+    const AdminEconomyPlayerFinancialHistoryRequest = async (req, res) => {
+        const playerId = resolvePositiveInteger(req.params.id, 0);
+
+        if (!playerId) {
+            return res.status(400).send({ message: 'Invalid player id.' });
+        }
+
+        const page = resolvePositiveInteger(req.query.page, 1);
+        const response = await getEconomyPlayerFinancialHistoryRepository(playerId, {
+            page,
+            viewMode: resolvePlayerFinancialHistoryViewMode(req.query.viewMode),
+        });
+        return res.status(response.status).send({ message: response.message });
+    };
+
+    const AdminEconomyLockedPlayersRequest = async (req, res) => {
+        const page = resolvePositiveInteger(req.query.page, 1);
+        const response = await getEconomyLockedPlayersRepository({
+            page,
+            search: req.query.search,
+        });
+        return res.status(response.status).send({ message: response.message });
+    };
+
+    const AdminEconomyPlayerFinancialLockRequest = async (req, res) => {
+        const playerId = resolvePositiveInteger(req.params.id, 0);
+        if (!playerId) {
+            return res.status(400).send({ message: 'Invalid player id.' });
+        }
+
+        const locked = resolveBoolean(req.body?.locked);
+        if (locked === null) {
+            return res.status(400).send({ message: 'Field `locked` must be a boolean-like value.' });
+        }
+
+        const response = await setEconomyPlayerFinancialLockRepository(playerId, {
+            locked,
+            reason: req.body?.reason,
+            admin: {
+                id: req.user?.data?.id,
+                name: req.user?.data?.name,
+                email: req.user?.data?.email,
+            },
+        });
+
+        if (response.status === 200) {
+            emitAdminEvent('economy:financial_lock_updated', {
+                playerId,
+                locked,
+                commandId: response.message?.action?.commandId || null,
+                phase: 'queued',
+                status: 'PENDING',
+            });
+        }
+
+        return res.status(response.status).send({ message: response.message });
+    };
+
     const AdminEconomyTransfersRequest = async (req, res) => {
         const range = resolveDateRange(req.query);
 
@@ -172,6 +273,10 @@ module.exports = app => {
         AdminEconomyMonsterDetailsRequest,
         AdminEconomyInterventionsRequest,
         AdminEconomyBreakdownRequest,
+        AdminEconomyPlayerProfileRequest,
+        AdminEconomyPlayerFinancialHistoryRequest,
+        AdminEconomyLockedPlayersRequest,
+        AdminEconomyPlayerFinancialLockRequest,
         AdminEconomyTransfersRequest,
     };
 };

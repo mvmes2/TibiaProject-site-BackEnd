@@ -1,4 +1,5 @@
 require('dotenv');
+const connection = require('../config/dbMasterConf');
 const { accounts, players, players_online, player_deaths, guild_invites,
   players_titles, guild_membership, guilds, guild_ranks } = require('../models/MasterModels');
 
@@ -11,6 +12,125 @@ module.exports = app => {
   let checkIfAccExistsLastUpdated = 0;
   let checkAcc = 0;
   let accountsCreatedAtColumn = null;
+  let hasFinancialLockStateTable = null;
+
+  const resolveHasFinancialLockStateTable = async () => {
+    if (hasFinancialLockStateTable !== null) {
+      return hasFinancialLockStateTable;
+    }
+
+    try {
+      hasFinancialLockStateTable = await connection.schema.hasTable('gold_player_financial_lock_state');
+    } catch (err) {
+      console.log('[UserRepository] resolveHasFinancialLockStateTable error:', err);
+      hasFinancialLockStateTable = false;
+    }
+
+    return hasFinancialLockStateTable;
+  };
+
+  const attachFinancialLockDataToAccountInfo = async (accountInfo) => {
+    if (!accountInfo || !Array.isArray(accountInfo.editedCharList) || accountInfo.editedCharList.length < 1) {
+      return {
+        ...accountInfo,
+        financialLockAlerts: [],
+      };
+    }
+
+    const hasLockTable = await resolveHasFinancialLockStateTable();
+    if (!hasLockTable) {
+      return {
+        ...accountInfo,
+        editedCharList: accountInfo.editedCharList.map((character) => ({
+          ...character,
+          financialLock: null,
+        })),
+        financialLockAlerts: [],
+      };
+    }
+
+    const playerIds = accountInfo.editedCharList
+      .map((character) => Number(character?.playerId || character?.id || 0))
+      .filter((playerId) => playerId > 0);
+
+    if (playerIds.length < 1) {
+      return {
+        ...accountInfo,
+        editedCharList: accountInfo.editedCharList.map((character) => ({
+          ...character,
+          financialLock: null,
+        })),
+        financialLockAlerts: [],
+      };
+    }
+
+    try {
+      const financialLockRows = await connection('gold_player_financial_lock_state as lockState')
+        .leftJoin('players as staff', 'staff.id', 'lockState.locked_by_player_id')
+        .select(
+          'lockState.player_id as playerId',
+          'lockState.is_locked as isLocked',
+          'lockState.reason',
+          'lockState.locked_by_player_id as lockedByPlayerId',
+          'lockState.locked_by_name_snapshot as lockedByNameSnapshot',
+          'lockState.updated_at as updatedAt',
+          'staff.name as lockedByPlayerName'
+        )
+        .whereIn('lockState.player_id', playerIds)
+        .andWhere('lockState.is_locked', 1);
+
+      const lockMapByPlayerId = new Map();
+      financialLockRows.forEach((row) => {
+        const playerId = Number(row.playerId) || 0;
+        if (!playerId) {
+          return;
+        }
+
+        lockMapByPlayerId.set(playerId, {
+          isLocked: Boolean(Number(row.isLocked) || 0),
+          reason: row.reason || '',
+          lockedByPlayerId: row.lockedByPlayerId ? Number(row.lockedByPlayerId) : null,
+          lockedByNameSnapshot: row.lockedByPlayerName || row.lockedByNameSnapshot || null,
+          updatedAt: Number(row.updatedAt) || 0,
+        });
+      });
+
+      const editedCharList = accountInfo.editedCharList.map((character) => {
+        const playerId = Number(character?.playerId || character?.id || 0);
+        return {
+          ...character,
+          financialLock: playerId ? (lockMapByPlayerId.get(playerId) || null) : null,
+        };
+      });
+
+      const financialLockAlerts = editedCharList
+        .filter((character) => character?.financialLock?.isLocked)
+        .map((character) => ({
+          playerId: Number(character.playerId || 0) || null,
+          name: character.name,
+          reason: character.financialLock.reason || '',
+          lockedByPlayerId: character.financialLock.lockedByPlayerId,
+          lockedByNameSnapshot: character.financialLock.lockedByNameSnapshot || null,
+          updatedAt: Number(character.financialLock.updatedAt) || 0,
+        }));
+
+      return {
+        ...accountInfo,
+        editedCharList,
+        financialLockAlerts,
+      };
+    } catch (err) {
+      console.log('[UserRepository] attachFinancialLockDataToAccountInfo error:', err);
+      return {
+        ...accountInfo,
+        editedCharList: accountInfo.editedCharList.map((character) => ({
+          ...character,
+          financialLock: null,
+        })),
+        financialLockAlerts: [],
+      };
+    }
+  };
 
   const resolveAccountsCreatedAtColumn = async () => {
     if (accountsCreatedAtColumn) return accountsCreatedAtColumn;
@@ -117,6 +237,7 @@ module.exports = app => {
     if (validateLoginData.id == data.id && getCreateCharacterController() !== 0 && moment().diff(validateLoginLastUpdated, 'minutes') < 5) {
       console.log('Cache validateLoginAccMannagement aplicado com sucesso!')
 
+      validateLoginAccInfo = await attachFinancialLockDataToAccountInfo(validateLoginAccInfo);
       return { status: 200, message: validateLoginAccInfo };
     }
 
@@ -147,6 +268,7 @@ module.exports = app => {
       const editedCharList = [];
 
       for (x in characters) {
+        const playerId = Number(characters[x].id) || 0;
         const deathList = await player_deaths.query().select('time', 'level', 'killed_by', 'is_player', 'mostdamage_by', 'mostdamage_is_player', 'unjustified', 'mostdamage_unjustified').where({ player_id: characters[x].id });
 
         const online = await players_online.query().select('*').where({ player_id: characters[x].id });
@@ -170,11 +292,12 @@ module.exports = app => {
         deathList.slice(0, 15);
         delete characters[x].id;
         const newCharInfo = {
+          playerId,
           ...characters[x],
           deathList,
           isOnline: online[0]?.player_id ? true : false,
           guild_name: playerGuildName?.name,
-          guild_invite_name: playerAccepGuildInvit?.name
+          guild_invite_name: playerAccepGuildInvit?.name,
         }
         editedCharList.push(newCharInfo);
       }
@@ -194,10 +317,10 @@ module.exports = app => {
         accUpdatedPremiumTime.created_at = 0;
       }
 
-      validateLoginAccInfo = {
+      validateLoginAccInfo = await attachFinancialLockDataToAccountInfo({
         ...accUpdatedPremiumTime,
         editedCharList,
-      }
+      });
 
       validateLoginLastUpdated = moment();
       validateLoginData = data;

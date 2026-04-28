@@ -279,6 +279,51 @@ CREATE TABLE IF NOT EXISTS `gold_server_stock_snapshot` (
   KEY `gold_server_stock_snapshot_at_idx` (`snapshot_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 
+CREATE TABLE IF NOT EXISTS `gold_server_player_stock_snapshot` (
+  `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
+  `snapshot_id` bigint UNSIGNED NOT NULL,
+  `boot_id` bigint UNSIGNED NOT NULL,
+  `snapshot_at` bigint UNSIGNED NOT NULL,
+  `player_id` int UNSIGNED NOT NULL,
+  `player_name_snapshot` varchar(255) NOT NULL DEFAULT '',
+  `level` int UNSIGNED NOT NULL DEFAULT '0',
+  `is_online` tinyint(1) NOT NULL DEFAULT '0',
+  `bank_gold` bigint UNSIGNED NOT NULL DEFAULT '0',
+  `inventory_gold` bigint UNSIGNED NOT NULL DEFAULT '0',
+  `depot_gold` bigint UNSIGNED NOT NULL DEFAULT '0',
+  `house_gold` bigint UNSIGNED NOT NULL DEFAULT '0',
+  `total_gold` bigint UNSIGNED NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `gold_server_player_stock_snapshot_snapshot_player_uidx` (`snapshot_id`,`player_id`),
+  KEY `gold_server_player_stock_snapshot_player_idx` (`player_id`,`snapshot_at`),
+  KEY `gold_server_player_stock_snapshot_snapshot_total_idx` (`snapshot_id`,`total_gold`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE IF NOT EXISTS `punishment` (
+  `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
+  `player_id` int UNSIGNED NOT NULL,
+  `account_id` int UNSIGNED DEFAULT NULL,
+  `punishment_type` varchar(32) NOT NULL DEFAULT 'STAFF_NOTE',
+  `severity` varchar(24) NOT NULL DEFAULT 'INFO',
+  `status` varchar(24) NOT NULL DEFAULT 'RECORDED',
+  `reason` varchar(255) NOT NULL DEFAULT '',
+  `notes` varchar(255) NOT NULL DEFAULT '',
+  `source_table` varchar(64) NOT NULL DEFAULT '',
+  `source_ref_id` bigint UNSIGNED DEFAULT NULL,
+  `source_fingerprint` varchar(191) NOT NULL DEFAULT '',
+  `recorded_at` bigint UNSIGNED NOT NULL DEFAULT '0',
+  `starts_at` bigint UNSIGNED DEFAULT NULL,
+  `expires_at` bigint UNSIGNED DEFAULT NULL,
+  `created_by_player_id` int UNSIGNED DEFAULT NULL,
+  `created_by_name_snapshot` varchar(64) NOT NULL DEFAULT '',
+  `updated_at` bigint UNSIGNED NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `punishment_source_fingerprint_uidx` (`source_fingerprint`),
+  KEY `punishment_player_recorded_idx` (`player_id`, `recorded_at`),
+  KEY `punishment_account_recorded_idx` (`account_id`, `recorded_at`),
+  KEY `punishment_source_idx` (`source_table`, `source_ref_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
 INSERT IGNORE INTO `gold_class_dim` (`id`, `name`, `description`) VALUES
   (1, 'FAUCET', 'Gold entrou na economia realizada'),
   (2, 'SINK', 'Gold saiu definitivamente da economia'),
@@ -315,7 +360,14 @@ INSERT IGNORE INTO `gold_mechanism_dim` (`id`, `name`, `description`) VALUES
   (21, 'LOW_LEVEL_UNCLASSIFIED_ADD', 'Adicao bruta de gold sem contexto auditado'),
   (22, 'LOW_LEVEL_UNCLASSIFIED_REMOVE', 'Remocao bruta de gold sem contexto auditado'),
   (23, 'SERVER_TAX_OTHER', 'Outras taxas do servidor'),
-  (24, 'ADMIN_COMMAND_GOLD_GRANT', 'Gold injetado por comando administrativo');
+  (24, 'ADMIN_COMMAND_GOLD_GRANT', 'Gold injetado por comando administrativo'),
+  (25, 'MAP_FIXED_GOLD_SPAWN_PENDING', 'Gold estatico de chao de mapa, ainda nao reclamado'),
+  (26, 'MAP_FIXED_GOLD_SPAWN_CLAIM', 'Gold estatico de chao de mapa coletado por player'),
+  (27, 'MAP_FIXED_GOLD_SPAWN_DECAY', 'Gold estatico de chao perdido por decay antes do claim'),
+  (28, 'QUEST_STATIC_CONTAINER_GOLD_PENDING', 'Gold estatico em container/chest de quest, ainda nao reclamado'),
+  (29, 'QUEST_STATIC_CONTAINER_GOLD_CLAIM', 'Gold estatico em container/chest de quest coletado por player'),
+  (30, 'QUEST_STATIC_CONTAINER_GOLD_DECAY', 'Gold estatico em container perdido por decay antes do claim'),
+  (31, 'ADMIN_CREATED_GOLD_HANDOFF', 'Moeda criada por staff e repassada para outro jogador');
 
 INSERT IGNORE INTO `gold_origin_root_dim` (`id`, `name`, `description`) VALUES
   (1, 'MONSTER_DIRECT_COIN', 'Gold dropado diretamente por monstro'),
@@ -369,8 +421,27 @@ SELECT
   'AUDIT_FACT' AS `record_source`,
   CAST(f.`event_seq` AS UNSIGNED) AS `source_row_id`,
   f.`occurred_at` AS `occurred_at`,
-  'FAUCET' AS `event_class`,
-  'ADMIN_COMMAND_GOLD_GRANT' AS `mechanism_name`,
+  CASE f.`class_id`
+    WHEN 1 THEN 'FAUCET'
+    WHEN 2 THEN 'SINK'
+    WHEN 3 THEN 'TRANSFER'
+    WHEN 4 THEN 'PENDING'
+    ELSE 'UNKNOWN'
+  END AS `event_class`,
+  CASE
+    WHEN (COALESCE(f.`inventory_delta`, 0) + COALESCE(f.`bank_delta`, 0)) > 0 THEN 'CREDIT'
+    WHEN (COALESCE(f.`inventory_delta`, 0) + COALESCE(f.`bank_delta`, 0)) < 0 THEN 'DEBIT'
+    WHEN f.`class_id` = 3 THEN 'TRANSFER'
+    WHEN f.`class_id` = 1 THEN 'CREDIT'
+    WHEN f.`class_id` = 2 THEN 'DEBIT'
+    ELSE 'NEUTRAL'
+  END AS `change_direction`,
+  CASE f.`mechanism_id`
+    WHEN 20 THEN 'BANK_TRANSFER_PLAYER'
+    WHEN 24 THEN 'ADMIN_COMMAND_GOLD_GRANT'
+    WHEN 31 THEN 'ADMIN_CREATED_GOLD_HANDOFF'
+    ELSE 'ADMIN_AUDIT_EVENT'
+  END AS `mechanism_name`,
   f.`actor_player_id` AS `actor_player_id`,
   actor.`name` AS `actor_player_name`,
   f.`beneficiary_player_id` AS `subject_player_id`,
@@ -378,6 +449,7 @@ SELECT
   f.`amount` AS `amount`,
   f.`inventory_delta` AS `inventory_delta`,
   f.`bank_delta` AS `bank_delta`,
+  CAST(COALESCE(f.`inventory_delta`, 0) + COALESCE(f.`bank_delta`, 0) AS SIGNED) AS `net_delta`,
   CAST(NULL AS SIGNED) AS `balance_before`,
   CAST(NULL AS SIGNED) AS `balance_after`,
   f.`source_ref_id` AS `source_ref_id`,
@@ -389,13 +461,15 @@ SELECT
 FROM `gold_audit_event_fact` f
 LEFT JOIN `players` actor ON actor.`id` = f.`actor_player_id`
 LEFT JOIN `players` subject ON subject.`id` = f.`beneficiary_player_id`
-WHERE f.`mechanism_id` = 24
+WHERE f.`mechanism_id` IN (24, 31)
+  OR (f.`mechanism_id` = 20 AND COALESCE(actor.`group_id`, 0) >= 2)
 UNION ALL
 SELECT
   'DB_TRIGGER' AS `record_source`,
   m.`id` AS `source_row_id`,
   m.`changed_at` AS `occurred_at`,
   CASE WHEN m.`delta` >= 0 THEN 'FAUCET' ELSE 'SINK' END AS `event_class`,
+  CASE WHEN m.`delta` > 0 THEN 'CREDIT' WHEN m.`delta` < 0 THEN 'DEBIT' ELSE 'NEUTRAL' END AS `change_direction`,
   'DATABASE_EXTERNAL_BALANCE_CHANGE' AS `mechanism_name`,
   NULL AS `actor_player_id`,
   NULL AS `actor_player_name`,
@@ -404,6 +478,7 @@ SELECT
   CAST(ABS(m.`delta`) AS UNSIGNED) AS `amount`,
   0 AS `inventory_delta`,
   m.`delta` AS `bank_delta`,
+  CAST(m.`delta` AS SIGNED) AS `net_delta`,
   CAST(m.`previous_balance` AS SIGNED) AS `balance_before`,
   CAST(m.`new_balance` AS SIGNED) AS `balance_after`,
   NULL AS `source_ref_id`,

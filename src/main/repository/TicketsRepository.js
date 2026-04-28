@@ -7,6 +7,36 @@ let getTicketListData = 0;
 let getTickeListInfo = 0;
 let getTickeListLastUpdated = 0;
 
+const resolveInsertedId = (insertResult) => {
+	if (Array.isArray(insertResult)) {
+		return resolveInsertedId(insertResult[0]);
+	}
+
+	if (insertResult && typeof insertResult === 'object') {
+		if (insertResult.id !== undefined && insertResult.id !== null) {
+			const id = Number(insertResult.id);
+			return Number.isInteger(id) && id > 0 ? id : null;
+		}
+
+		if (insertResult.insertId !== undefined && insertResult.insertId !== null) {
+			const insertId = Number(insertResult.insertId);
+			return Number.isInteger(insertId) && insertId > 0 ? insertId : null;
+		}
+	}
+
+	const numericResult = Number(insertResult);
+	return Number.isInteger(numericResult) && numericResult > 0 ? numericResult : null;
+};
+
+const invalidateTicketCaches = () => {
+	getTicketListData = 0;
+	getTickeListInfo = 0;
+	getTickeListLastUpdated = 0;
+	ticketLastUpdated = 0;
+	ticketInfo = 0;
+	ticketData = 0;
+};
+
 const getTicketListFromUser = async (data) => {
 	console.log('VAI ENTRAR NO CACHE DE GETTICKETS??? ', data.id, getTicketListData.id);
 	//cache
@@ -41,20 +71,23 @@ const CreateNewTicketInDB = async (data, files) => {
 			language: data.language,
 			createdAt: (Date.now() / 1000)
 		}
-		const ticket = await tickets().insert(newTicket);
-		console.log('oque temos aqui? ', ticket[0])
-		let ticketImage = null;
+		const insertedTicket = await tickets().insert(newTicket);
+		const ticketId = resolveInsertedId(insertedTicket);
+
+		if (!ticketId) {
+			throw new Error('Could not resolve inserted ticket id');
+		}
+
 		if (files?.length > 0) {
-			files.map(async (file) => {
+			for (const file of files) {
 				const newTicketImage = {
-					ticket_id: (Number(ticket[0])),
+					ticket_id: ticketId,
 					image_name: file.filename
 				}
-				ticketImage = await tickets_images().insert(newTicketImage);
-			})
-			console.log('kd imagens?  ', ticketImage)
+				await tickets_images().insert(newTicketImage);
+			}
 		}
-		getTickeListLastUpdated = 0;
+		invalidateTicketCaches();
 		return { status: 200, message: 'ok' };
 	} catch (err) {
 		console.log(err);
@@ -106,6 +139,7 @@ const getTicket = async (data) => {
 const updateTicketsRepository = async (data) => {
 	try {
 		await tickets().update(data.update).where({ id: data.id });
+		invalidateTicketCaches();
 		return { status: 200, message: 'ticket updated!' }
 	} catch (err) {
 		console.log('Error while trying to update ticket at: updateTicketsRepository... ', err);
@@ -116,18 +150,36 @@ const updateTicketsRepository = async (data) => {
 const insertNewTicketResponseRepository = async (data, files) => {
 	console.log('tem files? ', files)
 	try {
-		const ticketResponse = await tickets_response().insert(data);
+		const ticketId = Number(data.ticket_id) || null;
+		const createdAt = Number(data.createdAt) || (Date.now() / 1000);
+		const ticketResponsePayload = {
+			...data,
+			ticket_id: ticketId,
+			createdAt,
+		};
+
+		if (!ticketId) {
+			throw new Error('Invalid ticket id while inserting ticket response');
+		}
+
+		const insertedTicketResponse = await tickets_response().insert(ticketResponsePayload);
+		const responseId = resolveInsertedId(insertedTicketResponse);
+
+		if (!responseId) {
+			throw new Error('Could not resolve inserted ticket response id');
+		}
 
 		if (files?.length > 0) {
-			files.map(async (file) => {
+			for (const file of files) {
 				const newTicketImage = {
-					ticket_id: ticketResponse.ticket_id,
-					response_id: (Number(ticketResponse.id)),
+					ticket_id: ticketId,
+					response_id: responseId,
 					image_name: file.filename
 				}
 				await tickets_response_images().insert(newTicketImage);
-			});
+			}
 		}
+		invalidateTicketCaches();
 		return { status: 201, message: 'response inserted!' }
 	} catch (err) {
 		console.log('Error while trying to insert ticketResponse at: insertNewTicketResponseRepository... ', err);
@@ -197,6 +249,7 @@ const AdminOnDeleteTicketRepository = async (data) => {
 	await tickets_response().delete().where({ ticket_id: data.id });
 	///// deletando Ticket
 	await tickets().delete().where({ id: data.id });
+	invalidateTicketCaches();
 	return { status: 200, message: 'Deletado!' }
 }
 
